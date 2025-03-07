@@ -2,7 +2,7 @@ import { Routes } from "@angular/router";
 
 export default [
   {
-    path:'',
+    path:'login',
     loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent)
   },
   {

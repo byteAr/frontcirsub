@@ -10,7 +10,7 @@ import { Ripple } from 'primeng/ripple'
 
 @Component({
   selector: 'app-header',
-  imports: [Menubar, BadgeModule, AvatarModule, InputTextModule, Ripple, CommonModule],
+  imports: [BadgeModule, AvatarModule, InputTextModule, CommonModule],
   templateUrl: './header.component.html',
   styles: ``
 })

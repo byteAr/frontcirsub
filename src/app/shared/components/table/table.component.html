@@ -9,7 +9,7 @@
         Nuevo trámite
       </button>
     </div>
-    <p-table #dt [value]="datos" [paginator]="true" [rows]="10"  [globalFilterFields]="['Detalle', 'PersonaCreacionTramite', 'estado', 'areaInterviniente', 'fechaInicio','fechaCreacion', 'perioricidad', 'ultimaModificacion']">
+    <p-table #dt [value]="datos" [paginator]="true" [rows]="7"  [globalFilterFields]="['Detalle', 'PersonaCreacionTramite', 'estado', 'areaInterviniente', 'fechaInicio','fechaCreacion', 'perioricidad', 'ultimaModificacion']">
       <ng-template pTemplate="header">
         <tr>
           <th pSortableColumn="id" class="whitespace-nowrap">ID <p-sortIcon class="pl-2" field="id"></p-sortIcon></th>
