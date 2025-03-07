@@ -11,10 +11,6 @@ import { ButtonModule } from 'primeng/button';
 })
 export class SidebarComponent {
 
-  visible: boolean = false
 
-  visibleDrawer() {
-    this.visible = !this.visible
-  }
 
 }
