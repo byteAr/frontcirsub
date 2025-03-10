@@ -8,5 +8,9 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     loadChildren: () => import('./admin/admin.routes')
+  },
+  {
+    path:'**',
+    redirectTo: 'auth'
   }
 ];
