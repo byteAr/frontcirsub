@@ -3,3 +3,7 @@
 @plugin "daisyui" {
   themes: winter --default, winter --prefersdark, cupcake, dracula;
 }
+
+* {
+    box-sizing: border-box;
+}
