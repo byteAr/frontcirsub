@@ -11,11 +11,12 @@ import { SelectModule } from 'primeng/select';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ProcedureService } from '../../services/procedures.service';
+import { RouterLink } from '@angular/router';
 
 
 @Component({
   selector: 'app-table',
-  imports: [TagModule, IconFieldModule, InputIconModule, InputTextModule, MultiSelectModule,SelectModule,CommonModule,TableModule, ],
+  imports: [RouterLink ,TagModule, IconFieldModule, InputIconModule, InputTextModule, MultiSelectModule,SelectModule,CommonModule,TableModule, ],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css',
 })
