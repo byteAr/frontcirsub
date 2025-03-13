@@ -23,5 +23,6 @@ export const appConfig: ApplicationConfig = {
         ripple: true
     }),
     provideHttpClient()
+
   ]
 };

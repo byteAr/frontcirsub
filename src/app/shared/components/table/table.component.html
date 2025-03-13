@@ -46,26 +46,26 @@
           <td class="whitespace-nowrap font-semibold">
             <div class="flex items-center">
               <img class="w-7 pr-2" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSIjMDU5NjY5IiBkPSJNNyAxMWgydjJIN3ptMCA0aDJ2Mkg3em00LTRoMnYyaC0yem0wIDRoMnYyaC0yem00LTRoMnYyaC0yem0wIDRoMnYyaC0yeiIvPjxwYXRoIGZpbGw9IiMwNTk2NjkiIGQ9Ik01IDIyaDE0YzEuMTAzIDAgMi0uODk3IDItMlY2YzAtMS4xMDMtLjg5Ny0yLTItMmgtMlYyaC0ydjJIOVYySDd2Mkg1Yy0xLjEwMyAwLTIgLjg5Ny0yIDJ2MTRjMCAxLjEwMy44OTcgMiAyIDJNMTkgOGwuMDAxIDEySDVWOHoiLz48L3N2Zz4=" alt="">
-              <span [ngClass]="rowData.estado === 'VENCIDO' ? 'text-red-500' : ''">{{ rowData.Fecha_Inicio | date: 'dd/MM/yyyy HH:mm' }}</span>
+              <span [ngClass]="rowData.estado === 'VENCIDO' ? 'text-red-500' : ''">{{ rowData.Fecha_Inicio | date:'dd/MM/yyyy HH:mm':'UTC' }}</span>
             </div>
           </td>
           <td class="whitespace-nowrap font-semibold">
             <div class="flex items-center">
               <img class="w-7 pr-2" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSIjMDU5NjY5IiBkPSJNNyAxMWgydjJIN3ptMCA0aDJ2Mkg3em00LTRoMnYyaC0yem0wIDRoMnYyaC0yem00LTRoMnYyaC0yem0wIDRoMnYyaC0yeiIvPjxwYXRoIGZpbGw9IiMwNTk2NjkiIGQ9Ik01IDIyaDE0YzEuMTAzIDAgMi0uODk3IDItMlY2YzAtMS4xMDMtLjg5Ny0yLTItMmgtMlYyaC0ydjJIOVYySDd2Mkg1Yy0xLjEwMyAwLTIgLjg5Ny0yIDJ2MTRjMCAxLjEwMy44OTcgMiAyIDJNMTkgOGwuMDAxIDEySDVWOHoiLz48L3N2Zz4=" alt="">
-              <span [ngClass]="rowData.estado === 'VENCIDO' ? 'text-red-500' : ''">{{ rowData.Fecha_Fin | date: 'dd/MM/yyyy HH:mm' }}</span>
+              <span [ngClass]="rowData.estado === 'VENCIDO' ? 'text-red-500' : ''">{{ rowData.Fecha_Fin | date:'dd/MM/yyyy HH:mm':'UTC' }}</span>
             </div>
           </td>
 
           <td class="whitespace-nowrap font-semibold">
             <div class="flex items-center">
               <img class="w-7 pr-2" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSIjMDU5NjY5IiBkPSJNNyAxMWgydjJIN3ptMCA0aDJ2Mkg3em00LTRoMnYyaC0yem0wIDRoMnYyaC0yem00LTRoMnYyaC0yem0wIDRoMnYyaC0yeiIvPjxwYXRoIGZpbGw9IiMwNTk2NjkiIGQ9Ik01IDIyaDE0YzEuMTAzIDAgMi0uODk3IDItMlY2YzAtMS4xMDMtLjg5Ny0yLTItMmgtMlYyaC0ydjJIOVYySDd2Mkg1Yy0xLjEwMyAwLTIgLjg5Ny0yIDJ2MTRjMCAxLjEwMy44OTcgMiAyIDJNMTkgOGwuMDAxIDEySDVWOHoiLz48L3N2Zz4=" alt="">
-              <span [ngClass]="rowData.estado === 'VENCIDO' ? 'text-red-500' : ''">{{ rowData.Fecha_Creacion | date: 'dd/MM/yyyy HH:mm'  }}</span>
+              <span [ngClass]="rowData.estado === 'VENCIDO' ? 'text-red-500' : ''">{{ rowData.Fecha_Creacion | date:'dd/MM/yyyy HH:mm':'UTC'  }}</span>
             </div>
           </td>
           <td class="whitespace-nowrap font-semibold">
             <div class="flex items-center">
               <img class="w-7 pr-2" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSIjMDU5NjY5IiBkPSJNNyAxMWgydjJIN3ptMCA0aDJ2Mkg3em00LTRoMnYyaC0yem0wIDRoMnYyaC0yem00LTRoMnYyaC0yem0wIDRoMnYyaC0yeiIvPjxwYXRoIGZpbGw9IiMwNTk2NjkiIGQ9Ik01IDIyaDE0YzEuMTAzIDAgMi0uODk3IDItMlY2YzAtMS4xMDMtLjg5Ny0yLTItMmgtMlYyaC0ydjJIOVYySDd2Mkg1Yy0xLjEwMyAwLTIgLjg5Ny0yIDJ2MTRjMCAxLjEwMy44OTcgMiAyIDJNMTkgOGwuMDAxIDEySDVWOHoiLz48L3N2Zz4=" alt="">
-              <span [ngClass]="rowData.estado === 'VENCIDO' ? 'text-red-500' : ''">{{ rowData.ULTIMA_MODIFICACION_ | date: 'dd/MM/yyyy HH:mm'  }}</span>
+              <span [ngClass]="rowData.estado === 'VENCIDO' ? 'text-red-500' : ''">{{ rowData.ULTIMA_MODIFICACION_ | date:'dd/MM/yyyy HH:mm':'UTC'  }}</span>
             </div>
           </td>
           <td class="whitespace-nowrap font-semibold "><p [ngClass]="rowData.estado === 'VENCIDO' ? 'text-red-500' : ''" class="text-center">{{ rowData.perioricidad | uppercase}}</p></td>

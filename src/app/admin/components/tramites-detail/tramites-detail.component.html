@@ -1,15 +1,23 @@
 <div class="block p-5">
   <div class="h-full flex justify-center p-5">
-    <form action="" class="w-1/2 m-aut block p-5">
-      <div class="block">
-        <label class="font-semibold text-gray-500 text-lef mb-5t" for="">Detalle</label>
-        <br>
-        <input type="text" placeholder="Ingrese el detalle" class="input mb-5 mt-2 border-emerald-700" />
+    <form [formGroup]="formDetailTramite" class="w-1/2 m-aut block p-5" (ngSubmit)="onSubmit()">
+
+        <div>
+          <p-floatlabel variant="on">
+            <input formControlName="detalle" pInputText id="on_label" autocomplete="off" />
+            <label for="on_label">Detalle</label>
+        </p-floatlabel>
+          <p-datepicker formControlName="fechaInicio" placeholder="Seleccione fecha de inicio" />
+          <p-datepicker [disabled]="true" formControlName="fechaFin" placeholder="Seleccione fecha de fin"/>
+          <div class="card flex justify-center">
+            <p-select formControlName="tipoPerioricidad" [options]="perioricidad" [(ngModel)]="selectPerioricidad" optionLabel="tipoPerioricidad" placeholder="Perioricidad" class="w-full md:w-56" />
+          </div>
+          <p-checkbox formControlName="activo" [(ngModel)]="checked" [binary]="true" />
+        </div>
+        <div class="text-right">
+          <button type="submit"  class="btn bg-cyan-700 text-white ">Siguiente</button>
         </div>
     </form>
-  </div>
-  <div class="text-right">
-    <button routerLink="responsable"  class="btn bg-cyan-700 text-white ">Siguiente</button>
   </div>
 </div>
 
