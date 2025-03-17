@@ -14,6 +14,7 @@ export default [
         loadComponent: ()=> import('./pages/tramites/tramites.component'),
 
           },
+
           {
             path:'nuevo',
             loadComponent: ()=> import('./pages/nuevo-tramite/nuevo-tramite.component'),
@@ -33,7 +34,11 @@ export default [
       {
         path:'credencial',
         loadComponent: ()=> import('./pages/credencial/credencial.component')
-      }
+      },
+      {
+        path:'notificaciones',
+        loadComponent: ()=> import('./pages/notificaciones/notificaciones.component')
+      },
     ]
   }
 ] as Routes

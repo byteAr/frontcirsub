@@ -1,1 +1,10 @@
-<p>responsable-tramite-detail works!</p>
+<div class="w-1/2 m-auto mt-5">
+
+    <div class="flex justify-around border-2">
+      <p-floatlabel class="mb-5" variant="on">
+        <input class="w-full" formControlName="detalle" pInputText id="on_label" autocomplete="off" />
+        <label for="on_label">Responsable</label>
+     </p-floatlabel>
+     <p-select formControlName="tipoPerioricidad" [options]="emails" [(ngModel)]="selectPerioricidad" optionLabel="email" placeholder="Email" class="w-full md:w-56" />
+    </div>
+</div>

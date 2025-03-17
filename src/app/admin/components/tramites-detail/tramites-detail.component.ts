@@ -8,14 +8,18 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { CheckboxModule } from 'primeng/checkbox';
 import { TramitesService } from '../../services/tramites.service';
+import { Router, RouterLink } from '@angular/router';
+
+
 
 interface Periodo {
   tipoPerioricidad: string;
 }
 
+
 @Component({
   selector: 'app-tramites-detail',
-  imports: [ReactiveFormsModule, DatePickerModule, FloatLabel, InputTextModule, SelectModule, CheckboxModule, CommonModule, FormsModule ],
+  imports: [ReactiveFormsModule, DatePickerModule, FloatLabel, InputTextModule, SelectModule, CheckboxModule, CommonModule, FormsModule, RouterLink ],
   templateUrl: './tramites-detail.component.html',
   styleUrl: './tramites-detail.component.css',
 })
@@ -28,6 +32,8 @@ export default class TramitesDetailComponent implements OnInit  {
     selectPerioricidad: Periodo | undefined;
 
     tramitesService = inject(TramitesService);
+
+
 
     ngOnInit() {
         this.perioricidad = [

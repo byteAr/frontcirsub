@@ -1,0 +1,19 @@
+<div class="card mx-1 max-w-6xl bg-white rounded-2xl">
+  <p-table class="px-7 py-5 max-w-screen " [value]="notificaciones" selectionMode="single" [(selection)]="selectedProduct" [metaKeySelection]="metaKey" dataKey="id" [tableStyle]="{ 'min-width': '50rem' }">
+      <ng-template #header>
+          <tr>
+              <th>ORD</th>
+              <th>Detalle</th>
+              <th>Remitente</th>
+          </tr>
+      </ng-template>
+      <ng-template #body let-notificacion>
+          <tr [pSelectableRow]="notificacion">
+              <td>{{ notificacion.id }}</td>
+              <td>{{ notificacion.detalle }}</td>
+              <td class="font-semibold">{{ notificacion.remitente }}</td>
+          </tr>
+      </ng-template>
+  </p-table>
+</div>
+

@@ -1,34 +1,39 @@
 import { Component, input, output } from '@angular/core';
-
-import { DrawerModule } from 'primeng/drawer';
-import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
+import { DrawerModule } from 'primeng/drawer';
+import { ButtonModule } from 'primeng/button';
+
+import { BadgeModule } from 'primeng/badge';
+import { OverlayBadgeModule } from 'primeng/overlaybadge';
+
 @Component({
   selector: 'app-sidebar',
-  imports: [DrawerModule, ButtonModule, CommonModule, RouterModule],
+  imports: [DrawerModule, ButtonModule, CommonModule, RouterModule, BadgeModule, OverlayBadgeModule],
   templateUrl: './sidebar.component.html',
   styleUrl:'./sidebar.component.css'
 })
 export class SidebarComponent {
+  badge: number = 2;
   isLeftSidebarCollapsed = input.required<boolean>();
   changeIsLeftSidebarCollapsed = output<boolean>();
   items = [
     {
-      routeLink: 'credencial',
-      icon: 'fal fa-address-card',
-      label: 'Credencial Virtual',
+      routeLink: 'notificaciones',
+      icon: 'fal fa-solid fa-bell',
+      label: 'Notificaciones',
+      badge: true
     },
     {
       routeLink: 'tramites',
-      icon: 'fal fa-user',
+      icon: 'fal fa-solid fa-file-signature',
       label: 'Tramites',
     },
     {
-      routeLink: 'products',
-      icon: 'fal fa-box-open',
-      label: 'Products',
+      routeLink: 'credencial',
+      icon: 'fal fa-address-card',
+      label: 'Credencial Virtual',
     },
     {
       routeLink: 'pages',

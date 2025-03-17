@@ -22,7 +22,13 @@
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
         >
-          <i class="sidenav-link-icon" [class]="item.icon"></i>
+          @if (item.badge) {
+            <p-overlaybadge value="2" badgeSize="small">
+              <i  class="sidenav-link-icon"  [class]="item.icon" ></i>
+            </p-overlaybadge>
+          }@else {
+            <i class="sidenav-link-icon"  [class]="item.icon" ></i>
+          }
           @if (!isLeftSidebarCollapsed()) {
             <span class="sidenav-link-text font-semibold">{{ item.label }}</span>
           }

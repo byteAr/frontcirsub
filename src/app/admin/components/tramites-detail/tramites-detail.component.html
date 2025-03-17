@@ -1,21 +1,27 @@
 <div class="block p-5">
   <div class="h-full flex justify-center p-5">
-    <form [formGroup]="formDetailTramite" class="w-1/2 m-aut block p-5" (ngSubmit)="onSubmit()">
-
+    <form [formGroup]="formDetailTramite" class="w-1/2 m-auto p-5" (ngSubmit)="onSubmit()">
         <div>
-          <p-floatlabel variant="on">
-            <input formControlName="detalle" pInputText id="on_label" autocomplete="off" />
+          <p-floatlabel class="mb-5" variant="on">
+            <input class="w-full" formControlName="detalle" pInputText id="on_label" autocomplete="off" />
             <label for="on_label">Detalle</label>
-        </p-floatlabel>
-          <p-datepicker formControlName="fechaInicio" placeholder="Seleccione fecha de inicio" />
-          <p-datepicker [disabled]="true" formControlName="fechaFin" placeholder="Seleccione fecha de fin"/>
-          <div class="card flex justify-center">
-            <p-select formControlName="tipoPerioricidad" [options]="perioricidad" [(ngModel)]="selectPerioricidad" optionLabel="tipoPerioricidad" placeholder="Perioricidad" class="w-full md:w-56" />
+         </p-floatlabel>
+         <div class="w-full flex justify-star mb-5">
+           <p-datepicker class="mr-5" formControlName="fechaInicio" placeholder="Seleccione fecha de inicio" />
+           <p-datepicker [disabled]="true" formControlName="fechaFin" placeholder="Seleccione fecha de fin"/>
+         </div>
+          <div class="mb-5 flex justify-between ">
+            <div class="mr-2">
+              <p-select formControlName="tipoPerioricidad" [options]="perioricidad" [(ngModel)]="selectPerioricidad" optionLabel="tipoPerioricidad" placeholder="Perioricidad" class="w-full md:w-56" />
+            </div>
+            <div class="flex items-center">
+              <label class="mr-2" for="">Iniciar trámite hoy</label>
+              <p-checkbox formControlName="activo" [(ngModel)]="checked" [binary]="true" />
+            </div>
           </div>
-          <p-checkbox formControlName="activo" [(ngModel)]="checked" [binary]="true" />
         </div>
         <div class="text-right">
-          <button type="submit"  class="btn bg-cyan-700 text-white ">Siguiente</button>
+          <button routerLink="responsable"  class="btn bg-cyan-700 text-white">Siguiente</button>
         </div>
     </form>
   </div>
