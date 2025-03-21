@@ -5,10 +5,29 @@
         <figure>
           <img class="w-30 mb-2" src="cirsub.png" alt="">
         </figure>
-
-      </div>
-      <div class="flex justify-center items-center mb-5">
-        <button class="btn btn-success text-white bg-linear-to-r from-cyan-500 to-green-500">Registrarme</button>
+        <form class="w-54 m-auto" [formGroup]="formRegister" (ngSubmit)="sendRegister()" >
+          <p-floatlabel class="mb-5" variant="on">
+            <input class="w-full" formControlName="nombre" pInputText id="labelName" autocomplete="off" />
+            <label for="labelName">Nombre</label>
+         </p-floatlabel>
+          <p-floatlabel class="mb-5" variant="on">
+            <input class="w-full" formControlName="apellido" pInputText id="labelFullName" autocomplete="off" />
+            <label for="labelFullName">Apellido</label>
+         </p-floatlabel>
+         <div class="mb-5">
+           <p-select formControlName="tipodni" [options]="tiposDni" [(ngModel)]="selectPerioricidad" optionLabel="Detalle" placeholder="Tipo documento" class="w-full" />
+         </div>
+         <p-floatlabel class="mb-5" variant="on">
+          <input class="w-full " formControlName="dni" pInputText id="labelFullName" autocomplete="off" />
+          <label for="labelFullName">Número de documento</label>
+          </p-floatlabel>
+          <div class="w-full mb-5">
+            <p-datepicker  class=" mb-5" formControlName="fechaNacimiento" placeholder="Fecha de nacimiento" />
+          </div>
+          <div class="flex justify-center items-center mb-5">
+            <button type="submit" class="btn btn-success text-white bg-linear-to-r from-cyan-500 to-green-500">Registrarme</button>
+          </div>
+        </form>
       </div>
       <p class="text-center text-gray-400 font-sans">Ya tiene una cuenta? <a routerLink="/auth/login" class="font-semibold bg-linear-to-r from-cyan-500 to-green-500 bg-clip-text text-transparent">Iniciar sesión</a></p>
     </div>

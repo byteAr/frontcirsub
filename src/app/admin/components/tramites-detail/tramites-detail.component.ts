@@ -52,7 +52,7 @@ export default class TramitesDetailComponent implements OnInit  {
   formDetailTramite = this.fb.group({
     detalle: ['', [Validators.required, Validators.minLength(4)]],
     fechaInicio: [ Date ,[Validators.required]],
-    fechaFin: ['', [Validators.required]],
+    fechaFin: [Date, [Validators.required]],
     tipoPerioricidad: ['', [Validators.required]],
     activo: [false, [Validators.required]]
   })
