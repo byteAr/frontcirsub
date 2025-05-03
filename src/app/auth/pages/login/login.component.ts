@@ -13,7 +13,7 @@ export class LoginComponent {
   fb = inject(FormBuilder);
 
   hasError = signal(false);
-  isPosting = signal(false);
+
 
   loginForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],

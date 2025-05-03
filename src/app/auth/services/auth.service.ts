@@ -11,8 +11,12 @@ export class AuthService {
   http = inject(HttpClient)
   constructor() { }
 
-  createPerson(persona:any): Observable<any>{
-    return this.http.post(`${this.url}/auth/addpersona`, persona)
+  createPerson(dni:string): Observable<any>{
+    return this.http.post(`${this.url}/auth/addpersona`, dni)
+  }
+
+  register(dni: string): Observable<any> {
+    return this.http.post(`${this.url}/auth/register`, {dni})
   }
 
 }

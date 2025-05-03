@@ -10,6 +10,10 @@ export default [
     loadComponent:() => import('./pages/register/register.component').then(m => m.RegisterComponent)
   },
   {
+    path: 'password-reset',
+    loadComponent:() => import('./pages/repassword/repassword.component').then(m => m.RepasswordComponent)
+  },
+  {
     path:'**',
     redirectTo: 'login'
   }
