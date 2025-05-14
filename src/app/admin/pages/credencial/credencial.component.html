@@ -1,43 +1,82 @@
 <div class="flex justify-center items-center w-[85vw] h-[70vh]" >
-  <div class="card bg-base-100 w-xlflex justify-between drop-shadow-2xl" #credencialCard>
-    <div class="flex justify-between items-center  rounded-2xl">
-      <svg class="static" width="100%" height="100%" id="svg" viewBox="0 0 1440 390" xmlns="http://www.w3.org/2000/svg" class="transition duration-300 ease-in-out delay-150"><defs><linearGradient id="gradient" x1="0%" y1="50%" x2="100%" y2="50%"><stop offset="5%" stop-color="#00c951"></stop><stop offset="95%" stop-color="#00b8da"></stop></linearGradient></defs><path d="M 0,400 L 0,150 C 143.32142857142856,140.17857142857144 286.6428571428571,130.35714285714286 402,132 C 517.3571428571429,133.64285714285714 604.7499999999999,146.75000000000003 707,158 C 809.2500000000001,169.24999999999997 926.3571428571429,178.64285714285714 1051,177 C 1175.642857142857,175.35714285714286 1307.8214285714284,162.67857142857144 1440,150 L 1440,400 L 0,400 Z" stroke="none" stroke-width="0" fill="url(#gradient)" fill-opacity="1" class="transition-all duration-300 ease-in-out delay-150 path-0" transform="rotate(-180 720 200)"></path></svg>
-      <div class=" w-full p-5 absolute top-0 flex justify-between items-center">
-        <figure>
-          <img class="w-25" src="/cirsub.png" alt="">
-        </figure>
-        <div>
-          <p class="text-white text-right text-sm font-semibold">MUTUAL CIRCULO DE SUBOFICIALES DE <br> GENDARMERIA NACIONAL ARGENTINA</p>
-        </div>
-      </div>
-    </div>
-    <div class="flex justify-between items-center px-16">
-      <figure>
-        <div tabindex="0" role="button" class="w-40 h-40 btn btn-ghost btn-circle avatar mr-5">
-          <div class=" rounded-full">
-            <img
-              alt="Tailwind CSS Navbar component"
-              src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+  <div class="block">
+
+    <!-- <div class="card bg-base-100 w-xlflex justify-between drop-shadow-2xl" #credencialCard>
+      <div class="flex justify-between items-center  rounded-2xl">
+        <svg class="static" width="100%" height="100%" id="svg" viewBox="0 0 1440 390" xmlns="http://www.w3.org/2000/svg" class="transition duration-300 ease-in-out delay-150"><defs><linearGradient id="gradient" x1="0%" y1="50%" x2="100%" y2="50%"><stop offset="5%" stop-color="#00c951"></stop><stop offset="95%" stop-color="#00b8da"></stop></linearGradient></defs><path d="M 0,400 L 0,150 C 143.32142857142856,140.17857142857144 286.6428571428571,130.35714285714286 402,132 C 517.3571428571429,133.64285714285714 604.7499999999999,146.75000000000003 707,158 C 809.2500000000001,169.24999999999997 926.3571428571429,178.64285714285714 1051,177 C 1175.642857142857,175.35714285714286 1307.8214285714284,162.67857142857144 1440,150 L 1440,400 L 0,400 Z" stroke="none" stroke-width="0" fill="url(#gradient)" fill-opacity="1" class="transition-all duration-300 ease-in-out delay-150 path-0" transform="rotate(-180 720 200)"></path></svg>
+        <div class=" w-full p-5 absolute top-0 flex justify-between items-center">
+          <div></div>
+
+          <div>
+            <p class="text-white text-right text-sm font-semibold">MUTUAL CIRCULO DE SUBOFICIALES DE <br> GENDARMERIA NACIONAL ARGENTINA</p>
           </div>
         </div>
-      </figure>
-      <div class="w-80 ml-5">
-        <div>
-          <ul class="block">
-            <li class="text-center mb-3 font-semibold text-2xl bg-linear-to-r from-cyan-500 to-green-500 bg-clip-text text-transparent">Norma Rodriguez</li>
-            <li class="text-xl"><span class="font-semibold">DNI:</span> 3485690</li>
-            <li class="text-xl"><span class="font-semibold">N° SOCIO:</span> 84308</li>
-            <li class="text-xl"><span class="font-semibold">FILIAL:</span> CENTRO</li>
-          </ul>
+      </div>
+      <div class="flex justify-between items-center px-16">
+        <figure>
+          <div tabindex="0" role="button" class="w-40 h-40 btn btn-ghost btn-circle avatar mr-5">
+            <div class=" rounded-full">
+              <img
+                alt="Tailwind CSS Navbar component"
+                src="/cirsub.png" />
+            </div>
+          </div>
+        </figure>
+        <div class="w-80 ml-5">
+          <div>
+            <ul class="block">
+              <li class="text-center mb-3 font-semibold text-2xl bg-linear-to-r from-cyan-500 to-green-500 bg-clip-text text-transparent">Julian Rodriguez</li>
+              <li class="text-xl"><span class="font-semibold">DNI:</span> 3485690</li>
+              <li class="text-xl"><span class="font-semibold">N° SOCIO:</span> 84308</li>
+              <li class="text-xl"><span class="font-semibold">FILIAL:</span> CENTRO</li>
+            </ul>
 
+          </div>
         </div>
       </div>
-    </div>
-    <div class="qr-container flex justify-between items-end px-5 pb-5" *ngIf="qrUrl">
-      <p class="text-sm text-gray-500 font-base">La presente credencial solo es válida presentando el DNI</p>
-      <img class="w-20 border-b-cyan-800" [src]="qrUrl" alt="QR del usuario" />
-    </div>
-</div>
+      <div class="qr-container flex justify-between items-end px-5 pb-5" *ngIf="qrUrl">
+        <p class="text-sm text-gray-500 font-base">La presente credencial solo es válida presentando el DNI</p>
+        <img class="w-20 border-b-cyan-800" [src]="qrUrl" alt="QR del usuario" />
+      </div>
+    </div> -->
+    <div class="card bg-base-100 w-2xl justify-between drop-shadow-2xl" #credencialCard>
+      <div class="flex justify-between items-center  rounded-2xl">
+        <svg class="static" width="100%" height="100%" id="svg" viewBox="0 0 1440 390" xmlns="http://www.w3.org/2000/svg" class="transition duration-300 ease-in-out delay-150"><defs><linearGradient id="gradient" x1="0%" y1="50%" x2="100%" y2="50%"><stop offset="5%" stop-color="#00c951"></stop><stop offset="95%" stop-color="#00b8da"></stop></linearGradient></defs><path d="M 0,400 L 0,150 C 143.32142857142856,140.17857142857144 286.6428571428571,130.35714285714286 402,132 C 517.3571428571429,133.64285714285714 604.7499999999999,146.75000000000003 707,158 C 809.2500000000001,169.24999999999997 926.3571428571429,178.64285714285714 1051,177 C 1175.642857142857,175.35714285714286 1307.8214285714284,162.67857142857144 1440,150 L 1440,400 L 0,400 Z" stroke="none" stroke-width="0" fill="url(#gradient)" fill-opacity="1" class="transition-all duration-300 ease-in-out delay-150 path-0" transform="rotate(-180 720 200)"></path></svg>
+        <div class=" w-full p-5 absolute top-0 flex justify-between items-center">
+
+          <figure>
+            <img class="w-25" src="/cirsub.png" alt="">
+          </figure>
+          <div>
+            <p class="text-white text-right text-sm font-semibold">MUTUAL CIRCULO DE SUBOFICIALES DE <br> GENDARMERIA NACIONAL ARGENTINA</p>
+          </div>
+        </div>
+      </div>
+      <div class="block px-16 mb-5">
+        <h2 class="font-semibold text-lg mb-2">Familiares:</h2>
+      <div class="w-full mb-12">
+        <ul class="flex justify-between">
+          <li class="w-1/3"><span class="font-semibold">Carla Rojas</span></li>
+          <li class="w-1/3"><span class="font-semibold">DNI</span>: 21569632</li>
+          <li class="w-1/3"><span class="font-semibold">Parentesco:</span> Esposa</li>
+        </ul>
+        <ul class="flex justify-between">
+          <li class="w-1/3"><span class="font-semibold">Martin Rodriguez</span></li>
+          <li class="w-1/3"><span class="font-semibold">DNI</span>: 33526369</li>
+          <li class="w-1/3"><span class="font-semibold">Parentesco:</span> Hijo</li>
+        </ul>
+        <ul class="flex justify-between">
+          <li class="w-1/3"><span class="font-semibold">Noelia Rodiguez</span></li>
+          <li class="w-1/3"><span class="font-semibold">DNI</span>: 25365856</li>
+          <li class="w-1/3 flex items-center"><span class="font-semibold">Parentesco:</span> Hija<span class="ml-2"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"><g fill="none" stroke="#059669" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M14 7a2 2 0 1 1-4 0a2 2 0 0 1 4 0Z"/><path stroke-linecap="round" d="M18 10s-3.537 1.5-6 1.5S6 10 6 10m6 2v1.452m0 0a3 3 0 0 0 .476 1.623L15 19m-3-5.548a3 3 0 0 1-.476 1.623L9 19"/></g></svg></span></li>
+        </ul>
+      </div>
+      </div>
+      <div class="qr-container flex justify-between items-end px-5 pb-5" *ngIf="qrUrl">
+        <p class="text-sm text-gray-500 font-base">La presente credencial solo es válida presentando el DNI</p>
+      </div>
+  </div>
+  </div>
 </div>
 <div class="flex justify-center mt-10 w-[85vw]">
   <button (click)="downloadImage()" class="btn font-semibold text-lg text-white btn-outline border-2 hover:bg-cyan-500">Descargar Credencial</button>
