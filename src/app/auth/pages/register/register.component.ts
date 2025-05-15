@@ -16,7 +16,7 @@ export interface tipoDni {
 
 @Component({
   selector: 'app-register',
-  imports: [RouterLink, ReactiveFormsModule, CommonModule, FloatLabel, InputTextModule, SelectModule],
+  imports: [RouterLink, ReactiveFormsModule, CommonModule, InputTextModule, SelectModule],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'
 })
@@ -34,6 +34,7 @@ export class RegisterComponent implements OnInit {
 
   formRegister = this.fb.group({
     dni: ['',[Validators.required, Validators.minLength(7), Validators.pattern(/^\d+$/)]],
+    telefono: ['',[Validators.required, Validators.minLength(8), Validators.pattern(/^\d+$/)]],
   })
 
   ngOnInit(): void {
