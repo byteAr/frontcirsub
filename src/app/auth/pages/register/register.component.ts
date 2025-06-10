@@ -3,11 +3,15 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+
 
 import { FloatLabel } from 'primeng/floatlabel';
 import { TramitesService } from '../../../admin/services/tramites.service';
 import { SelectModule } from 'primeng/select';
 import { AuthService } from '../../services/auth.service';
+
 
 export interface tipoDni {
   id: number;
@@ -30,7 +34,13 @@ export class RegisterComponent implements OnInit {
 
   tramitesService = inject(TramitesService);
 
+
   authService = inject(AuthService);
+  user:any;
+  visible:boolean= true;
+  error: string = ''
+;
+
 
   formRegister = this.fb.group({
     dni: ['',[Validators.required, Validators.minLength(7), Validators.pattern(/^\d+$/)]],
@@ -45,9 +55,14 @@ export class RegisterComponent implements OnInit {
     if(!dni) return
     this.authService.register(dni)
       .subscribe(resp => {
-        console.log(resp);
+        this.user = resp;
+        if(resp) {
+          this.visible = false
+        } else {
+          this.error==''
+        }
+        console.log(this.user);
       })
-
   }
 
 }

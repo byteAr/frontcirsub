@@ -1,0 +1,56 @@
+
+
+<section class="flex justify-center items-center h-screen bg-linear-to-r from-cyan-500 to-green-500">
+  <div>
+    <div class="card card-border bg-base-100 w-96 border-2  pb-5 px-5 shadow-2xl">
+      <div class="card-body">
+        <figure>
+          <img class="w-30 mb-2" src="cirsub.png" alt="">
+        </figure>
+       <form [formGroup]="formOtp" (ngSubmit)="sendOtp()" class="flex flex-col items-center gap-8">
+
+  <div class="flex justify-center items-center space-x-2">
+
+    <input #input1
+           type="text"
+           maxlength="1"
+           formControlName="digit1"
+           (keyup)="onKeyUp($event, 1, input2)"
+           class="w-12 h-12 text-center text-3xl font-bold bg-gray-100 border-2 border-gray-300 rounded-md focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-300 transition-all duration-300 ease-in-out">
+
+    <input #input2
+           type="text"
+           maxlength="1"
+           formControlName="digit2"
+           (keyup)="onKeyUp($event, 2, input3, input1)"
+           class="w-12 h-12 text-center text-3xl font-bold bg-gray-100 border-2 border-gray-300 rounded-md focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-300 transition-all duration-300 ease-in-out">
+
+    <input #input3
+           type="text"
+           maxlength="1"
+           formControlName="digit3"
+           (keyup)="onKeyUp($event, 3, input4, input2)"
+           class="w-12 h-12 text-center text-3xl font-bold bg-gray-100 border-2 border-gray-300 rounded-md focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-300 transition-all duration-300 ease-in-out">
+
+    <input #input4
+           type="text"
+           maxlength="1"
+           formControlName="digit4"
+           (keyup)="onKeyUp($event, 4, null, input3)"
+           class="w-12 h-12 text-center text-3xl font-bold bg-gray-100 border-2 border-gray-300 rounded-md focus:outline-none focus:bordergreen-5000 focus:ring-2 focus:ring-green-300 transition-all duration-300 ease-in-out">
+  </div>
+
+  <button type="submit"
+          [disabled]="formOtp.invalid"
+          class="w-full max-w-xs px-4 py-3 mt-4 font-semibold text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">
+    Verificar Código
+  </button>
+</form>
+      </div>
+      <p class="text-center text-gray-400 font-sans">Ya tiene una cuenta? <a routerLink="/auth/login" class="font-semibold bg-linear-to-r from-cyan-500 to-green-500 bg-clip-text text-transparent">Iniciar sesión</a></p>
+    </div>
+  </div>
+</section>
+
+
+

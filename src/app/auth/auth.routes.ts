@@ -10,6 +10,10 @@ export default [
     loadComponent:() => import('./pages/register/register.component').then(m => m.RegisterComponent)
   },
   {
+    path: 'otp',
+    loadComponent:() => import('../auth/pages/otp/otp.component').then(m => m.OtpComponent)
+  },
+  {
     path: 'password-reset',
     loadComponent:() => import('./pages/repassword/repassword.component').then(m => m.RepasswordComponent)
   },
