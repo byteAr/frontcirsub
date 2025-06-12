@@ -10,7 +10,7 @@ export default [
     loadComponent:() => import('./pages/register/register.component').then(m => m.RegisterComponent)
   },
   {
-    path: 'otp',
+    path: 'verify-code',
     loadComponent:() => import('../auth/pages/otp/otp.component').then(m => m.OtpComponent)
   },
   {

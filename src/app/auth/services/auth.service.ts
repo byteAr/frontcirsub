@@ -19,4 +19,10 @@ export class AuthService {
     return this.http.post(`${this.url}/auth/register`, {dni})
   }
 
+  sendOtp(phoneNumber:string, email:string): Observable<any> {
+    console.log('llego als ervicio auth');
+
+    return this.http.post(`${this.url}/auth/send-otp`, { phoneNumber, email } )
+  }
+
 }
