@@ -5,11 +5,12 @@
         <figure>
           <img class="w-30 mb-2" src="cirsub.png" alt="">
         </figure>
-        <div *ngIf="user">
+        <div *ngIf="user && !repass">
           <h2 class="text-center text-lg font-bold bg-linear-to-r from-cyan-500 to-green-500 bg-clip-text text-transparent"> Bienvenido {{ user?.Nombre }} {{ user?.Apellido}}</h2>
+          <h4 class="text-center text-xs  font-semibold bg-linear-to-r from-cyan-500 to-green-500 bg-clip-text text-transparent">Ingrese el código de 4 dígitos que le enviamos al whatsapp</h4>
         </div>
-        <form class="w-54 m-auto" [formGroup]="formRegister" (ngSubmit)="sendRegister()">
-          <div *ngIf="visible">
+        <form *ngIf="visible"  class="w-54 m-auto" [formGroup]="formRegister" (ngSubmit)="sendRegister()">
+          <div >
             <fieldset class="fieldset">
               <legend class="fieldset-legend font-semibold bg-linear-to-r from-cyan-500 to-green-500 bg-clip-text text-transparent">Ingrese su número de documento</legend>
               <label class="input input-success validator">
@@ -38,8 +39,7 @@
               </div>
             </fieldset>
           </div>
-
-          <div *ngIf="!visible">
+          <div >
             <fieldset class="fieldset">
               <legend class="fieldset-legend font-semibold bg-linear-to-r from-cyan-500 to-green-500 bg-clip-text text-transparent">Ingrese su número de teléfono</legend>
               <label class="input input-success validator">
@@ -77,7 +77,7 @@
                   formControlName="email"
                   autocomplete="new-password"
                   type="email"
-                  placeholder="mail@cirsubgn.org"
+                  placeholder="email@correo.com"
                 />
               </label>
               <div *ngIf="emailControl.invalid && formSubmitted" style="margin-top: 5px;">
@@ -94,10 +94,141 @@
 
           <div class="flex justify-center items-center mb-5 mt-5">
             <button type="submit" class="btn btn-success text-white bg-linear-to-r from-cyan-500 to-green-500">
-              {{ visible ? 'Continuar' : 'Registrarme' }}
+              registrarme
             </button>
           </div>
         </form>
+        <div *ngIf="!visible && !repass" class="card-body">
+
+          <form [formGroup]="formOtp" (ngSubmit)="sendOtp()" class="flex flex-col items-center gap-8">
+
+             <div class="flex justify-center items-center space-x-2">
+
+               <input #input1
+                     type="text"
+                     maxlength="1"
+                     formControlName="digit1"
+                     (keyup)="onKeyUp($event, 1, input2)"
+                     class="w-12 h-12 text-center text-3xl font-bold bg-gray-100 border-2 border-gray-300 rounded-md focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-300 transition-all duration-300 ease-in-out">
+
+               <input #input2
+                     type="text"
+                     maxlength="1"
+                     formControlName="digit2"
+                     (keyup)="onKeyUp($event, 2, input3, input1)"
+                     class="w-12 h-12 text-center text-3xl font-bold bg-gray-100 border-2 border-gray-300 rounded-md focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-300 transition-all duration-300 ease-in-out">
+
+               <input #input3
+                     type="text"
+                     maxlength="1"
+                     formControlName="digit3"
+                     (keyup)="onKeyUp($event, 3, input4, input2)"
+                     class="w-12 h-12 text-center text-3xl font-bold bg-gray-100 border-2 border-gray-300 rounded-md focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-300 transition-all duration-300 ease-in-out">
+
+               <input #input4
+                     type="text"
+                     maxlength="1"
+                     formControlName="digit4"
+                     (keyup)="onKeyUp($event, 4, null, input3)"
+                     class="w-12 h-12 text-center text-3xl font-bold bg-gray-100 border-2 border-gray-300 rounded-md focus:outline-none focus:bordergreen-5000 focus:ring-2 focus:ring-green-300 transition-all duration-300 ease-in-out">
+             </div>
+
+             <button type="submit"
+                     [disabled]="formOtp.invalid"
+                     class="w-full rounded-2xl max-w-xs px-4 py-3 mt-4 font-semibold text-whitebtn btn-success text-white bg-linear-to-r from-cyan-500 to-green-500 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">
+               Verificar Código
+             </button>
+           </form>
+         </div>
+         <div>
+          <form *ngIf="repass" [formGroup]="formsetPassword" (ngSubmit)="onSubmitPassword()" class="max-w-md mx-auto p-6  space-y-6">
+            <h1 class=" text-center font-semibold bg-linear-to-r from-cyan-500 to-green-500 bg-clip-text text-transparent">Cree su contraseña para iniciar sesión</h1>
+            <!-- Campo contraseña -->
+            <div>
+              <label class="label">
+                <span class="label-text">Contraseña</span>
+              </label>
+              <div class="relative">
+                <input
+                  [type]="showPassword ? 'text' : 'password'"
+                  formControlName="password"
+                  placeholder="••••••••"
+                  class="input input-bordered w-full pr-10"
+                  [class.input-error]="password?.invalid && password?.touched"
+                />
+                <button type="button" (click)="togglePassword()" class="absolute inset-y-0 right-0 px-3 flex items-center text-base-content/70">
+                  <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                       viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                  <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                       viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.966 9.966 0 012.225-3.592M9.88 9.88a3 3 0 104.24 4.24"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M3 3l18 18"/>
+                  </svg>
+                </button>
+              </div>
+              <div *ngIf="password?.touched && password?.invalid" class="mt-1 text-error text-sm">
+                <p *ngIf="password?.errors?.['required']">La contraseña es obligatoria.</p>
+                <p *ngIf="password?.errors?.['pattern']">
+                  Mínimo 8 caracteres, una mayúscula, una minúscula y un símbolo.
+                </p>
+              </div>
+            </div>
+
+            <!-- Campo confirmar contraseña -->
+            <div>
+              <label class="label">
+                <span class="label-text">Confirmar contraseña</span>
+              </label>
+              <div class="relative">
+                <input
+                  [type]="showConfirm ? 'text' : 'password'"
+                  formControlName="confirmPassword"
+                  placeholder="••••••••"
+                  class="input input-bordered w-full pr-10"
+                  [class.input-error]="(confirmPassword?.touched && confirmPassword?.invalid) || (formsetPassword.errors?.['passwordsMismatch'] && confirmPassword?.touched)"
+                />
+                <button type="button" (click)="toggleConfirm()" class="absolute inset-y-0 right-0 px-3 flex items-center text-base-content/70">
+                  <svg *ngIf="!showConfirm" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                       viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                  <svg *ngIf="showConfirm" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                       viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.966 9.966 0 012.225-3.592M9.88 9.88a3 3 0 104.24 4.24"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M3 3l18 18"/>
+                  </svg>
+                </button>
+              </div>
+              <div *ngIf="confirmPassword?.touched && confirmPassword?.invalid" class="mt-1 text-error text-sm">
+                <p *ngIf="confirmPassword?.errors?.['required']">Este campo es obligatorio.</p>
+              </div>
+              <div *ngIf="formsetPassword.errors?.['passwordsMismatch'] && confirmPassword?.touched" class="mt-1 text-error text-sm">
+                <p>Las contraseñas no coinciden.</p>
+              </div>
+            </div>
+
+            <div class="text-center">
+              <button type="submit" class="w-full rounded-2xl max-w-xs px-4 py-3 mt-4 font-semibold text-whitebtn btn-success text-white bg-linear-to-r from-cyan-500 to-green-500 cursor-pointer disabled:bg-gray-400" [disabled]="formsetPassword.invalid">
+                Guardar contraseña
+              </button>
+            </div>
+          </form>
+
+
+         </div>
+
       </div>
       <p class="text-center text-gray-400 font-sans">Ya tiene una cuenta? <a routerLink="/auth/login" class="font-semibold bg-linear-to-r from-cyan-500 to-green-500 bg-clip-text text-transparent">Iniciar sesión</a></p>
     </div>

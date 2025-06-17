@@ -24,19 +24,7 @@ export class OtpComponent {
     digit4: ['', [Validators.required, Validators.pattern('[0-9]')]],
   });
 
-  sendOtp() {
-    // Si el formulario no es válido, no hacemos nada.
-    if (this.formOtp.invalid) {
-      return;
-    }
 
-    // CAPTURA DE LA CLAVE: Unimos los valores de cada control para formar el OTP final.
-    const { digit1, digit2, digit3, digit4 } = this.formOtp.value;
-    const otpCompleto = `${digit1}${digit2}${digit3}${digit4}`;
-
-    console.log('OTP enviado:', otpCompleto);
-    // Aquí puedes agregar la lógica para enviar el 'otpCompleto' a tu backend.
-  }
 
   // Lógica para mover el foco automáticamente entre los inputs
   onKeyUp(event: KeyboardEvent, index: number, nextInput: HTMLInputElement | null, prevInput: HTMLInputElement | null = null) {
@@ -52,5 +40,19 @@ export class OtpComponent {
     if (input.value.match(/[0-9]/) && nextInput) {
       nextInput.focus();
     }
+  }
+
+  sendOtp() {
+    // Si el formulario no es válido, no hacemos nada.
+    if (this.formOtp.invalid) {
+      return;
+    }
+
+    // CAPTURA DE LA CLAVE: Unimos los valores de cada control para formar el OTP final.
+    const { digit1, digit2, digit3, digit4 } = this.formOtp.value;
+    const otpCompleto = `${digit1}${digit2}${digit3}${digit4}`;
+
+    console.log('OTP enviado:', otpCompleto);
+    // Aquí puedes agregar la lógica para enviar el 'otpCompleto' a tu backend.
   }
 }
