@@ -1,18 +1,63 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild, ElementRef, OnInit} from '@angular/core';
+import { Component, ViewChild, ElementRef, HostListener , OnInit} from '@angular/core';
+import { RouterLink, RouterOutlet } from '@angular/router';
 import domtoimage from 'dom-to-image';
 import QRCode from 'qrcode';
 
 @Component({
   selector: 'app-credencial',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterOutlet, RouterLink,],
   templateUrl: './credencial.component.html',
   styleUrl: './credencial.component.css'
 })
 export default class CredencialComponen implements OnInit {
+
+  isFlipped: boolean = false;
+
+  currentRotation: number = 0;
+  private touchStartX: number = 0;
+  private touchEndX: number = 0;
+  private swipeThreshold: number = 50;
+
+  toggleFlip(): void {
+    this.isFlipped = !this.isFlipped;
+  }
+
+  get cardRotationStyle(): { transform: string } {
+    return { transform: `rotateY(${this.currentRotation}deg)` };
+  }
+
+   flipCard(direction: 'left' | 'right'): void {
+    if (direction === 'left') {
+      // Si swipe a la izquierda, giramos 180 grados en sentido horario
+      this.currentRotation += 180;
+    } else { // direction === 'right'
+      // Si swipe a la derecha, giramos 180 grados en sentido antihorario
+      this.currentRotation -= 180;
+    }
+    // Opcional: Para mantener los grados dentro de 0-360 si lo necesitas,
+    // aunque CSS maneja rotaciones mayores a 360 sin problema.
+    // this.currentRotation = this.currentRotation % 360;
+  }
+
+   private handleSwipe(): void {
+    const deltaX = this.touchEndX - this.touchStartX;
+
+    if (Math.abs(deltaX) > this.swipeThreshold) {
+      if (deltaX > 0) {
+        // Deslizamiento hacia la derecha
+        this.flipCard('right');
+      } else {
+        // Deslizamiento hacia la izquierda
+        this.flipCard('left');
+      }
+    }
+  }
+
   ngOnInit(): void {
     this.generateQrCode();
   }
+
   @ViewChild('credencialCard', { static: false }) credencialCard!: ElementRef;
   userId: number = 123;  // Definimos el ID del usuario
   qrUrl: string = 'http://iugna.edu.ar'; // URL del QR generada
@@ -58,5 +103,23 @@ export default class CredencialComponen implements OnInit {
       this.qrUrl = url; // Asignamos la URL del QR generada
     });
   }
+
+ @HostListener('touchstart', ['$event'])
+  onTouchStart(event: TouchEvent): void {
+    this.touchStartX = event.touches[0].clientX;
+  }
+
+  @HostListener('touchend', ['$event'])
+  onTouchEnd(event: TouchEvent): void {
+    this.touchEndX = event.changedTouches[0].clientX;
+    this.handleSwipe();
+  }
+
+  @HostListener('touchmove', ['$event'])
+  onTouchMove(event: TouchEvent): void {
+    // event.preventDefault(); // Descomentar si quieres evitar el scroll al deslizar sobre la credencial
+  }
+
+
 
 }

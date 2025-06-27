@@ -39,6 +39,11 @@ export default [
         path:'notificaciones',
         loadComponent: ()=> import('./pages/notificaciones/notificaciones.component')
       },
+      {
+        path:'mensajes',
+        loadComponent: ()=> import('./pages/mensajesdeservicio/mensajesdeservicio.component')
+
+      }
     ]
   }
 ] as Routes

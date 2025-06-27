@@ -4,10 +4,12 @@ export const routes: Routes = [
   {
     path: 'auth',
     loadChildren: () => import('./auth/auth.routes')
+    //TODO: GUARDS
   },
   {
     path: 'dashboard',
-    loadChildren: () => import('./admin/admin.routes')
+    loadChildren: () => import('./admin/admin.routes'),
+    //TODO: GUARDS
   },
   {
     path:'**',

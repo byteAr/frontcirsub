@@ -1,0 +1,41 @@
+/* Estilos para el contenedor 3D */
+.card-container {
+    perspective: 1000px; /* Necesario para la perspectiva 3D */
+}
+
+/* Estilos de la credencial base */
+.card {
+    position: relative;
+    transform-style: preserve-3d; /* Permite que los hijos sean 3D */
+    transition: transform 0.8s; /* Suaviza la animación de volteo */
+    border-radius: 12px; /* Aplica bordes redondeados a la tarjeta */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra para la tarjeta */
+}
+
+/* Estado de volteo */
+.card.flipped {
+    transform: rotateY(180deg);
+}
+
+/* Caras de la credencial */
+.card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden; /* Oculta la cara trasera cuando está volteada */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px; /* Asegura que las caras también tengan los bordes redondeados */
+}
+
+/* Configuración inicial de la cara frontal */
+.card-front {
+    /* No necesita transformaciones iniciales */
+}
+
+/* Configuración inicial de la cara trasera (rotada para estar detrás) */
+.card-back {
+    transform: rotateY(180deg);
+}
