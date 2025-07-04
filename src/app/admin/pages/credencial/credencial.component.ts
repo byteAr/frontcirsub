@@ -3,10 +3,13 @@ import { Component, ViewChild, ElementRef, HostListener , OnInit} from '@angular
 import { RouterLink, RouterOutlet } from '@angular/router';
 import domtoimage from 'dom-to-image';
 import QRCode from 'qrcode';
+import { HeaderCardComponent } from "../../components/header-card/header-card.component";
+import { CardFrontComponent } from "../../components/card-front/card-front.component";
 
 @Component({
   selector: 'app-credencial',
-  imports: [CommonModule, RouterOutlet, RouterLink,],
+  standalone: true,
+  imports: [CommonModule, RouterOutlet, RouterLink,  CardFrontComponent],
   templateUrl: './credencial.component.html',
   styleUrl: './credencial.component.css'
 })

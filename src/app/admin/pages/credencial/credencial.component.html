@@ -1,20 +1,16 @@
 
 <div class="flex flex-col items-center justify-center mt-5 mb-10">
-    <div class="card-container">
-        <div class="card w-86 h-60" [ngStyle]="cardRotationStyle">
+    <div class="[perspective:1000px]">
+        <div class=" [transform-style:preserve-3d] transition-transform duration-800 rounded-xl shadow-md  w-86 h-60" [ngStyle]="cardRotationStyle">
             <div class="card-face card-front">
+              <!-- header card -->
               <div class="flex justify-between items-center w-full rounded-2xl overflow-hidden">
                 <svg id="svg" viewBox="0 0 1440 490" xmlns="http://www.w3.org/2000/svg" class="transition duration-300 ease-in-out delay-150"><defs><linearGradient id="gradient" x1="100%" x2="0%"><stop offset="5%" stop-color="#00b8da"></stop><stop offset="95%" stop-color="#00c951"></stop></linearGradient></defs><path d="M 0,500 L 0,187 C 111.60000000000002,150.73333333333335 223.20000000000005,114.46666666666667 395,116 C 566.8,117.53333333333333 798.8,156.86666666666665 983,175 C 1167.2,193.13333333333335 1303.6,190.06666666666666 1440,187 L 1440,500 L 0,500 Z" stroke="none" stroke-width="0" fill="url(#gradient)" fill-opacity="1" class="transition-all duration-300 ease-in-out delay-150 path-0" transform="rotate(-180 720 250)"></path></svg>
-                  <div class=" w-full absolute top-0 flex justify-between items-center">
-                    <div></div>
-                    <div class="pr-3 pt-4">
-                      <p class="text-white text-right text-[0.6rem] font-medium md:text-lg md:font-semibold">MUTUAL CIRCULO DE SUBOFICIALES DE <br> GENDARMERIA NACIONAL ARGENTINA</p>
-                    </div>
-                  </div>
               </div>
-              <div class="flex justify-between items-center md:px-16 w-full p-2">
-                  <figure class="w-1/2" >
-                    <div tabindex="0" role="button" class="w-25 h-25 btn btn-ghost btn-circle avatar">
+              <div class=" w-full absolute top-0 flex justify-between items-start">
+                <div>
+                  <figure class="pt-2 pl-2">
+                    <div tabindex="0" role="button" class="w-14 h-14 btn btn-ghost btn-circle avatar">
                       <div class=" rounded-full">
                         <img
                           alt="Tailwind CSS Navbar component"
@@ -22,90 +18,93 @@
                       </div>
                     </div>
                   </figure>
-                  <div class="w-1/2">
-                    <div>
-                      <ul class="block text-center">
-                        <li class="w-full text-center mb-2 font-semibold text-lg bg-linear-to-r from-cyan-500 to-green-500 bg-clip-text text-transparent">Marcos Lopez</li>
-                        <li class="text-sm"><span class="">DNI:</span> 34824092</li>
-                      </ul>
+                </div>
+                <div class="pr-3 pt-4">
+                  <p class="text-white text-right text-[0.6rem] font-semibold md:text-lg md:font-semibold">CIRCULO DE SUBOFICIALES <br> GENDARMERIA NACIONAL</p>
+                </div>
+              </div>
+              <div class="w-full">
+                <router-outlet name="front"></router-outlet>
+              </div>
+                <div class="w-full pr-3 pl-5 pb-3 mt-5">
+                  <div class="flex justify-between">
+                    <div class="flex">
+                      <div routerLink="../credencial" class="mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#0891B2" d="M13 22L3 12L13 2v6h8v8h-8zM6 12l5 5v-3h8v-4h-8V7z"/></svg>
+                      </div>
+                      <div [routerLink]="['.', { outlets: { front: ['info'] } }]" class="mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 16 16"><path fill="#0891b2" d="M7 4.75c0-.412.338-.75.75-.75h.5c.412 0 .75.338.75.75v.5c0 .412-.338.75-.75.75h-.5A.753.753 0 0 1 7 5.25zM10 12H6v-1h1V8H6V7h3v4h1z"/><path fill="#0891b2" d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m0 14.5a6.5 6.5 0 1 1 0-13a6.5 6.5 0 0 1 0 13"/></svg>
+                      </div>
 
                     </div>
-                  </div>
-                </div>
-                <div class="w-full flex justify-between items-end pr-3 pl-5 pb-3 mt-5" *ngIf="qrUrl">
-                  <div>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 16 16"><path fill="#0891b2" d="M7 4.75c0-.412.338-.75.75-.75h.5c.412 0 .75.338.75.75v.5c0 .412-.338.75-.75.75h-.5A.753.753 0 0 1 7 5.25zM10 12H6v-1h1V8H6V7h3v4h1z"/><path fill="#0891b2" d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m0 14.5a6.5 6.5 0 1 1 0-13a6.5 6.5 0 0 1 0 13"/></svg>
-                  </div>
-                  <div>
-                    <p class="text-center text-[0.5rem] text-gray-500">La presente credencial digital <br>sólo es válida presentando el DNI</p>
-                  </div>
-                  <div class="flex">
-                    <div class="mr-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"><path fill="#0891b2" d="M3 11h8V3H3zm2-6h4v4H5zM3 21h8v-8H3zm2-6h4v4H5zm8-12v8h8V3zm6 6h-4V5h4zm-5.99 4h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm4 0h2v2h-2zm2 2h2v2h-2zm-4 0h2v2h-2zm2-6h2v2h-2zm2 2h2v2h-2z"/></svg>
+                    <div class="flex">
+                      <div [routerLink]="['.', { outlets: { front: ['mensajes'] } }]" class="mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#0891B2" d="M3 22q-.825 0-1.412-.587T1 20V7h2v13h15v2zm11-8.35l-7-4.1V16h14V9.55zM7 18q-.825 0-1.412-.587T5 16V7.5q0-.525.238-1t.712-.75L14 1l2 1.175L7.2 7.35l6.8 4l6.75-4q.375-.225.763-.212t.737.212t.55.538t.2.762V16q0 .825-.587 1.413T21 18zm7-8l-2.8-2.8l1.4-1.4L14 7.2l3.55-3.55l1.4 1.4zm0 6h7H7z"/></svg>
+                      </div>
+                      <div (click)="flipCard('left')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#0891b2" d="M12 7C6.5 7 2 9.2 2 12c0 2.2 2.9 4.1 7 4.8V20l4-4l-4-4v2.7c-3.2-.6-5-1.9-5-2.7c0-1.1 3-3 8-3s8 1.9 8 3c0 .7-1.5 1.9-4 2.5v2.1c3.5-.8 6-2.5 6-4.6c0-2.8-4.5-5-10-5"/></svg>
+                      </div>
+
                     </div>
-                    <div (click)="flipCard('left')">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"><path fill="#0891b2" d="M12 7C6.5 7 2 9.2 2 12c0 2.2 2.9 4.1 7 4.8V20l4-4l-4-4v2.7c-3.2-.6-5-1.9-5-2.7c0-1.1 3-3 8-3s8 1.9 8 3c0 .7-1.5 1.9-4 2.5v2.1c3.5-.8 6-2.5 6-4.6c0-2.8-4.5-5-10-5"/></svg>
-                  </div>
                   </div>
                 </div>
             </div>
 
             <div class="card-face card-back ">
-                <div class="flex justify-between items-center w-full rounded-2xl overflow-hidden">
-                <svg id="svg" viewBox="0 0 1440 490" xmlns="http://www.w3.org/2000/svg" class="transition duration-300 ease-in-out delay-150"><defs><linearGradient id="gradient" x1="100%" x2="0%"><stop offset="5%" stop-color="#00b8da"></stop><stop offset="95%" stop-color="#00c951"></stop></linearGradient></defs><path d="M 0,500 L 0,187 C 111.60000000000002,150.73333333333335 223.20000000000005,114.46666666666667 395,116 C 566.8,117.53333333333333 798.8,156.86666666666665 983,175 C 1167.2,193.13333333333335 1303.6,190.06666666666666 1440,187 L 1440,500 L 0,500 Z" stroke="none" stroke-width="0" fill="url(#gradient)" fill-opacity="1" class="transition-all duration-300 ease-in-out delay-150 path-0" transform="rotate(-180 720 250)"></path></svg>
+              <div class="flex justify-between items-center w-full rounded-tr-2xl rounded-tl-2xl overflow-hidden">
+                <figure class="w-full rounded-bl-none">
+                  <svg class="w-full" id="svg" viewBox="0 0 1440 390" xmlns="http://www.w3.org/2000/svg" class="transition duration-300 ease-in-out delay-150"><defs><linearGradient id="gradient" x1="0%" y1="50%" x2="100%" y2="50%"><stop offset="5%" stop-color="#00b8da"></stop><stop offset="95%" stop-color="#00c951"></stop></linearGradient></defs><path d="M 0,400 L 0,0 C 205.71428571428572,0 822.8571428571429,0 1440,0 L 1440,400 L 0,400 Z" stroke="none" stroke-width="0" fill="url(#gradient)" fill-opacity="1" class="transition-all duration-300 ease-in-out delay-150 path-0"></path></svg>
+                </figure>
+
                   <div class=" w-full absolute top-0 flex justify-between items-center">
-                    <div></div>
-                    <div class="pr-3 pt-4">
-                      <p class="text-white text-right text-[0.6rem] font-medium md:text-lg md:font-semibold">MUTUAL CIRCULO DE SUBOFICIALES DE <br> GENDARMERIA NACIONAL ARGENTINA</p>
-                    </div>
-                  </div>
-              </div>
-              <div class="flex justify-between items-center md:px-16 w-full p-2">
-                  <figure class="w-1/4" >
-                    <div tabindex="0" role="button" class="w-10 h-10 btn btn-ghost btn-circle avatar">
-                      <div class=" rounded-full">
-                        <img
-                          alt="Tailwind CSS Navbar component"
-                          src="/cirsub.png" />
+                    <div class="flex justify-between w-full pt-2 px-3 items-center">
+                      <div class="w-[40%]">
+                        <p class="text-white font-semibold text-[0.6rem]">Marcos Matias Lopez</p>
+                        <p class="text-white font-semibold text-[0.6rem]">DNI: 3482492</p>
                       </div>
-                    </div>
-                  </figure>
-                  <div class="w-3/4">
-                    <div>
-                      <ul class="flex justify-start w-full">
-                        <li class="w-full  mb-2 font-semibold text-[0.7rem] bg-linear-to-r from-cyan-500 to-green-500 bg-clip-text text-transparent">Marcos Lopes</li>
-                        <li class="text-[0.7rem]"><span class="">DNI:</span> 34824092</li>
-                      </ul>
+                      <figure class="w-[20%] flex justify-center">
+                       <img class="w-10" src="/cirsub.png" alt="">
+                      </figure>
+                      <div class="w-[40%]">
+                        <p class="text-white font-semibold text-right text-[0.5rem] md:text-lg md:font-semibold">CIRCULO DE SUBOFICIALES <br> GENDARMERIA NACIONAL</p>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div>
-                  <router-outlet></router-outlet>
+
+                <div class="max-h-27 min-h-27">
+                  <router-outlet name="back"></router-outlet>
                 </div>
-                <div class="w-full flex justify-between items-center pr-3 pl-5 pb-3 mt-5" *ngIf="qrUrl">
-                  <div class="flex justify-start space-x-2">
-                    <svg routerLink="../mensajes" xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"><path fill="#0891b2" d="M18 3a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4h-4.724l-4.762 2.857a1 1 0 0 1-1.508-.743L7 21v-2H6a4 4 0 0 1-3.995-3.8L2 15V7a4 4 0 0 1 4-4zm-6 10a1 1 0 0 0-1 1v.01a1 1 0 0 0 2 0V14a1 1 0 0 0-1-1m0-6a1 1 0 0 0-1 1v3a1 1 0 0 0 2 0V8a1 1 0 0 0-1-1"/></svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"><path fill="#0891b2" d="M18 6q-.825 0-1.412-.587T16 4t.588-1.412T18 2t1.413.588T20 4t-.587 1.413T18 6m-1 16v-8q0-1-.513-1.8t-1.312-1.25l.875-2.575q.2-.625.738-1T18 7t1.213.375t.737 1L22.5 16H20v6zm-4.5-10.5q-.625 0-1.062-.437T11 10t.438-1.062T12.5 8.5t1.063.438T14 10t-.437 1.063t-1.063.437M5.5 6q-.825 0-1.412-.587T3.5 4t.588-1.412T5.5 2t1.413.588T7.5 4t-.587 1.413T5.5 6m-2 16v-7H2V9q0-.825.588-1.412T4 7h3q.825 0 1.413.588T9 9v6H7.5v7zm7.5 0v-4h-1v-4q0-.625.438-1.062T11.5 12.5h2q.625 0 1.063.438T15 14v4h-1v4z"/></svg>
+                <div class="w-full flex justify-between items-start pr-3 pl-5 pb-3 mt-5" *ngIf="qrUrl">
+                  <div [routerLink]="['.', { outlets: { back: ['grupofamiliar'] } }]" class="flex flex-col items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#0891B2" d="M18 6q-.825 0-1.412-.587T16 4t.588-1.412T18 2t1.413.588T20 4t-.587 1.413T18 6m-1 16V10.95h-1.825L16.5 7h3l3 9H20v6zm-4.5-10.5q-.625 0-1.062-.437T11 10t.438-1.062T12.5 8.5t1.063.438T14 10t-.437 1.063t-1.063.437M5.5 6q-.825 0-1.412-.587T3.5 4t.588-1.412T5.5 2t1.413.588T7.5 4t-.587 1.413T5.5 6m-2 16v-7H2V7h7v8H7.5v7zm7.5 0v-4h-1v-5.5h5V18h-1v4z"/></svg>
+                    <p class="text-[0.5rem] text-center text-cyan-700 font-semibold">Grupo <br> familiar</p>
+                  </div>
+                  <div [routerLink]="['.', { outlets: { back: ['farmacia'] } }]" class="flex flex-col items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#0891B2" d="M17 5v2a3 3 0 0 1 3 3v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V10a3 3 0 0 1 3-3V5zm-4 6h-2v2H9v2h1.999L11 17h2l-.001-2H15v-2h-2zm6-9v2H5V2z"/></svg>
+                    <p class="text-[0.5rem] text-center text-cyan-700 font-semibold">Farmacia</p>
+                  </div>
+                  <div [routerLink]="['.', { outlets: { back: ['estadia'] } }]" class="flex flex-col items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#0891B2" d="M1 19V4h2v10h8V6h12v13h-2v-3H3v3zm6-6q-1.25 0-2.125-.875T4 10t.875-2.125T7 7t2.125.875T10 10t-.875 2.125T7 13m0-2q.425 0 .713-.288T8 10t-.288-.712T7 9t-.712.288T6 10t.288.713T7 11m0 0q-.425 0-.712-.288T6 10t.288-.712T7 9t.713.288T8 10t-.288.713T7 11"/></svg>
+                    <p class="text-[0.5rem] text-center text-cyan-700 font-semibold">Estadía</p>
+                  </div>
+                  <div [routerLink]="['.', { outlets: { back: ['sepelio'] } }]" class="flex flex-col items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 16 16"><path fill="#0891B2" fill-rule="evenodd" d="M13.5 8a5.5 5.5 0 1 1-11 0a5.5 5.5 0 0 1 11 0M15 8A7 7 0 1 1 1 8a7 7 0 0 1 14 0M8.054 4.502c-.708 0-1.34.18-1.811.558a1.95 1.95 0 0 0-.74 1.545c0 .764.474 1.265.94 1.559c.457.287 1.007.448 1.448.547c.462.102.844.191 1.119.341c.227.125.274.224.274.376c0 .102-.04.217-.248.341c-.224.135-.577.229-.982.229c-.344 0-.682-.114-.952-.29c-.282-.184-.42-.388-.457-.506a.75.75 0 1 0-1.43.452c.17.543.59 1 1.067 1.31a3.27 3.27 0 0 0 1.772.534c.602 0 1.24-.134 1.754-.443c.53-.319.976-.864.976-1.627c0-.864-.51-1.394-1.055-1.692c-.478-.26-1.056-.389-1.46-.478l-.053-.012c-.386-.086-.736-.202-.973-.352c-.227-.142-.24-.236-.24-.29a.45.45 0 0 1 .18-.375c.134-.108.403-.227.87-.227c.47 0 .742.11.9.218a.83.83 0 0 1 .316.41a.75.75 0 0 0 1.407-.52A2.33 2.33 0 0 0 9.8 4.98c-.455-.31-1.037-.478-1.745-.478" clip-rule="evenodd"/></svg>
+                    <p class="text-[0.5rem] text-center text-cyan-700 font-semibold">Servicio de <br> sepelio</p>
+                  </div>
+                  <div [routerLink]="['.', { outlets: { back: ['ahorros'] } }]" class="flex flex-col items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><g fill="none"><path fill="#0891B2" d="M21 8c0 1.02-1.186 1.92-3 2.462c-1.134.34-2.513.538-4 .538s-2.866-.199-4-.538C8.187 9.92 7 9.02 7 8c0-1.657 3.134-3 7-3s7 1.343 7 3"/><path stroke="#0891B2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 8c0-1.657-3.134-3-7-3S7 6.343 7 8m14 0v4c0 1.02-1.186 1.92-3 2.462c-1.134.34-2.513.538-4 .538s-2.866-.199-4-.538C8.187 13.92 7 13.02 7 12V8m14 0c0 1.02-1.186 1.92-3 2.462c-1.134.34-2.513.538-4 .538s-2.866-.199-4-.538C8.187 9.92 7 9.02 7 8"/><path stroke="#0891B2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12v4c0 1.02 1.187 1.92 3 2.462c1.134.34 2.513.538 4 .538s2.866-.199 4-.538c1.813-.542 3-1.442 3-2.462v-1M3 12c0-1.197 1.635-2.23 4-2.711M3 12c0 1.02 1.187 1.92 3 2.462c1.134.34 2.513.538 4 .538c.695 0 1.366-.043 2-.124"/></g></svg>
+                    <p class="text-[0.5rem] text-center text-cyan-700 font-semibold">Caja de <br> ahorros</p>
+                  </div>
+                  <div [routerLink]="['.', { outlets: { back: ['movimientos'] } }]" class="flex flex-col items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#0891B2" d="M10.12 19.88a9.74 9.74 0 0 0 5.58-1.76a.26.26 0 0 1 .32 0l5 5.05a1.51 1.51 0 0 0 2.13-2.13l-5.05-5a.26.26 0 0 1 0-.32a9.74 9.74 0 1 0-8 4.18Zm1.32-8.2l-3.37-1.26A2.55 2.55 0 0 1 6.62 8a2.54 2.54 0 0 1 2.29-2.58a.24.24 0 0 0 .21-.25V4.5a1 1 0 0 1 2 0v.62a.26.26 0 0 0 .26.26h1.24a1 1 0 0 1 0 2H9.5c-.88 0-.88.43-.88.58a.9.9 0 0 0 .19.61l3.37 1.26a2.54 2.54 0 0 1 1.44 2.47a2.53 2.53 0 0 1-2.28 2.53a.25.25 0 0 0-.22.25v.67a1 1 0 0 1-2 0v-.63a.24.24 0 0 0-.24-.24H7.62a1 1 0 1 1 0-2h3.13c.87 0 .87-.44.87-.58a.93.93 0 0 0-.18-.62"/></svg>
+                    <p class="text-[0.5rem] text-center text-cyan-700 font-semibold">Extracto de <br>Movimientos</p>
                   </div>
 
 
-                  <div class="flex justify-center items-center">
-                    <div class="relative bg-white rounded-xl border-2 border-cyan-600 px-3 py-2">
-                      <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-white text-cyan-600 text-xs font-semibold px-2 rounded-full z-10">
-                        Servicios
-                      </div>
-                      <div class="flex justify-around items-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"><path fill="#0891b2" d="M10.5 13v1.5q0 .425.288.713t.712.287h1q.425 0 .713-.288t.287-.712V13H15q.425 0 .713-.288T16 12v-1q0-.425-.288-.712T15 10h-1.5V8.5q0-.425-.288-.712T12.5 7.5h-1q-.425 0-.712.288T10.5 8.5V10H9q-.425 0-.712.288T8 11v1q0 .425.288.713T9 13zm1.5 8.9q-.175 0-.325-.025t-.3-.075Q8 20.675 6 17.637T4 11.1V6.375q0-.625.363-1.125t.937-.725l6-2.25q.35-.125.7-.125t.7.125l6 2.25q.575.225.938.725T20 6.375V11.1q0 3.5-2 6.538T12.625 21.8q-.15.05-.3.075T12 21.9"/></svg>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"><path fill="#0891b2" d="M14 2h-4v6H4v4h6v10h4V12h6V8h-6z"/></svg>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"><path fill="#0891b2" d="M14.005 2.003a8 8 0 0 1 3.292 15.293A8 8 0 1 1 6.711 6.71a8 8 0 0 1 7.294-4.707m-3 7h-2v1a2.5 2.5 0 0 0-.164 4.995l.164.005h2l.09.008a.5.5 0 0 1 0 .984l-.09.008h-4v2h2v1h2v-1a2.5 2.5 0 0 0 .164-4.995l-.164-.005h-2l-.09-.008a.5.5 0 0 1 0-.984l.09-.008h4v-2h-2zm3-5A6 6 0 0 0 9.52 6.016a8 8 0 0 1 8.47 8.471a6 6 0 0 0-3.986-10.484"/></svg>
-                      </div>
-                    </div>
-                  <div class="flex ml-2">
-                    <div (click)="flipCard('left')">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"><path fill="#0891b2" d="M12 7C6.5 7 2 9.2 2 12c0 2.2 2.9 4.1 7 4.8V20l4-4l-4-4v2.7c-3.2-.6-5-1.9-5-2.7c0-1.1 3-3 8-3s8 1.9 8 3c0 .7-1.5 1.9-4 2.5v2.1c3.5-.8 6-2.5 6-4.6c0-2.8-4.5-5-10-5"/></svg>
-                    </div>
-                  </div>
 
+                  <div (click)="flipCard('left')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#0891b2" d="M12 7C6.5 7 2 9.2 2 12c0 2.2 2.9 4.1 7 4.8V20l4-4l-4-4v2.7c-3.2-.6-5-1.9-5-2.7c0-1.1 3-3 8-3s8 1.9 8 3c0 .7-1.5 1.9-4 2.5v2.1c3.5-.8 6-2.5 6-4.6c0-2.8-4.5-5-10-5"/></svg>
                   </div>
 
                 </div>
@@ -113,48 +112,9 @@
         </div>
     </div>
 </div>
-    <!-- <div class="card bg-base-100 w-2xl justify-between drop-shadow-2xl" #credencialCard>
-      <div class="flex justify-between items-center  rounded-2xl">
-        <svg class="static" width="100%" height="100%" id="svg" viewBox="0 0 1440 390" xmlns="http://www.w3.org/2000/svg" class="transition duration-300 ease-in-out delay-150"><defs><linearGradient id="gradient" x1="0%" y1="50%" x2="100%" y2="50%"><stop offset="5%" stop-color="#00c951"></stop><stop offset="95%" stop-color="#00b8da"></stop></linearGradient></defs><path d="M 0,400 L 0,150 C 143.32142857142856,140.17857142857144 286.6428571428571,130.35714285714286 402,132 C 517.3571428571429,133.64285714285714 604.7499999999999,146.75000000000003 707,158 C 809.2500000000001,169.24999999999997 926.3571428571429,178.64285714285714 1051,177 C 1175.642857142857,175.35714285714286 1307.8214285714284,162.67857142857144 1440,150 L 1440,400 L 0,400 Z" stroke="none" stroke-width="0" fill="url(#gradient)" fill-opacity="1" class="transition-all duration-300 ease-in-out delay-150 path-0" transform="rotate(-180 720 200)"></path></svg>
-        <div class=" w-full p-5 absolute top-0 flex justify-between items-center">
-
-          <figure>
-            <img class="w-25" src="/cirsub.png" alt="">
-          </figure>
-          <div>
-            <p class="text-white text-right text-sm font-semibold">MUTUAL CIRCULO DE SUBOFICIALES DE <br> GENDARMERIA NACIONAL ARGENTINA</p>
-          </div>
-        </div>
-      </div>
-      <div class="block px-16 mb-5">
-        <h2 class="font-semibold text-lg mb-2">Familiares:</h2>
-      <div class="w-full mb-12">
-        <ul class="flex justify-between">
-          <li class="w-1/3"><span class="font-semibold">Carla Rojas</span></li>
-          <li class="w-1/3"><span class="font-semibold">DNI</span>: 21569632</li>
-          <li class="w-1/3"><span class="font-semibold">Parentesco:</span> Esposa</li>
-        </ul>
-        <ul class="flex justify-between">
-          <li class="w-1/3"><span class="font-semibold">Martin Rodriguez</span></li>
-          <li class="w-1/3"><span class="font-semibold">DNI</span>: 33526369</li>
-          <li class="w-1/3"><span class="font-semibold">Parentesco:</span> Hijo</li>
-        </ul>
-        <ul class="flex justify-between">
-          <li class="w-1/3"><span class="font-semibold">Noelia Rodiguez</span></li>
-          <li class="w-1/3"><span class="font-semibold">DNI</span>: 25365856</li>
-          <li class="w-1/3 flex items-center"><span class="font-semibold">Parentesco:</span> Hija<span class="ml-2"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"><g fill="none" stroke="#059669" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M14 7a2 2 0 1 1-4 0a2 2 0 0 1 4 0Z"/><path stroke-linecap="round" d="M18 10s-3.537 1.5-6 1.5S6 10 6 10m6 2v1.452m0 0a3 3 0 0 0 .476 1.623L15 19m-3-5.548a3 3 0 0 1-.476 1.623L9 19"/></g></svg></span></li>
-        </ul>
-      </div>
-      </div>
-      <div class="qr-container flex justify-between items-end px-5 pb-5" *ngIf="qrUrl">
-        <p class="text-sm text-gray-500 font-base">La presente credencial solo es válida presentando el DNI</p>
-      </div>
-  </div> -->
 
 
-<!-- <div class="flex justify-center mt-10 w-[85vw]">
-  <button (click)="downloadImage()" class="btn font-semibold text-lg text-white btn-outline border-2 hover:bg-cyan-500">Descargar Credencial</button>
-</div> -->
+
 
 
 

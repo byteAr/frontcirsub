@@ -1,16 +1,5 @@
-/* Estilos para el contenedor 3D */
-.card-container {
-    perspective: 1000px; /* Necesario para la perspectiva 3D */
-}
 
-/* Estilos de la credencial base */
-.card {
-    position: relative;
-    transform-style: preserve-3d; /* Permite que los hijos sean 3D */
-    transition: transform 0.8s; /* Suaviza la animación de volteo */
-    border-radius: 12px; /* Aplica bordes redondeados a la tarjeta */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra para la tarjeta */
-}
+
 
 /* Estado de volteo */
 .card.flipped {
