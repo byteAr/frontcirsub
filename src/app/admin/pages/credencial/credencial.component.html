@@ -23,7 +23,7 @@
                   <p class="text-white text-right text-[0.6rem] font-semibold md:text-lg md:font-semibold">CIRCULO DE SUBOFICIALES <br> GENDARMERIA NACIONAL</p>
                 </div>
               </div>
-              <div class="w-full">
+              <div class="w-full ">
                 <router-outlet name="front"></router-outlet>
               </div>
                 <div class="w-full pr-3 pl-5 pb-3 mt-5">
@@ -41,10 +41,9 @@
                       <div [routerLink]="['.', { outlets: { front: ['mensajes'] } }]" class="mr-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#0891B2" d="M3 22q-.825 0-1.412-.587T1 20V7h2v13h15v2zm11-8.35l-7-4.1V16h14V9.55zM7 18q-.825 0-1.412-.587T5 16V7.5q0-.525.238-1t.712-.75L14 1l2 1.175L7.2 7.35l6.8 4l6.75-4q.375-.225.763-.212t.737.212t.55.538t.2.762V16q0 .825-.587 1.413T21 18zm7-8l-2.8-2.8l1.4-1.4L14 7.2l3.55-3.55l1.4 1.4zm0 6h7H7z"/></svg>
                       </div>
-                      <div (click)="flipCard('left')">
+                      <div [routerLink]="['.', { outlets: { back: ['grupofamiliar'] } }]" (click)="flipCard('left')">
                         <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#0891b2" d="M12 7C6.5 7 2 9.2 2 12c0 2.2 2.9 4.1 7 4.8V20l4-4l-4-4v2.7c-3.2-.6-5-1.9-5-2.7c0-1.1 3-3 8-3s8 1.9 8 3c0 .7-1.5 1.9-4 2.5v2.1c3.5-.8 6-2.5 6-4.6c0-2.8-4.5-5-10-5"/></svg>
                       </div>
-
                     </div>
                   </div>
                 </div>
@@ -59,7 +58,7 @@
                   <div class=" w-full absolute top-0 flex justify-between items-center">
                     <div class="flex justify-between w-full pt-2 px-3 items-center">
                       <div class="w-[40%]">
-                        <p class="text-white font-semibold text-[0.6rem]">Marcos Matias Lopez</p>
+                        <p class="text-white font-semibold text-[0.6rem]"></p>
                         <p class="text-white font-semibold text-[0.6rem]">DNI: 3482492</p>
                       </div>
                       <figure class="w-[20%] flex justify-center">
@@ -72,7 +71,7 @@
                   </div>
                 </div>
 
-                <div class="max-h-27 min-h-27">
+                <div class="max-h-27 min-h-27 w-full">
                   <router-outlet name="back"></router-outlet>
                 </div>
                 <div class="w-full flex justify-between items-start pr-3 pl-5 pb-3 mt-5" *ngIf="qrUrl">
@@ -86,7 +85,7 @@
                   </div>
                   <div [routerLink]="['.', { outlets: { back: ['estadia'] } }]" class="flex flex-col items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#0891B2" d="M1 19V4h2v10h8V6h12v13h-2v-3H3v3zm6-6q-1.25 0-2.125-.875T4 10t.875-2.125T7 7t2.125.875T10 10t-.875 2.125T7 13m0-2q.425 0 .713-.288T8 10t-.288-.712T7 9t-.712.288T6 10t.288.713T7 11m0 0q-.425 0-.712-.288T6 10t.288-.712T7 9t.713.288T8 10t-.288.713T7 11"/></svg>
-                    <p class="text-[0.5rem] text-center text-cyan-700 font-semibold">Estadía</p>
+                    <p class="text-[0.5rem] text-center text-cyan-700 font-semibold">Evacuaciones</p>
                   </div>
                   <div [routerLink]="['.', { outlets: { back: ['sepelio'] } }]" class="flex flex-col items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 16 16"><path fill="#0891B2" fill-rule="evenodd" d="M13.5 8a5.5 5.5 0 1 1-11 0a5.5 5.5 0 0 1 11 0M15 8A7 7 0 1 1 1 8a7 7 0 0 1 14 0M8.054 4.502c-.708 0-1.34.18-1.811.558a1.95 1.95 0 0 0-.74 1.545c0 .764.474 1.265.94 1.559c.457.287 1.007.448 1.448.547c.462.102.844.191 1.119.341c.227.125.274.224.274.376c0 .102-.04.217-.248.341c-.224.135-.577.229-.982.229c-.344 0-.682-.114-.952-.29c-.282-.184-.42-.388-.457-.506a.75.75 0 1 0-1.43.452c.17.543.59 1 1.067 1.31a3.27 3.27 0 0 0 1.772.534c.602 0 1.24-.134 1.754-.443c.53-.319.976-.864.976-1.627c0-.864-.51-1.394-1.055-1.692c-.478-.26-1.056-.389-1.46-.478l-.053-.012c-.386-.086-.736-.202-.973-.352c-.227-.142-.24-.236-.24-.29a.45.45 0 0 1 .18-.375c.134-.108.403-.227.87-.227c.47 0 .742.11.9.218a.83.83 0 0 1 .316.41a.75.75 0 0 0 1.407-.52A2.33 2.33 0 0 0 9.8 4.98c-.455-.31-1.037-.478-1.745-.478" clip-rule="evenodd"/></svg>

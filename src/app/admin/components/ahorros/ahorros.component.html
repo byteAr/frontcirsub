@@ -1,1 +1,26 @@
-<p>ahorros works!</p>
+<div class="flex flex-col h-28  overflow-hidden mt-1 mb-2 mx-4">
+  <div class="overflow-y-auto flex-grow custom-scrollbar">
+    <table class="min-w-full divide-y divide-gray-200 w-full">
+      <thead class="bg-gray-50 sticky top-0 z-10">
+        <tr>
+          <th scope="col" class="px-3 py-2 text-left font-semibold text-[0.5rem] text-gray-500 uppercase tracking-wider">
+            DETALLE
+          </th>
+          <th scope="col" class="px-3 py-2 text-left font-semibold text-[0.5rem] text-gray-500 uppercase tracking-wider">
+            CUOTA
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let ahorro of ahorros" class="hover:bg-gray-50">
+          <td class="px-3 py-2 whitespace-nowrap text-[0.6rem] text-gray-900 w-[50%]">{{ ahorro.detalle }}</td>
+          <td class="px-3 py-2 text-[0.6rem] text-gray-600  w-[50%] [50%]">$ {{ahorro.importe}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="text-[0.6rem] font-bold text-gray-400 text-right mb-1">Total: $29000</p>
+</div>
+
+
+

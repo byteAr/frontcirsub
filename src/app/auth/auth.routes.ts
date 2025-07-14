@@ -14,6 +14,10 @@ export default [
     loadComponent:() => import('../auth/pages/otp/otp.component').then(m => m.OtpComponent)
   },
   {
+    path: 'avatar-profile',
+    loadComponent:() => import('../auth/pages/avatar-profile/avatar-profile.component').then(m => m.default)
+  },
+  {
     path: 'password-reset',
     loadComponent:() => import('./pages/repassword/repassword.component').then(m => m.RepasswordComponent)
   },

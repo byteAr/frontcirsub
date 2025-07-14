@@ -2,7 +2,7 @@
 
 import { InputTextModule } from 'primeng/inputtext';
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators, FormControl,  AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -13,6 +13,8 @@ import { FloatLabel } from 'primeng/floatlabel';
 import { TramitesService } from '../../../admin/services/tramites.service';
 import { SelectModule } from 'primeng/select';
 import { AuthService } from '../../services/auth.service';
+
+
 
 
 export interface tipoDni {
@@ -29,6 +31,19 @@ export interface tipoDni {
 })
 export class RegisterComponent implements OnInit {
 
+  @ViewChild('videoElement') videoElement!: ElementRef;
+  @ViewChild('canvas') canvas!: ElementRef;
+
+  capturedImage: string | null = null;
+  private mediaStream: MediaStream | null = null;
+  isLoading: boolean = false;
+
+  async ngAfterViewInit() {
+    this.canvas.nativeElement.width = 300;
+    this.canvas.nativeElement.height = 300;
+    await this.startCamera();
+  }
+
   selectPerioricidad: tipoDni | undefined;
 
   fb = inject(FormBuilder);
@@ -36,10 +51,12 @@ export class RegisterComponent implements OnInit {
   authService = inject(AuthService);
 
   user: any;
+  userId: number = 0;
   visible: boolean = true;
   formotp: boolean = false
   error: string = '';
   repass: boolean = false;
+  avatar: boolean = false;
 
   showPassword = false;
   showConfirm = false;
@@ -47,6 +64,7 @@ export class RegisterComponent implements OnInit {
   private phoneNUmber : string = '';
   private idUser:number = 0;
   private email : string = '';
+  private passwordUser: string =''
 
   formSubmitted: boolean = false;
 
@@ -102,12 +120,9 @@ export class RegisterComponent implements OnInit {
     onSubmitPassword() {
       const password = this.password?.value
       if (this.formsetPassword.valid) {
-        console.log(this.user.Id, password);
-        this.authService.resetPassword(this.user.Id, password!)
-          .subscribe(resp => {
-            console.log(resp);
-
-          })
+        this.passwordUser = password!;
+        this.repass = false;
+        this.avatar = true
 
       } else {
         this.formsetPassword.markAllAsTouched();
@@ -136,8 +151,8 @@ export class RegisterComponent implements OnInit {
       this.authService.verifyDni(dni!)
         .subscribe(resp => {
           this.user = resp;
-          console.log(`esta es la resp:`,resp)
-          if (resp) {
+          if (resp.ok) {
+            this.userId = resp.userId;
             this.phoneNUmber = telefono!;
             this.email = email!;
             this.visible = false;
@@ -219,4 +234,125 @@ export class RegisterComponent implements OnInit {
 
       })
   }
+
+  // logica captura de imagen
+  async startCamera() {
+    try {
+      this.mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      this.videoElement.nativeElement.srcObject = this.mediaStream;
+      await this.videoElement.nativeElement.play();
+    } catch (err) {
+      console.error('Error al acceder a la cámara', err);
+      alert('No se pudo acceder a la cámara. Asegúrate de otorgar permisos.');
+    }
+  }
+
+  stopCamera() {
+    if (this.mediaStream) {
+      this.mediaStream.getTracks().forEach((track) => track.stop());
+      this.mediaStream = null;
+    }
+  }
+
+  capturePhoto() {
+    const video = this.videoElement.nativeElement;
+    const canvas = this.canvas.nativeElement;
+    const context = canvas.getContext('2d');
+
+    if (!context) {
+      console.error('No se pudo obtener el contexto 2D del canvas.');
+      return;
+    }
+
+    const videoWidth = video.videoWidth;
+    const videoHeight = video.videoHeight;
+    const squareSize = Math.min(videoWidth, videoHeight);
+
+    // Recortar desde el centro
+    const startX = (videoWidth - squareSize) / 2;
+    const startY = (videoHeight - squareSize) / 2;
+
+    // Canvas cuadrado
+    canvas.width = squareSize;
+    canvas.height = squareSize;
+
+    // Espejo horizontal
+    context.translate(squareSize, 0);
+    context.scale(-1, 1);
+
+    // Capturar imagen centrada y cuadrada
+    context.drawImage(video, startX, startY, squareSize, squareSize, 0, 0, squareSize, squareSize);
+
+    this.capturedImage = canvas.toDataURL('image/png');
+    this.stopCamera();
+  }
+
+  async retakePhoto() {
+    this.capturedImage = null;
+    await this.startCamera();
+  }
+
+  async updateProfile() {
+    if (!this.capturedImage) {
+      alert('Por favor, toma una foto primero.');
+      return;
+    }
+
+    this.isLoading = true; // Activa el estado de carga
+
+    // Convertir Data URL a Blob
+    // Esta función auxiliar convierte una data URL en un objeto Blob
+    const dataURLtoBlob = (dataurl: string): Promise<Blob> => {
+      return new Promise((resolve, reject) => {
+        const arr = dataurl.split(',');
+        // @ts-ignore
+        const mime = arr[0].match(/:(.*?);/)[1];
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+          u8arr[n] = bstr.charCodeAt(n);
+        }
+        resolve(new Blob([u8arr], { type: mime }));
+      });
+    };
+
+    try {
+      const imageBlob = await dataURLtoBlob(this.capturedImage);
+
+      // Crear un FormData para enviar el archivo
+      // Esto es crucial para enviar archivos binarios en peticiones multipart/form-data
+      const formData = new FormData();
+      formData.append('profilePicture', imageBlob, 'profile.jpeg');
+      console.log(this.userId) // 'profilePicture' es el nombre del campo en el backend
+      formData.append('userId', this.userId.toString()); // 'userId' es el nombre del campo en el backend
+
+      const {dni, telefono, email} = this.formRegister.value;
+
+      this.authService.register(dni!, this.passwordUser, telefono!)
+      .subscribe({
+        next: (res) => {
+          console.log('Registro exitoso', res);
+          this.authService.sendAvatar(formData)
+            .subscribe({
+              next: (res) => console.log('Avatar subido', res),
+              error: (err) => console.error('Error al subir avatar', err)
+            });
+          this.router.navigateByUrl('/dashboard/credencial')
+        },
+        error: (err) => console.error('Error en registro', err)
+      });
+
+    } catch (blobError) {
+      this.isLoading = false;
+      console.error('Error al convertir Data URL a Blob:', blobError);
+      alert('Error interno al preparar la imagen.');
+    }
+  }
+
+  ngOnDestroy() {
+    this.stopCamera(); // Detener la cámara al destruir el componente
+  }
+
+
 }

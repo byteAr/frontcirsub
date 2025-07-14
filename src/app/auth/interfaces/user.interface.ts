@@ -1,23 +1,35 @@
 export interface User {
-  Persona:     Persona[];
-  Socio:       Socio[];
-  Personal:    Personal[];
-  GpoFamiliar: GpoFamiliar[];
-  Beneficios:  any[];
+  ok:       boolean;
+  token:    string;
+  user:     UserClass;
+  userData: UserData;
 }
 
-export interface GpoFamiliar {
-  socioId:                  number;
-  Documento:                string;
-  Nombre:                   string;
-  Tipo_Socio?:              string;
-  Fecha_Alta:               Date;
-  Discapacitado:            string;
-  Socio_Id_Titular:         number;
-  socio?:                   string;
-  Consultado:               number;
-  tipo_parentesco_Id?:      number;
-  Tipo_Parentesco_Detalle?: string;
+export interface UserClass {
+  Id:                number;
+  Personas_Id:       number;
+  Pass_Hash:         string;
+  Celular:           string;
+  Activo:            boolean;
+  VALIDADO_:         boolean;
+  Bloqueado:         boolean;
+  Intentos_Fallidos: number;
+  Fecha_Creacion:    Date;
+}
+
+export interface UserData {
+  Persona:     Persona[];
+  Socio:       any[];
+  Personal:    Personal[];
+  GpoFamiliar: any[];
+  Beneficios:  Beneficio[];
+}
+
+export interface Beneficio {
+  Id:                         number;
+  afi_Tipo_Beneficio_Detalle: string;
+  Beneficio?:                 number;
+  Activo?:                    boolean;
 }
 
 export interface Persona {
@@ -35,10 +47,4 @@ export interface Personal {
   Filial_Detalle:     string;
   Tipo_Cargo_Detalle: string;
   es_Encargado_Area:  boolean;
-}
-
-export interface Socio {
-  Id:         number;
-  Fecha_Alta: Date;
-  TipoSocio:  string;
 }

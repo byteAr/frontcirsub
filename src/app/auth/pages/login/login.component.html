@@ -10,14 +10,14 @@
             <legend class="fieldset-legend font-semibold bg-linear-to-r from-cyan-500 to-green-500 bg-clip-text text-transparent">Ingrese su número de DNI</legend>
             <label class="input input-success validator">
               <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></g></svg>
-              <input formControlName="email" autocomplete="new-password" type="email" placeholder="mail@cirsubgn.org" required/>
+              <input class="text-gray-400" formControlName="dni" autocomplete="new-password" type="text" placeholder="12345678" required/>
             </label>
           </fieldset>
           <fieldset class="fieldset mb-2">
             <legend class="fieldset-legend font-semibold bg-linear-to-r from-cyan-500 to-green-500 bg-clip-text text-transparent">Ingrese su contraseña</legend>
             <label class="input input-success validator">
               <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"></path><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"></circle></g></svg>
-            <input formControlName="password" autocomplete="new-password"  type="password" required placeholder="Password" minlength="8" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must be more than 8 characters, including number, lowercase letter, uppercase letter" />
+            <input class="text-gray-400" formControlName="password" autocomplete="new-password"  type="password" required placeholder="Password" minlength="8" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must be more than 8 characters, including number, lowercase letter, uppercase letter" />
             </label>
           </fieldset>
           <p class="text-left text-gray-400 font-sans mb-5">Olvidó su contraseña? <a routerLink='/auth/register' routerLinkActive="router-link-active"  class="font-semibold bg-linear-to-r from-cyan-500 to-green-500 bg-clip-text text-transparent">Recuperarla</a></p>

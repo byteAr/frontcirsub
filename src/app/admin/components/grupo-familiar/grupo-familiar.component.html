@@ -1,1 +1,38 @@
-<p>grupo-familiar works!</p>
+
+<div class="flex flex-col h-28  overflow-hidden mx-1 mt-2">
+  <div class="overflow-y-auto flex-grow custom-scrollbar">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50 sticky top-0 z-10">
+        <tr>
+          <th scope="col" class="px-3 py-2 text-left font-semibold text-[0.4rem] text-gray-500 uppercase tracking-wider">
+            PARENTESCO
+          </th>
+          <th scope="col" class="px-3 py-2 text-left font-semibold text-[0.4rem] text-gray-500 uppercase tracking-wider">
+            NOMBRE Y APELLIDO
+          </th>
+          <th scope="col" class="px-3 py-2 text-left font-semibold text-[0.4rem] text-gray-500 uppercase tracking-wider">
+            DNI
+          </th>
+          <th scope="col" class="px-3 py-2 text-left font-semibold text-[0.4rem] text-gray-500 uppercase tracking-wider">
+            EDAD
+          </th>
+          <th scope="col" class="px-3 py-2 text-left font-semibold text-[0.4rem] text-gray-500 uppercase tracking-wider">
+
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let familiar of grupofamiliar" class="hover:bg-gray-50">
+          <td class="px-3 py-2 whitespace-nowrap text-[0.6rem] text-gray-900 w-[10%]">{{ familiar.parentesco }}</td>
+          <td class="px-3 py-2 text-[0.6rem] text-gray-600  w-[50%]">{{familiar.nombreApellido}}</td>
+          <td class="px-3 py-2 whitespace-nowrap text-[0.6rem] text-gray-500 w-[20%]">{{familiar.dni}}</td>
+          <td class="px-3 py-2 whitespace-nowrap text-[0.6rem] text-gray-500 w-[10%]">{{familiar.edad}}</td>
+          <td *ngIf="familiar.incapacidad" class="w-[10%]">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><g fill="none" stroke="#25D366" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M14 7a2 2 0 1 1-4 0a2 2 0 0 1 4 0Z"/><path stroke-linecap="round" d="M18 10s-3.537 1.5-6 1.5S6 10 6 10m6 2v1.452m0 0a3 3 0 0 0 .476 1.623L15 19m-3-5.548a3 3 0 0 1-.476 1.623L9 19"/></g></svg>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+

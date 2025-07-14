@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -12,11 +13,15 @@ export class LoginComponent {
 
   fb = inject(FormBuilder);
 
+  authService = inject(AuthService)
+
   hasError = signal(false);
+
+  router= inject(Router)
 
 
   loginForm = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
+    dni: ['', [Validators.required, Validators.minLength(7), Validators.pattern(/^\d+$/)]],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
@@ -29,10 +34,20 @@ export class LoginComponent {
       return;
     }
 
-    const { email='', password='' } = this.loginForm.value
+    const { dni='', password='' } = this.loginForm.value
 
-    console.log({email, password});
+    this.authService.login(dni!, password!)
+      .subscribe(isAuthenticated => {
+        if(isAuthenticated) {
+          this.router.navigateByUrl('/dashboard/credencial')
+          return
+        }
 
+        this.hasError.set(true);
+        setTimeout(() => {
+          this.hasError.set(false)
+        }, 3000);
+      });
   }
 
 

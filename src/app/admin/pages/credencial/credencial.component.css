@@ -17,6 +17,7 @@
     justify-content: center;
     align-items: center;
     border-radius: 12px; /* Asegura que las caras también tengan los bordes redondeados */
+    transform: translateZ(0);
 }
 
 /* Configuración inicial de la cara frontal */

@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild, ElementRef, HostListener , OnInit} from '@angular/core';
+import { Component, ViewChild, ElementRef, HostListener , OnInit, inject} from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import domtoimage from 'dom-to-image';
 import QRCode from 'qrcode';
 import { HeaderCardComponent } from "../../components/header-card/header-card.component";
 import { CardFrontComponent } from "../../components/card-front/card-front.component";
+import { AuthService } from '../../../auth/services/auth.service';
+import { User, UserData } from '../../../auth/interfaces/user.interface';
 
 @Component({
   selector: 'app-credencial',
@@ -14,6 +16,10 @@ import { CardFrontComponent } from "../../components/card-front/card-front.compo
   styleUrl: './credencial.component.css'
 })
 export default class CredencialComponen implements OnInit {
+
+  autService = inject(AuthService);
+
+  user?: UserData | null;
 
   isFlipped: boolean = false;
 
@@ -59,6 +65,8 @@ export default class CredencialComponen implements OnInit {
 
   ngOnInit(): void {
     this.generateQrCode();
+    this.user = this.autService.user();
+    console.log(this.user);
   }
 
   @ViewChild('credencialCard', { static: false }) credencialCard!: ElementRef;
