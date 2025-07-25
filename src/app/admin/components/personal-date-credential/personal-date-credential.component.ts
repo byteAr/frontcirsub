@@ -1,18 +1,20 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { AfterViewInit, Component, inject, OnInit } from '@angular/core';
 import { UserData } from '../../../auth/interfaces/user.interface';
 import { AuthService } from '../../../auth/services/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-personal-date-credential',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './personal-date-credential.component.html',
   styleUrl: './personal-date-credential.component.css'
 })
-export default class PersonalDateCredentialComponent implements OnInit {
+export default class PersonalDateCredentialComponent implements OnInit, AfterViewInit {
+
 
   imagenUrl: SafeUrl  | null = null;
 
@@ -24,14 +26,23 @@ export default class PersonalDateCredentialComponent implements OnInit {
   user : UserData | null = null
 
   ngOnInit(): void {
-    this.user = this.autService.user();
-    this.http.get('http://localhost:3000/auth/profile-image/4', {
+    setTimeout(() => {
+      const id = this.user?.Persona[0].Id;
+    const idString = id?.toString();
+    this.http.get(`http://localhost:3000/auth/profile-image/${idString}`, {
       responseType: 'blob'
     }).subscribe(blob => {
       const objectURL = URL.createObjectURL(blob);
       this.imagenUrl = this.sanitizer.bypassSecurityTrustUrl(objectURL);
     });
+    }, 50);
+
+
   };
+
+  ngAfterViewInit(): void {
+    this.user = this.autService.user();
+  }
 
 
 }

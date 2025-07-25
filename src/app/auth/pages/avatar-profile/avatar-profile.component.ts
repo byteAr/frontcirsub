@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component, ViewChild, ElementRef, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-avatar-profile',
@@ -11,6 +13,9 @@ import { Component, ViewChild, ElementRef } from '@angular/core';
 export default class AvatarProfileComponent {
   @ViewChild('videoElement') videoElement!: ElementRef;
   @ViewChild('canvas') canvas!: ElementRef;
+
+  router = inject(Router);
+  authService = inject(AuthService);
 
   isLoading: boolean = false;
 
@@ -113,6 +118,18 @@ export default class AvatarProfileComponent {
       const formData = new FormData();
       formData.append('profilePicture', imageBlob, 'profile.jpeg'); // 'profilePicture' es el nombre del campo en el backend
 
+
+      const userId = this.authService.getUserId().toString();
+      console.log(userId);
+
+      formData.append('userId', userId);
+
+      this.authService.updateAvatar(formData)
+            .subscribe({
+              next: (res) => console.log('Avatar subido', res),
+              error: (err) => console.error('Error al subir avatar', err)
+            });
+      this.router.navigateByUrl('/dashboard/credencial')
 
 
     } catch (blobError) {

@@ -44,9 +44,14 @@ export class AuthService {
   login(dni: string, password: string):Observable<boolean>   {
     return this.http.post<User>(`${this.url}/auth/login`, { dni, password })
     .pipe(
+      tap( resp=> console.log('Esta es la respuesta al loguearme:', resp)),
       map(resp => this.handleAuthSuccess(resp)),
       catchError((error: any) => this.handleAuthError(error))
     )
+  }
+
+  getUserId():number {
+    return this. _User()!.Persona[0].Id;
   }
 
 
@@ -60,12 +65,23 @@ export class AuthService {
     return this.http.post(`${this.url}/auth/verify-dni`, {dni})
   }
 
-  register(dni: string, password: string, telefono: string): Observable<any> {
-    return this.http.post(`${this.url}/auth/register`, {dni, password, telefono})
+  register(dni: string, password: string, telefono: string, userId: number, email: string): Observable<boolean> {
+    return this.http.post<User>(`${this.url}/auth/register`, {dni, password, telefono, userId, email})
+    .pipe(
+      tap( resp=> console.log( 'esta es la respuesta al registrarme:',resp)),
+      map(resp => this.handleAuthSuccess(resp)),
+      catchError((error: any) => this.handleAuthError(error))
+    )
   }
 
   sendAvatar(formData: FormData):  Observable<any>  {
     return this.http.post(`${this.url}/auth/upload-profileimage`, formData)
+  }
+
+  updateAvatar(formData: FormData):  Observable<any>  {
+    console.log(formData);
+
+    return this.http.post(`${this.url}/auth/update-profileimage`, formData)
   }
 
 
@@ -84,6 +100,10 @@ export class AuthService {
       id,
       password
     })
+
+  }
+
+  getContacto(id: string) {
 
   }
 

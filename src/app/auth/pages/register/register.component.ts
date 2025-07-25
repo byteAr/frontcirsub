@@ -44,6 +44,12 @@ export class RegisterComponent implements OnInit {
     await this.startCamera();
   }
 
+  async captureProfileImage() {
+    this.canvas.nativeElement.width = 300;
+    this.canvas.nativeElement.height = 300;
+    await this.startCamera();
+  }
+
   selectPerioricidad: tipoDni | undefined;
 
   fb = inject(FormBuilder);
@@ -93,8 +99,7 @@ export class RegisterComponent implements OnInit {
         Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/)
       ]],
       confirmPassword: ['', Validators.required]
-    }, { validators: this.passwordsMatchValidator
-    })
+    }, { validators: this.passwordsMatchValidator})
 
     get password() {
       return this.formsetPassword.get('password');
@@ -123,6 +128,11 @@ export class RegisterComponent implements OnInit {
         this.passwordUser = password!;
         this.repass = false;
         this.avatar = true
+        setTimeout(()=> {
+          this.capturePhoto();
+          this.retakePhoto()
+        }, 200)
+
 
       } else {
         this.formsetPassword.markAllAsTouched();
@@ -329,7 +339,7 @@ export class RegisterComponent implements OnInit {
 
       const {dni, telefono, email} = this.formRegister.value;
 
-      this.authService.register(dni!, this.passwordUser, telefono!)
+      this.authService.register(dni!, this.passwordUser, telefono!, this.userId, email!)
       .subscribe({
         next: (res) => {
           console.log('Registro exitoso', res);
