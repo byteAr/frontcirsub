@@ -280,6 +280,9 @@
 
           <!-- Canvas oculto -->
           <canvas #canvas class="hidden"></canvas>
+          <div class="font-bold text-center" *ngIf="message != ''" [ngClass]="{'text-red-500': !errorMessage, 'text-green-600': errorMessage}">
+            {{ message }}
+          </div>
         </div>
 
 

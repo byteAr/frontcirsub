@@ -64,6 +64,9 @@ export class RegisterComponent implements OnInit {
   repass: boolean = false;
   avatar: boolean = false;
 
+  message='';
+  errorMessage: boolean= false
+
   showPassword = false;
   showConfirm = false;
 
@@ -298,6 +301,7 @@ export class RegisterComponent implements OnInit {
   }
 
   async retakePhoto() {
+    this.message='';
     this.capturedImage = null;
     await this.startCamera();
   }
@@ -345,10 +349,24 @@ export class RegisterComponent implements OnInit {
           console.log('Registro exitoso', res);
           this.authService.sendAvatar(formData)
             .subscribe({
-              next: (res) => console.log('Avatar subido', res),
+              next: (res) => {
+                if(!res.ok){
+                  console.log('respuesta del rekognition',res);
+
+                  this.message = res.message;
+
+
+                } else {
+                  this.message='Felicidades, registro exitoso.'
+                  this.errorMessage=true;
+                  setTimeout(() => {
+                     this.router.navigateByUrl('/auth/login')
+                  }, 2000);
+                }
+              },
               error: (err) => console.error('Error al subir avatar', err)
             });
-          this.router.navigateByUrl('/dashboard/credencial')
+
         },
         error: (err) => console.error('Error en registro', err)
       });
