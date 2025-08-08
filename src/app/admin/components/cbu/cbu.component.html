@@ -1,0 +1,46 @@
+<div class="flex flex-col justify-center items-center h-full">
+  <p class="text-gray-400"></p>
+  <form [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <fieldset class="fieldset">
+      <div class="flex justify-between items-center mb-2">
+        <label class="input input-success validator">
+           <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#B0B1B2"/>
+                      <text
+                        x="8"
+                        y="10.5"
+                        text-anchor="middle"
+                        fill="white"
+                        font-size="5.5"
+                        font-weight="bold"
+                        font-family="Arial, sans-serif"
+                      >
+                        CBU
+                      </text>
+                    </svg>
+          <input  id="cbu"
+            type="text"
+            formControlName="cbu"
+            maxlength="22"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            [ngClass]="{'text-teal-500 font-semibold' : !visible, 'text-gray-400' : visible}" class="placeholder:text-gray-400" autocomplete="new-password" type="text" placeholder="" required/>
+        </label>
+        <svg *ngIf="visible" (click)="activatedEdit()" class="ml-2 cursor-pointer" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><g fill="#0891B2"><path d="M15.9 2L3 14.9v5.7h5.7L21.5 7.7zM7.8 18.5H5v-2.8l7.9-7.9l2.8 2.8zm6.5-12.1l1.6-1.6l2.8 2.8l-1.6 1.6z"/><path d="M12 21h8.6v-2H14z" opacity=".5"/></g></svg>
+        <!-- <button *ngIf="visible" (click)="activatedEdit()" type="submit" class="mt-4 font-semibold ml-2 text-[0.8rem] text-[#0891B2] cursor-pointer" >
+            Editar
+        </button> -->
+        <button [disabled]="form.controls['cbu'].invalid" *ngIf="!visible" (click)="guardar()" type="submit" class="font-semibold ml-2 text-[0.8rem]" [ngClass]="{
+            'text-[#0891B2] cursor-pointer': form.controls['cbu'].valid,
+            'text-gray-300 cursor-not-allowed': form.controls['cbu'].invalid
+            }">
+            Guardar
+        </button>
+      </div>
+    </fieldset>
+    <div *ngIf="submitted && form.controls['cbu'].invalid" class="text-red-600 text-[0.6rem] mb-2 text-center font-semibold">
+    El número de CBU debe tener exactamente 22 dígitos numéricos.
+    </div>
+  </form>
+  <p class="px-5 text-gray-400 text-center text-[0.5rem] ">* Mantenga actualizado su número de cbu, el mismo será utilizado para reintegros y todo trámite que lo requiera. El mismo debe pertenecer al titular de esta credencial.</p>
+</div>
+

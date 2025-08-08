@@ -1,0 +1,23 @@
+<div class="flex flex-col justify-center items-center h-full">
+  <p class="text-gray-400">¿Cómo calificarías este servicio?</p>
+  <div class="flex space-x-1 cursor-pointer">
+    <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
+      <svg
+        (click)="setRating(star)"
+        (mouseenter)="setHover(star)"
+        (mouseleave)="clearHover()"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        class="w-6 h-6"
+        [attr.fill]="star <= (hover || rating) ? '#ffd900' : 'transparent'"
+        [attr.stroke]="'#ffd900'"
+        stroke-width="2"
+      >
+        <!-- Estrella de puntas rectas -->
+        <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" />
+      </svg>
+    </ng-container>
+  </div>
+  <p class="mt-2 text-sm text-gray-700">{{ rating }}/5</p>
+</div>
+

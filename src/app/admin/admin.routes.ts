@@ -80,6 +80,16 @@ export default [
             loadComponent: ()=> import('./components/extractomovimientos/extractomovimientos.component'),
             outlet:'back'
           },
+          {
+            path: 'cbu',
+            loadComponent: ()=> import('./components/cbu/cbu.component'),
+            outlet:'back'
+          },
+          {
+            path: 'encuesta',
+            loadComponent: ()=> import('./components/encuesta/encuesta.component'),
+            outlet:'back'
+          },
         ]
       },
       {

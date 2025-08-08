@@ -19,7 +19,7 @@ export default class CredencialComponen implements OnInit {
 
   autService = inject(AuthService);
 
-  user?: UserData | null;
+  user = this.autService.user;
 
   isFlipped: boolean = false;
 
@@ -65,8 +65,8 @@ export default class CredencialComponen implements OnInit {
 
     ngOnInit(): void {
       this.generateQrCode();
-      this.user = this.autService.user();
-      console.log(this.user);
+      this.autService.checkStatus().subscribe();
+      console.log(this.user());
     }
 
     @ViewChild('credencialCard', { static: false }) credencialCard!: ElementRef;

@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
+import { AuthService } from '../../../auth/services/auth.service';
 
 interface familia {
   parentesco: string;
@@ -16,6 +17,26 @@ interface familia {
   styleUrl: './grupo-familiar.component.css'
 })
 export default class GrupoFamiliarComponent {
+
+
+  constructor(){
+    effect(() => {
+    const u = this.user();
+    if (u) {
+      this.familia = u.GpoFamiliar;
+      console.log('Familia cargada:', this.familia);
+    }
+  });
+   this.authService.checkStatus().subscribe();
+  }
+
+  authService=inject(AuthService)
+
+  user = this.authService.user;
+
+  familia:any;
+
+
 
   grupofamiliar: familia[] = [
     {
