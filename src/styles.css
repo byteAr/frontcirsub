@@ -1,11 +1,25 @@
-/* You can add global styles to this file, and also import other style files */
+/* Tailwind + DaisyUI */
 @import "tailwindcss";
 @plugin "daisyui" {
   themes: winter --default, winter --prefersdark, cupcake, dracula;
 }
 
-* {
-    box-sizing: border-box;
+/* (opcional) reset */
+* { box-sizing: border-box; }
 
+/* 1) keyframes: fuera del @layer */
+@keyframes zoomBeyondSmooth {
+  0%   { transform: scale(1);  opacity: 1; }
+  40%  { transform: scale(3);  opacity: 1; }
+  70%  { transform: scale(6);  opacity: 1; }
+  85%  { transform: scale(8);  opacity: .9; }
+  100% { transform: scale(10); opacity: 0; }
 }
 
+/* 2) utilidad: dentro de UN solo @layer */
+@layer utilities {
+  .animate-zoom-beyond-smooth {
+    animation: zoomBeyondSmooth 1.8s cubic-bezier(0.19,1,0.22,1) forwards;
+    will-change: transform, opacity;
+  }
+}

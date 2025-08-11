@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ViewChild, ElementRef, HostListener , OnInit, inject} from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import domtoimage from 'dom-to-image';
 import QRCode from 'qrcode';
 import { HeaderCardComponent } from "../../components/header-card/header-card.component";
@@ -11,7 +11,7 @@ import { User, UserData } from '../../../auth/interfaces/user.interface';
 @Component({
   selector: 'app-credencial',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive ],
   templateUrl: './credencial.component.html',
   styleUrl: './credencial.component.css'
 })

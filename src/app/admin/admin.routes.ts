@@ -51,6 +51,11 @@ export default [
             outlet:'front'
           },
           {
+            path: 'mensajes-oficiales',
+            loadComponent: ()=> import('./components/notifications-oficiales/notifications-oficiales.component'),
+            outlet:'front'
+          },
+          {
             path: 'grupofamiliar',
             loadComponent: ()=> import('./components/grupo-familiar/grupo-familiar.component'),
             outlet:'back'

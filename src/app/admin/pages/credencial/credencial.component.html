@@ -29,27 +29,101 @@
               </div>
                 <div class="w-full pr-3 pl-5 pb-3 mt-5">
                   <div class="flex justify-between">
-                    <div class="flex">
-                      <div routerLink="../credencial" class="mr-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#0891B2" d="M13 22L3 12L13 2v6h8v8h-8zM6 12l5 5v-3h8v-4h-8V7z"/></svg>
-                      </div>
-                      <div [routerLink]="['.', { outlets: { front: ['info'] } }]" class="mr-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 16 16"><path fill="#0891b2" d="M7 4.75c0-.412.338-.75.75-.75h.5c.412 0 .75.338.75.75v.5c0 .412-.338.75-.75.75h-.5A.753.753 0 0 1 7 5.25zM10 12H6v-1h1V8H6V7h3v4h1z"/><path fill="#0891b2" d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m0 14.5a6.5 6.5 0 1 1 0-13a6.5 6.5 0 0 1 0 13"/></svg>
-                      </div>
+                  <div class="flex">
+                    <!-- Inicio / credencial -->
+                    <div
+                      routerLink="../credencial"
+                      routerLinkActive="active"
+                      [routerLinkActiveOptions]="{ exact: true }"
+                      #rlaCred="routerLinkActive"
+                      class="mr-2 flex flex-col items-center cursor-pointer"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24">
+                        <path
+                          [attr.fill]="rlaCred.isActive ? '#0891B2' : '#61788f'"
+                          d="M13 22L3 12L13 2v6h8v8h-8zM6 12l5 5v-3h8v-4h-8V7z"
+                        />
+                      </svg>
 
                     </div>
-                    <div class="flex">
-                      <div [routerLink]="['.', { outlets: { front: ['mensajes'] } }]" class="mr-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#00C284" d="M21 15.26a1 1 0 0 0-1 1v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.67l5.88 5.89a3 3 0 0 0 2.1.87a3 3 0 0 0 1.43-.36a1 1 0 0 0 .4-1.36a1 1 0 0 0-1.36-.4a1 1 0 0 1-1.15-.17L5.41 8.26H12a1 1 0 0 0 0-2H5a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-3a1 1 0 0 0-1-1m0-12h-5a1 1 0 0 0-1 1v8a1 1 0 0 0 1.57.82l1.93-1.29l1.91 1.28a1.06 1.06 0 0 0 .59.19a1 1 0 0 0 .41-.09a1 1 0 0 0 .59-.91v-8a1 1 0 0 0-1-1m-1 7.12l-.94-.63a1 1 0 0 0-1.12 0l-.94.63V5.26h3Z"/></svg>
-                      </div>
-                      <div [routerLink]="['.', { outlets: { front: ['mensajes'] } }]" class="mr-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#0891B2" d="M3 22q-.825 0-1.412-.587T1 20V7h2v13h15v2zm11-8.35l-7-4.1V16h14V9.55zM7 18q-.825 0-1.412-.587T5 16V7.5q0-.525.238-1t.712-.75L14 1l2 1.175L7.2 7.35l6.8 4l6.75-4q.375-.225.763-.212t.737.212t.55.538t.2.762V16q0 .825-.587 1.413T21 18zm7-8l-2.8-2.8l1.4-1.4L14 7.2l3.55-3.55l1.4 1.4zm0 6h7H7z"/></svg>
-                      </div>
-                      <div [routerLink]="['.', { outlets: { back: ['grupofamiliar'] } }]" (click)="flipCard('left')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#0891b2" d="M12 7C6.5 7 2 9.2 2 12c0 2.2 2.9 4.1 7 4.8V20l4-4l-4-4v2.7c-3.2-.6-5-1.9-5-2.7c0-1.1 3-3 8-3s8 1.9 8 3c0 .7-1.5 1.9-4 2.5v2.1c3.5-.8 6-2.5 6-4.6c0-2.8-4.5-5-10-5"/></svg>
-                      </div>
+
+                    <!-- Info -->
+                    <div
+                      [routerLink]="['.', { outlets: { front: ['info'] } }]"
+                      routerLinkActive="active"
+                      [routerLinkActiveOptions]="{ exact: true }"
+                      #rlaInfo="routerLinkActive"
+                      class="mr-2 flex flex-col items-center cursor-pointer"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 16 16">
+                        <path
+                          [attr.fill]="rlaInfo.isActive ? '#0891B2' : '#61788f'"
+                          d="M7 4.75c0-.412.338-.75.75-.75h.5c.412 0 .75.338.75.75v.5c0 .412-.338.75-.75.75h-.5A.753.753 0 0 1 7 5.25zM10 12H6v-1h1V8H6V7h3v4h1z"
+                        />
+                        <path
+                          [attr.fill]="rlaInfo.isActive ? '#0891B2' : '#61788f'"
+                          d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m0 14.5a6.5 6.5 0 1 1 0-13a6.5 6.5 0 0 1 0 13"
+                        />
+                      </svg>
+
                     </div>
                   </div>
+
+                  <div class="flex">
+                    <!-- Mensajes (icono 1) -->
+                    <div
+                      [routerLink]="['.', { outlets: { front: ['mensajes-oficiales'] } }]"
+                      routerLinkActive="active"
+                      [routerLinkActiveOptions]="{ exact: true }"
+                      #rlaMsg1="routerLinkActive"
+                      class="mr-2 flex flex-col items-center cursor-pointer"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24">
+                        <path
+                          [attr.fill]="rlaMsg1.isActive ? '#00BC7D' : '#61788f'"
+                          d="M21 15.26a1 1 0 0 0-1 1v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.67l5.88 5.89a3 3 0 0 0 2.1.87a3 3 0 0 0 1.43-.36a1 1 0 0 0 .4-1.36a1 1 0 0 0-1.36-.4a1 1 0 0 1-1.15-.17L5.41 8.26H12a1 1 0 0 0 0-2H5a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-3a1 1 0 0 0-1-1m0-12h-5a1 1 0 0 0-1 1v8a1 1 0 0 0 1.57.82l1.93-1.29l1.91 1.28a1.06 1.06 0 0 0 .59.19a1 1 0 0 0 .41-.09a1 1 0 0 0 .59-.91v-8a1 1 0 0 0-1-1m-1 7.12l-.94-.63a1 1 0 0 0-1.12 0l-.94.63V5.26h3Z"
+                        />
+                      </svg>
+
+                    </div>
+
+                    <!-- Mensajes (icono 2) -->
+                    <div
+                      [routerLink]="['.', { outlets: { front: ['mensajes'] } }]"
+                      routerLinkActive="active"
+                      [routerLinkActiveOptions]="{ exact: true }"
+                      #rlaMsg2="routerLinkActive"
+                      class="mr-2 flex flex-col items-center cursor-pointer"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24">
+                        <path
+                          [attr.fill]="rlaMsg2.isActive ? '#0891B2' : '#61788f'"
+                          d="M3 22q-.825 0-1.412-.587T1 20V7h2v13h15v2zm11-8.35l-7-4.1V16h14V9.55zM7 18q-.825 0-1.412-.587T5 16V7.5q0-.525.238-1t.712-.75L14 1l2 1.175L7.2 7.35l6.8 4l6.75-4q .375-.225 .763-.212t .737 .212t .55 .538t .2 .762V16q0 .825-.587 1.413T21 18zm7-8l-2.8-2.8l1.4-1.4L14 7.2l3.55-3.55l1.4 1.4zm0 6h7H7z"
+                        />
+                      </svg>
+
+                    </div>
+
+                    <!-- Flip a back -->
+                    <div
+                      [routerLink]="['.', { outlets: { back: ['grupofamiliar'] } }]"
+                      (click)="flipCard('left')"
+                      routerLinkActive="active"
+                      [routerLinkActiveOptions]="{ exact: true }"
+                      #rlaFlip="routerLinkActive"
+                      class="flex flex-col items-center cursor-pointer"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24">
+                        <path
+                          [attr.fill]="rlaFlip.isActive ? '#0891B2' : '#61788f'"
+                          d="M12 7C6.5 7 2 9.2 2 12c0 2.2 2.9 4.1 7 4.8V20l4-4l-4-4v2.7c-3.2-.6-5-1.9-5-2.7c0-1.1 3-3 8-3s8 1.9 8 3c0 .7-1.5 1.9-4 2.5v2.1c3.5-.8 6-2.5 6-4.6c0-2.8-4.5-5-10-5"
+                        />
+                      </svg>
+
+                    </div>
+                  </div>
+                  </div>
+
                 </div>
             </div>
 
@@ -62,8 +136,8 @@
                   <div class=" w-full absolute top-0 flex justify-between items-center">
                     <div class="flex justify-between w-full pt-2 px-3 items-center">
                       <div class="w-[40%]">
-                        <p class="text-white font-semibold text-[0.6rem]"></p>
-                        <p class="text-white font-semibold text-[0.6rem]">DNI: 3482492</p>
+                        <p class="text-white font-semibold text-[0.6rem]">{{ user()?.Persona?.[0]?.Nombre}} {{ user()?.Persona?.[0]?.Apellido}}</p>
+                        <p class="text-white font-semibold text-[0.6rem]">DNI: {{ user()?.Persona?.[0]?.Documento }}</p>
                       </div>
                       <figure class="w-[20%] flex justify-center">
                        <img class="w-10" src="/cirsub.png" alt="">
@@ -79,50 +153,132 @@
                   <router-outlet name="back"></router-outlet>
                 </div>
                 <div class="w-full flex justify-between items-start pr-3 pl-5 pb-3 mt-5" *ngIf="qrUrl">
-                  <div [routerLink]="['.', { outlets: { back: ['grupofamiliar'] } }]" class="flex flex-col items-center justify-center cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#0891B2" d="M18 6q-.825 0-1.412-.587T16 4t.588-1.412T18 2t1.413.588T20 4t-.587 1.413T18 6m-1 16V10.95h-1.825L16.5 7h3l3 9H20v6zm-4.5-10.5q-.625 0-1.062-.437T11 10t.438-1.062T12.5 8.5t1.063.438T14 10t-.437 1.063t-1.063.437M5.5 6q-.825 0-1.412-.587T3.5 4t.588-1.412T5.5 2t1.413.588T7.5 4t-.587 1.413T5.5 6m-2 16v-7H2V7h7v8H7.5v7zm7.5 0v-4h-1v-5.5h5V18h-1v4z"/></svg>
-                    <p class="text-[0.5rem] text-center text-cyan-700 font-semibold">Grupo <br> familiar</p>
+                  <div
+                    [routerLink]="['.', { outlets: { back: ['grupofamiliar'] } }]"
+                    routerLinkActive="active"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    #rlaGF="routerLinkActive"
+                    class="flex flex-col items-center justify-center cursor-pointer"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24">
+                      <path
+                        [attr.fill]="rlaGF.isActive ? '#0891B2' : '#61788f'"
+                        d="M18 6q-.825 0-1.412-.587T16 4t.588-1.412T18 2t1.413.588T20 4t-.587 1.413T18 6m-1 16V10.95h-1.825L16.5 7h3l3 9H20v6zm-4.5-10.5q-.625 0-1.062-.437T11 10t.438-1.062T12.5 8.5t1.063.438T14 10t-.437 1.063t-1.063.437M5.5 6q-.825 0-1.412-.587T3.5 4t.588-1.412T5.5 2t1.413.588T7.5 4t-.587 1.413T5.5 6m-2 16v-7H2V7h7v8H7.5v7zm7.5 0v-4h-1v-5.5h5V18h-1v4z"
+                      />
+                    </svg>
+                    <p class="text-[0.5rem] text-center font-semibold"
+
+                      [ngClass]="rlaGF.isActive ? 'text-cyan-700' : 'text-gray-500'">
+                      Grupo <br> familiar
+                    </p>
                   </div>
-                  <div [routerLink]="['.', { outlets: { back: ['farmacia'] } }]" class="flex flex-col items-center justify-center cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#0891B2" d="M17 5v2a3 3 0 0 1 3 3v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V10a3 3 0 0 1 3-3V5zm-4 6h-2v2H9v2h1.999L11 17h2l-.001-2H15v-2h-2zm6-9v2H5V2z"/></svg>
-                    <p class="text-[0.5rem] text-center text-cyan-700 font-semibold">Farmacia</p>
+
+                  <!-- Farmacia -->
+                  <div
+                    [routerLink]="['.', { outlets: { back: ['farmacia'] } }]"
+                    routerLinkActive="active"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    #rlaFarm="routerLinkActive"
+                    class="flex flex-col items-center justify-center cursor-pointer"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24">
+                      <path
+                        [attr.fill]="rlaFarm.isActive ? '#0891B2' : '#61788f'"
+                        d="M17 5v2a3 3 0 0 1 3 3v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V10a3 3 0 0 1 3-3V5zm-4 6h-2v2H9v2h1.999L11 17h2l-.001-2H15v-2h-2zm6-9v2H5V2z"
+                      />
+                    </svg>
+                    <p class="text-[0.5rem] text-center font-semibold"
+                      [ngClass]="rlaFarm.isActive ? 'text-cyan-700' : 'text-gray-500'">Farmacia</p>
                   </div>
-                  <div [routerLink]="['.', { outlets: { back: ['estadia'] } }]" class="flex flex-col items-center justify-center cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#0891B2" d="M1 19V4h2v10h8V6h12v13h-2v-3H3v3zm6-6q-1.25 0-2.125-.875T4 10t.875-2.125T7 7t2.125.875T10 10t-.875 2.125T7 13m0-2q.425 0 .713-.288T8 10t-.288-.712T7 9t-.712.288T6 10t.288.713T7 11m0 0q-.425 0-.712-.288T6 10t.288-.712T7 9t.713.288T8 10t-.288.713T7 11"/></svg>
-                    <p class="text-[0.5rem] text-center text-cyan-700 font-semibold">Evacuaciones</p>
+
+                  <!-- Evacuaciones -->
+                  <div
+                    [routerLink]="['.', { outlets: { back: ['estadia'] } }]"
+                    routerLinkActive="active"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    #rlaEvac="routerLinkActive"
+                    class="flex flex-col items-center justify-center cursor-pointer"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24">
+                      <path
+                        [attr.fill]="rlaEvac.isActive ? '#0891B2' : '#61788f'"
+                        d="M1 19V4h2v10h8V6h12v13h-2v-3H3v3zm6-6q-1.25 0-2.125-.875T4 10t.875-2.125T7 7t2.125.875T10 10t-.875 2.125T7 13m0-2q.425 0 .713-.288T8 10t-.288-.712T7 9t-.712.288T6 10t.288.713T7 11"
+                      />
+                    </svg>
+                    <p class="text-[0.5rem] text-center font-semibold"
+                      [ngClass]="rlaEvac.isActive ? 'text-cyan-700' : 'text-gray-500'">Evacuaciones</p>
                   </div>
-                  <div [routerLink]="['.', { outlets: { back: ['sepelio'] } }]" class="flex flex-col items-center justify-center cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 16 16"><path fill="#0891B2" fill-rule="evenodd" d="M13.5 8a5.5 5.5 0 1 1-11 0a5.5 5.5 0 0 1 11 0M15 8A7 7 0 1 1 1 8a7 7 0 0 1 14 0M8.054 4.502c-.708 0-1.34.18-1.811.558a1.95 1.95 0 0 0-.74 1.545c0 .764.474 1.265.94 1.559c.457.287 1.007.448 1.448.547c.462.102.844.191 1.119.341c.227.125.274.224.274.376c0 .102-.04.217-.248.341c-.224.135-.577.229-.982.229c-.344 0-.682-.114-.952-.29c-.282-.184-.42-.388-.457-.506a.75.75 0 1 0-1.43.452c.17.543.59 1 1.067 1.31a3.27 3.27 0 0 0 1.772.534c.602 0 1.24-.134 1.754-.443c.53-.319.976-.864.976-1.627c0-.864-.51-1.394-1.055-1.692c-.478-.26-1.056-.389-1.46-.478l-.053-.012c-.386-.086-.736-.202-.973-.352c-.227-.142-.24-.236-.24-.29a.45.45 0 0 1 .18-.375c.134-.108.403-.227.87-.227c.47 0 .742.11.9.218a.83.83 0 0 1 .316.41a.75.75 0 0 0 1.407-.52A2.33 2.33 0 0 0 9.8 4.98c-.455-.31-1.037-.478-1.745-.478" clip-rule="evenodd"/></svg>
-                    <p class="text-[0.5rem] text-center text-cyan-700 font-semibold">Servicio de <br> sepelio</p>
+
+                  <!-- Sepelio -->
+                  <div
+                    [routerLink]="['.', { outlets: { back: ['sepelio'] } }]"
+                    routerLinkActive="active"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    #rlaSep="routerLinkActive"
+                    class="flex flex-col items-center justify-center cursor-pointer"
+                  >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 16 16">
+                      <path
+                        [attr.fill]="rlaSep.isActive ? '#0891B2' : '#61788f'"
+                        fill-rule="evenodd"
+                        d="M13.5 8a5.5 5.5 0 1 1-11 0a5.5 5.5 0 0 1 11 0M15 8A7 7 0 1 1 1 8a7 7 0 0 1 14 0M8.054 4.502c-.708 0-1.34.18-1.811.558a1.95 1.95 0 0 0-.74 1.545c0 .764.474 1.265.94 1.559c.457.287 1.007.448 1.448.547c.462.102.844.191 1.119.341c.227.125.274.224.274.376c0 .102-.04.217-.248.341c-.224.135-.577.229-.982.229c-.344 0-.682-.114-.952-.29c-.282-.184-.42-.388-.457-.506a.75.75 0 1 0-1.43.452c.17.543.59 1 1.067 1.31a3.27 3.27 0 0 0 1.772.534c.602 0 1.24-.134 1.754-.443c.53-.319.976-.864.976-1.627c0-.864-.51-1.394-1.055-1.692c-.478-.26-1.056-.389-1.46-.478l-.053-.012c-.386-.086-.736-.202-.973-.352c-.227-.142-.24-.236-.24-.29a.45.45 0 0 1 .18-.375c.134-.108.403-.227.87-.227c.47 0 .742.11.9.218a.83.83 0 0 1 .316.41a.75.75 0 0 0 1.407-.52A2.33 2.33 0 0 0 9.8 4.98c-.455-.31-1.037-.478-1.745-.478" clip-rule="evenodd"
+                      />
+                      </svg>
+                    <p class="text-[0.5rem] text-center font-semibold"
+                      [ngClass]="rlaSep.isActive ? 'text-cyan-700' : 'text-gray-500'">Servicio de<br>sepelio</p>
                   </div>
-                  <div [routerLink]="['.', { outlets: { back: ['cbu'] } }]" class="flex flex-col items-center justify-center cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#0891B2"/>
-                      <text
-                        x="8"
-                        y="10.5"
-                        text-anchor="middle"
-                        fill="white"
-                        font-size="5.5"
-                        font-weight="bold"
-                        font-family="Arial, sans-serif"
-                      >
+
+                  <!-- CBU -->
+                  <div
+                    [routerLink]="['.', { outlets: { back: ['cbu'] } }]"
+                    routerLinkActive="active"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    #rlaCbu="routerLinkActive"
+                    class="flex flex-col items-center justify-center cursor-pointer"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 16 16">
+                      <circle cx="8" cy="8" r="8"
+                              [attr.fill]="rlaCbu.isActive ? '#0891B2' : '#61788f'"/>
+                      <text x="8" y="10.5" text-anchor="middle" fill="white" font-size="5.5" font-weight="bold" font-family="Arial, sans-serif">
                         CBU
                       </text>
                     </svg>
-                    <p class="text-[0.5rem] text-center text-cyan-700 font-semibold">Actualización <br>de CBU</p>
-                  </div>
-                  <div [routerLink]="['.', { outlets: { back: ['encuesta'] } }]" class="flex flex-col items-center justify-center cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#0891B2" d="M6 4v4h12V4h2.007c.548 0 .993.445.993.993v16.014a.994.994 0 0 1-.993.993H3.993A.993.993 0 0 1 3 21.007V4.993C3 4.445 3.445 4 3.993 4zm3 13H7v2h2zm0-3H7v2h2zm0-3H7v2h2zm7-9v4H8V2z"/></svg>
-                    <p class="text-[0.5rem] text-center text-cyan-700 font-semibold">Encuesta</p>
+                    <p class="text-[0.5rem] text-center font-semibold"
+                      [ngClass]="rlaCbu.isActive ? 'text-cyan-700' : 'text-gray-500'">Actualización<br>de CBU</p>
                   </div>
 
-
-
-                  <div (click)="flipCard('left')" class="cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#0891b2" d="M12 7C6.5 7 2 9.2 2 12c0 2.2 2.9 4.1 7 4.8V20l4-4l-4-4v2.7c-3.2-.6-5-1.9-5-2.7c0-1.1 3-3 8-3s8 1.9 8 3c0 .7-1.5 1.9-4 2.5v2.1c3.5-.8 6-2.5 6-4.6c0-2.8-4.5-5-10-5"/></svg>
+                  <!-- Encuesta -->
+                  <div
+                    [routerLink]="['.', { outlets: { back: ['encuesta'] } }]"
+                    routerLinkActive="active"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    #rlaEnc="routerLinkActive"
+                    class="flex flex-col items-center justify-center cursor-pointer"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24">
+                      <path
+                        [attr.fill]="rlaEnc.isActive ? '#0891B2' : '#61788f'"
+                        d="M6 4v4h12V4h2.007c.548 0 .993.445.993.993v16.014a.994.994 0 0 1-.993.993H3.993A.993.993 0 0 1 3 21.007V4.993C3 4.445 3.445 4 3.993 4zm3 13H7v2h2zm0-3H7v2h2zm0-3H7v2h2zm7-9v4H8V2z"
+                      />
+                    </svg>
+                    <p class="text-[0.5rem] text-center font-semibold"
+                      [ngClass]="rlaEnc.isActive ? 'text-cyan-700' : 'text-gray-500'">Encuesta</p>
                   </div>
 
+                  <!-- Volver (flip) -->
+                  <div
+                  [routerLink]="['.', { outlets: { front: ['credencial'] } }]"
+                  routerLinkActive="active"
+                  [routerLinkActiveOptions]="{ exact: true }"
+                  #rlaMsg2="routerLinkActive"
+                   (click)="flipCard('left')" class="cursor-pointer flex flex-col items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24">
+                      <path fill="#61788f" d="M12 7C6.5 7 2 9.2 2 12c0 2.2 2.9 4.1 7 4.8V20l4-4l-4-4v2.7c-3.2-.6-5-1.9-5-2.7c0-1.1 3-3 8-3s8 1.9 8 3c0 .7-1.5 1.9-4 2.5v2.1c3.5-.8 6-2.5 6-4.6c0-2.8-4.5-5-10-5"/>
+                    </svg>
+                    <p class="text-[0.5rem] text-center text-gray-500 font-semibold">Voltear</p>
+                  </div>
                 </div>
+
             </div>
         </div>
     </div>

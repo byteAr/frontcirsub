@@ -79,8 +79,12 @@ export default class CBUComponent implements OnInit {
     if(!id) return;
     this.credencialService.updateCbu(id, this.form.get('cbu')?.value)
       .subscribe(resp => {
-        console.log(resp);
 
+      })
+    console.log('estos son los datos que van al php',id, this.form.get('cbu')?.value)
+    this.credencialService.updateCbuPhp(id, this.form.get('cbu')?.value)
+      .subscribe(resp => {
+        console.log('esta es la respuesta del php',id, this.form.get('cbu')?.value, resp)
       })
     this.submitted = true;
 

@@ -36,31 +36,4 @@ export default class GrupoFamiliarComponent {
 
   familia:any;
 
-
-
-  grupofamiliar: familia[] = [
-    {
-      parentesco: 'Conyugue',
-      nombreApellido: 'Amalia Rodriguez',
-      dni: 35698545,
-      edad: 38,
-      incapacidad: false
-    },
-    {
-      parentesco: 'Hija',
-      nombreApellido: 'Amalia Gonzalez',
-      dni: 35698545,
-      edad: 12,
-      incapacidad: true
-    },
-    {
-      parentesco: 'Hijo',
-      nombreApellido: 'Lucio Gonzalez',
-      dni: 35698545,
-      edad: 9,
-      incapacidad: false
-    },
-  ]
-
-
 }

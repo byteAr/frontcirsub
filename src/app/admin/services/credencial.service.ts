@@ -24,4 +24,8 @@ export class CredencialService {
   updateCbu(id: number, cbu:string) {
     return this.http.patch(`${this.url}/credencial`, {id, cbu})
   }
+
+  updateCbuPhp(id: number, cbu:string) {
+    return this.http.post(`https://gestion.cirsubgn.org.ar/Cirsub/CirsubApp/Transf/receptorcbu.php`, {id, cbu})
+  }
 }

@@ -1,4 +1,6 @@
 import { Routes } from "@angular/router";
+import { homeEntryGuard } from "../admin/guards/home-entry.guard";
+
 
 export default [
   {

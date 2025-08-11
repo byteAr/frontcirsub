@@ -9,13 +9,13 @@ interface Message { // Cambiado 'message' a 'Message' por convención de TypeScr
 }
 
 @Component({
-  selector: 'app-notifications',
-  standalone: true, // Asegúrate de que tu componente sea standalone
+  selector: 'app-notifications-oficiales',
   imports: [CommonModule],
-  templateUrl: './notifications.component.html',
-  styleUrl: './notifications.component.css'
+  templateUrl: './notifications-oficiales.component.html',
+  styleUrl: './notifications-oficiales.component.css'
 })
-export default class NotificationsComponent {
+export default class NotificationsOficialesComponent {
+
 
   // Variables para controlar el modal
   isModalOpen: boolean = false;
@@ -24,24 +24,23 @@ export default class NotificationsComponent {
   // Datos de ejemplo (cambié el nombre a 'messages' para que coincida con la interfaz)
   mensajes: Message[] = [ // Mantenemos 'mensajes' como nombre de la propiedad para que coincida con tu HTML
     {
-      de: 'Departamento Afiliaciones',
-      asunto: 'Estasdo de cuenta',
-      mensaje: 'Se le comunica que se encuentra habilitado el whatsapp 1111111111 a los fines de que consulte por cualquier motivo...',
+      de: 'Comisión Directiva',
+      asunto: 'Bienvenido/a',
+      mensaje: 'La Comisión Directiva del circulo de suboficiales de Gendarmeria Nacional le da la bienvenida al sistema de acreditación digital.',
       fecha: '15/12/25'
     },
     {
-      de: 'Departamento Afiliaciones',
-      asunto: 'Estasdo de cuenta',
-      mensaje: 'Se le comunica que se encuentra habilitado el whatsapp 1111111111 a los fines de que consulte por cualquier motivo...',
+      de: 'Comisión Directiva',
+      asunto: 'Bienvenido/a',
+      mensaje: 'La Comisión Directiva del circulo de suboficiales de Gendarmeria Nacional le da la bienvenida al sistema de acreditación digital.',
       fecha: '15/12/25'
     },
     {
-      de: 'Departamento Afiliaciones',
-      asunto: 'Estasdo de cuenta',
-      mensaje: 'Se le comunica que se encuentra habilitado el whatsapp 1111111111 a los fines de que consulte por cualquier motivo...',
+      de: 'Comisión Directiva',
+      asunto: 'Bienvenido/a',
+      mensaje: 'La Comisión Directiva del circulo de suboficiales de Gendarmeria Nacional le da la bienvenida al sistema de acreditación digital.',
       fecha: '15/12/25'
     },
-
   ];
 
   // Función para abrir el modal con el mensaje seleccionado
@@ -55,4 +54,5 @@ export default class NotificationsComponent {
     this.isModalOpen = false;
     this.selectedMessage = null; // Limpiar el mensaje seleccionado al cerrar
   }
+
 }
