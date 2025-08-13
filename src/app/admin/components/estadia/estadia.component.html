@@ -1,3 +1,11 @@
-<div class="max-h-28 min-h-28 flex justify-center items-center">
-  <p class="text-4xl font-bold text-purple-800">15/45</p>
-</div>
+<ng-container *ngIf="user()?.Beneficios![0].Evacuacion > 0; else elseTemplate">
+  <div class="max-h-28 min-h-28 flex justify-center items-center px-5">
+  <p class="text-[0.7rem] text-gray-400 font-semibold text-center">Usted cuenta con <span class="text-teal-500 font-semibold">45</span> días de evacuación anual, servicio que cubre <span class="text-teal-500">alojamiento y racionamiento</span>, con acompañante si la orden del médico lo especifíca.</p>
+  </div>
+</ng-container>
+<ng-template #elseTemplate>
+  <app-adherirse></app-adherirse>
+</ng-template>
+
+
+

@@ -270,12 +270,14 @@
 
             <button
             (click)="updateProfile()"
-            [disabled]="!capturedImage"
-            class="font-semibold btn btn-success text-white bg-linear-to-r from-cyan-500 to-green-500"
+
+            class="font-semibold text-white btn "
+            [ngClass]="capturedImage && isChecked ? '  bg-linear-to-r from-cyan-500 to-green-500 btn-success cursor-pointer' : 'text-gray-600'"
             >
             Guardar
             <svg class="ml-2" xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24"><path fill="#ffffff" d="M5 21h14a2 2 0 0 0 2-2V8a1 1 0 0 0-.29-.71l-4-4A1 1 0 0 0 16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2m10-2H9v-5h6zM13 7h-2V5h2zM5 5h2v4h8V5h.59L19 8.41V19h-2v-5a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v5H5z"/></svg>
             </button>
+
           </div>
 
           <!-- Canvas oculto -->
@@ -284,8 +286,21 @@
             {{ message }}
           </div>
         </div>
-
-
+        <div *ngIf="!repass && avatar" class="w-full flex justify-center">
+          <label class="flex items-start gap-3 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            class="h-5 w-5 rounded border-gray-300
+                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+                   focus-visible:ring-[#00BAD3]"
+            style="accent-color:#00C860"
+            (change)="onToggle($event)"
+          />
+          <span class="text-sm text-gray-00 leading-5">
+            Acepto los <a class="text-cyan-600 font-semibold" href="pdf/TERMINOS_Y_CONDICIONES_DE_USO_DE_LA_APP_CREDENCIAL_DIGITAL.pdf">términos y condiciones</a>
+          </span>
+          </label>
+        </div>
       </div>
       <p class="text-center text-gray-400 font-sans">Ya tiene una cuenta? <a routerLink="/auth/login" class="font-semibold bg-linear-to-r from-cyan-500 to-green-500 bg-clip-text text-transparent">Iniciar sesión</a></p>
     </div>

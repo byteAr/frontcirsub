@@ -225,7 +225,7 @@
                       />
                       </svg>
                     <p class="text-[0.5rem] text-center font-semibold"
-                      [ngClass]="rlaSep.isActive ? 'text-cyan-700' : 'text-gray-500'">Servicio de<br>sepelio</p>
+                      [ngClass]="rlaSep.isActive ? 'text-cyan-700' : 'text-gray-500'">Seguros</p>
                   </div>
 
                   <!-- CBU -->
@@ -267,7 +267,7 @@
 
                   <!-- Volver (flip) -->
                   <div
-                  [routerLink]="['.', { outlets: { front: ['credencial'] } }]"
+                  [routerLink]="['.', { outlets: { front: [''] } }]"
                   routerLinkActive="active"
                   [routerLinkActiveOptions]="{ exact: true }"
                   #rlaMsg2="routerLinkActive"

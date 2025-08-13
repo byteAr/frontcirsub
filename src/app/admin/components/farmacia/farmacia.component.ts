@@ -1,44 +1,45 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
+import { AuthService } from '../../../auth/services/auth.service';
+import { AdherirseComponent } from "../adherirse/adherirse.component";
 
-interface farmacia {
-  fechaReceta: string;
-  fechaFactura: string;
-  importeReintegro: string;
-  fechaCarga: string;
-  fechaReintegro: string
+interface reintegro {
+  Id: number;
+  Personas_id: number;
+  FechaCargaReceta: string;
+  DescripcionReintegro: string;
+  Fechapago: string;
+  Op_estado:string;
+  Op_importe:number;
+  OrdenPago:number;
 }
 
 @Component({
   selector: 'app-farmacia',
-  imports: [CommonModule],
+  imports: [CommonModule, AdherirseComponent],
   templateUrl: './farmacia.component.html',
   styleUrl: './farmacia.component.css'
 })
 export default class FarmaciaComponent {
 
-  reintegroFarmacia: farmacia[] = [
-    {
-      fechaReceta: '12/06/25',
-      fechaFactura: '15/06/25',
-      importeReintegro: '2369',
-      fechaCarga: '15/06/25',
-      fechaReintegro: '20/06/25'
-    },
-    {
-      fechaReceta: '12/06/25',
-      fechaFactura: '15/06/25',
-      importeReintegro: '2369',
-      fechaCarga: '15/06/25',
-      fechaReintegro: '20/06/25'
-    },
-    {
-      fechaReceta: '12/06/25',
-      fechaFactura: '15/06/25',
-      importeReintegro: '2369',
-      fechaCarga: '15/06/25',
-      fechaReintegro: '20/06/25'
-    },
-  ]
+  authService=inject(AuthService)
+
+  user = this.authService.user;
+
+  reintegro: any
+
+  constructor() {
+
+    effect(() => {
+    const u = this.user();
+    if (u) {
+      this.reintegro = u.Reintegros;
+    }
+  });
+   this.authService.checkStatus().subscribe();
+  }
+
+
+
 
 }

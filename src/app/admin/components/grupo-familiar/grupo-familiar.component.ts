@@ -24,7 +24,6 @@ export default class GrupoFamiliarComponent {
     const u = this.user();
     if (u) {
       this.familia = u.GpoFamiliar;
-      console.log('Familia cargada:', this.familia);
     }
   });
    this.authService.checkStatus().subscribe();

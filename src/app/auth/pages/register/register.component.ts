@@ -63,6 +63,7 @@ export class RegisterComponent implements OnInit {
   error: string = '';
   repass: boolean = false;
   avatar: boolean = false;
+  isChecked = false;
 
   message='';
   errorMessage: boolean= false
@@ -307,6 +308,7 @@ export class RegisterComponent implements OnInit {
   }
 
   async updateProfile() {
+    if( this.isChecked !== true ) return
     if (!this.capturedImage) {
       alert('Por favor, toma una foto primero.');
       return;
@@ -360,7 +362,7 @@ export class RegisterComponent implements OnInit {
                   this.message='Felicidades, registro exitoso.'
                   this.errorMessage=true;
                   setTimeout(() => {
-                     this.router.navigateByUrl('/auth/login')
+                     this.router.navigateByUrl('/dashboard/credencial')
                   }, 2000);
                 }
               },
@@ -376,6 +378,10 @@ export class RegisterComponent implements OnInit {
       console.error('Error al convertir Data URL a Blob:', blobError);
       alert('Error interno al preparar la imagen.');
     }
+  }
+
+   onToggle(event: Event) {
+    this.isChecked = (event.target as HTMLInputElement).checked;
   }
 
   ngOnDestroy() {

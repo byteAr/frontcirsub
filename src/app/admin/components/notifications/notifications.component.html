@@ -1,5 +1,5 @@
 <div class="flex flex-col h-26 overflow-hidden mt-1 mb-2 mx-4">
-  <p class="text-center mb-2 text-[0.9rem] text-[#0891B2] font-semibold">Comunicaciones de Servicio</p>
+  <p class="text-center mb-2 text-[0.8rem] text-[#0891B2] font-semibold">COMUNICACIONES DE SERVICIO</p>
   <div class="overflow-y-auto flex-grow custom-scrollbar">
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50 sticky top-0 z-10">
@@ -18,9 +18,9 @@
       <tbody class="bg-white divide-y divide-gray-200">
         <!-- Agrega el evento (click) a la fila y cursor-pointer para mejor UX -->
         <tr *ngFor="let mensaje of mensajes" class="hover:bg-gray-50 cursor-pointer" (click)="openModal(mensaje)">
-          <td class="px-3 py-2 whitespace-nowrap text-[0.6rem] text-gray-900 w-[30%]">{{ mensaje.de }}</td>
-          <td class="px-3 py-2 text-[0.6rem] text-gray-600 w-[50%] max-w-[50%]">{{mensaje.asunto}}</td>
-          <td class="px-3 py-2 whitespace-nowrap text-[0.6rem] text-gray-500 w-[20%]">{{mensaje.fecha}}</td>
+          <td class="font-semibold px-3 py-2 whitespace-nowrap text-[0.7rem] text-gray-500 w-[30%]">{{ mensaje.de }}</td>
+          <td class="font-semibold px-3 py-2 text-[0.7rem] text-gray-500 w-[50%] max-w-[50%]">{{mensaje.asunto}}</td>
+          <td class="font-semibold px-3 py-2 whitespace-nowrap text-[0.7rem] text-gray-500 w-[20%]">{{mensaje.fecha}}</td>
         </tr>
       </tbody>
     </table>
@@ -33,27 +33,27 @@
   <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto p-6">
     <!-- Encabezado del Modal -->
     <div class="flex justify-between items-center mb-1">
-      <h3 class="text-md font-bold text-teal-600">{{ selectedMessage?.de }}</h3>
+      <h3 class="text-md font-bold text-cyan-600">{{ selectedMessage?.de }}</h3>
       <!-- Botón para cerrar el modal -->
       <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">&times;</button>
     </div>
 
     <!-- Contenido del Mensaje -->
     <div class="text-sm text-gray-700 mb-4 max-h-28 overflow-y-auto custom-scrollbar-modal">
-      <p class="mb-1">
+      <p class="mb-1 text-xs">
         <span class="font-semibold">Asunto:</span> {{ selectedMessage?.asunto }}
       </p>
-      <p class="mb-1">
+      <p class="mb-1 text-xs">
         <span class="font-semibold">Fecha:</span> {{ selectedMessage?.fecha }}
       </p>
-      <p>
-        <span class="font-semibold"></span> {{ selectedMessage?.mensaje }}
+      <p class="text-xs">
+        <span class="font-semibold text-[0.5rem]"></span>Estimado/a Socio/a  <span class="text-cyan-600 font-semibold">{{this.authService.user()!.Persona[0].Nombre}} {{this.authService.user()!.Persona[0].Apellido}}</span>, tenemos el gusto de registrarlo en la credencial digital, herramienta por medio de la cual  les haremos llegar  la información actualizada de nuestra MUTUAL y de esta forma lograr una comunicación permanente con usted, que es lo mas importante para la mutual.
       </p>
     </div>
 
     <!-- Pie del Modal -->
     <div class="flex justify-end">
-      <button (click)="closeModal()" class="px-4 py-1 bg-teal-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 text-sm">
+      <button (click)="closeModal()" class="cursor-pointer px-4 py-1 bg-cyan-600 text-white rounded hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:ring-opacity-50 text-sm">
         Cerrar
       </button>
     </div>

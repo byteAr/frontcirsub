@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
+import { AuthService } from '../../../auth/services/auth.service';
+import { Persona } from '../../../auth/interfaces/user.interface';
 
 interface Message { // Cambiado 'message' a 'Message' por convención de TypeScript
   de: string;
@@ -17,6 +19,22 @@ interface Message { // Cambiado 'message' a 'Message' por convención de TypeScr
 })
 export default class NotificationsComponent {
 
+  constructor(){
+    effect(() => {
+    const u = this.user();
+    if (u) {
+      this.familia = u.Persona;
+    }
+  });
+   this.authService.checkStatus().subscribe();
+  }
+
+  authService=inject(AuthService)
+
+  user = this.authService.user;
+
+  familia:Persona[]=[];
+
   // Variables para controlar el modal
   isModalOpen: boolean = false;
   selectedMessage: Message | null = null; // Para almacenar el mensaje completo
@@ -25,22 +43,10 @@ export default class NotificationsComponent {
   mensajes: Message[] = [ // Mantenemos 'mensajes' como nombre de la propiedad para que coincida con tu HTML
     {
       de: 'Departamento Afiliaciones',
-      asunto: 'Estasdo de cuenta',
-      mensaje: 'Se le comunica que se encuentra habilitado el whatsapp 1111111111 a los fines de que consulte por cualquier motivo...',
-      fecha: '15/12/25'
-    },
-    {
-      de: 'Departamento Afiliaciones',
-      asunto: 'Estasdo de cuenta',
-      mensaje: 'Se le comunica que se encuentra habilitado el whatsapp 1111111111 a los fines de que consulte por cualquier motivo...',
-      fecha: '15/12/25'
-    },
-    {
-      de: 'Departamento Afiliaciones',
-      asunto: 'Estasdo de cuenta',
-      mensaje: 'Se le comunica que se encuentra habilitado el whatsapp 1111111111 a los fines de que consulte por cualquier motivo...',
-      fecha: '15/12/25'
-    },
+      asunto: 'Bienvenida',
+      mensaje: `Estimado/a Socio/a  ${this.user()?.Persona[0].Apellido}, tenemos el gusto de registrarlo en la credencial digital, herramienta por medio de la cual  les haremos llegar  la información actualizada de nuestra MUTUAL y de esta forma lograr una comunicación permanente con usted, que es lo mas importante para la mutual.`,
+      fecha: '14/08/25'
+    }
 
   ];
 

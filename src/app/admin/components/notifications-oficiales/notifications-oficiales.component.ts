@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { AuthService } from '../../../auth/services/auth.service';
 
 interface Message { // Cambiado 'message' a 'Message' por convención de TypeScript
   de: string;
@@ -16,6 +17,8 @@ interface Message { // Cambiado 'message' a 'Message' por convención de TypeScr
 })
 export default class NotificationsOficialesComponent {
 
+  authService=inject(AuthService);
+
 
   // Variables para controlar el modal
   isModalOpen: boolean = false;
@@ -25,22 +28,11 @@ export default class NotificationsOficialesComponent {
   mensajes: Message[] = [ // Mantenemos 'mensajes' como nombre de la propiedad para que coincida con tu HTML
     {
       de: 'Comisión Directiva',
-      asunto: 'Bienvenido/a',
-      mensaje: 'La Comisión Directiva del circulo de suboficiales de Gendarmeria Nacional le da la bienvenida al sistema de acreditación digital.',
-      fecha: '15/12/25'
+      asunto: 'Bienvenida',
+      mensaje: `Estimado socio, es un honor contar con su pertenencia a nuestra institución. A partir de hoy, ponemos a su disposición una nueva herramienta: la credencial digital.Con ella podremos mantener una comunicación permanente con usted y avanzar hacia una administración más transparente, ágil y cercana.¡Gracias por acompañarnos en este nuevo paso!`,
+      fecha: '14/08/25'
     },
-    {
-      de: 'Comisión Directiva',
-      asunto: 'Bienvenido/a',
-      mensaje: 'La Comisión Directiva del circulo de suboficiales de Gendarmeria Nacional le da la bienvenida al sistema de acreditación digital.',
-      fecha: '15/12/25'
-    },
-    {
-      de: 'Comisión Directiva',
-      asunto: 'Bienvenido/a',
-      mensaje: 'La Comisión Directiva del circulo de suboficiales de Gendarmeria Nacional le da la bienvenida al sistema de acreditación digital.',
-      fecha: '15/12/25'
-    },
+
   ];
 
   // Función para abrir el modal con el mensaje seleccionado

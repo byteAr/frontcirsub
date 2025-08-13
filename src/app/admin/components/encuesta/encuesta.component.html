@@ -1,5 +1,5 @@
-<div class="flex flex-col justify-center items-center h-full">
-  <p class="text-gray-400">¿Cómo calificarías este servicio?</p>
+<div class="flex flex-col justify-center items-center h-32">
+  <p class="text-gray-400 text-xs">¿Cómo calificarías este servicio?</p>
   <div class="flex space-x-1 cursor-pointer">
     <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
       <svg
@@ -18,6 +18,27 @@
       </svg>
     </ng-container>
   </div>
-  <p class="mt-2 text-sm text-gray-700">{{ rating }}/5</p>
+  <p class="text-gray-400 text-xs">¿Cómo calificarías la atención?</p>
+  <div class="flex space-x-1 cursor-pointer">
+    <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
+      <svg
+        (click)="setRating2(star)"
+        (mouseenter)="setHover2(star)"
+        (mouseleave)="clearHover2()"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        class="w-6 h-6"
+        [attr.fill]="star <= (hover2 || rating2) ? '#ffd900' : 'transparent'"
+        [attr.stroke]="'#ffd900'"
+        stroke-width="2"
+      >
+        <!-- Estrella de puntas rectas -->
+        <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" />
+      </svg>
+    </ng-container>
+  </div>
+  <div>
+    <button (click)="calificar()" [ngClass]="rating == 0 || rating2 === 0 ? 'bg-gray-500':'bg-cyan-600 cursor-pointer'"  class="text-xs  text-white p-1 mt-2 rounded-2xl px-2">Calificar</button>
+  </div>
 </div>
 

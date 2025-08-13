@@ -2,7 +2,6 @@ import { Component, DestroyRef, effect, inject, OnInit, signal } from '@angular/
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { AuthService } from '../../../auth/services/auth.service';
@@ -10,7 +9,7 @@ import { AuthService } from '../../../auth/services/auth.service';
 @Component({
   selector: 'app-personal-date-credential',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './personal-date-credential.component.html',
   styleUrl: './personal-date-credential.component.css'
 })
@@ -36,6 +35,8 @@ export default class PersonalDateCredentialComponent implements OnInit {
     // Reacciona al cambio de usuario; sólo pide imagen cuando hay Id
     effect(() => {
       const id = this.autService.user()?.Persona?.[0]?.Id;
+      console.log('esta es la data de date personal',this.user());
+
 
       // Si aún no hay user/Id, resetea y muestra spinner
       if (!id) {
