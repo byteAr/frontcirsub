@@ -35,7 +35,8 @@ export default class PersonalDateCredentialComponent implements OnInit {
     // Reacciona al cambio de usuario; sólo pide imagen cuando hay Id
     effect(() => {
       const id = this.autService.user()?.Persona?.[0]?.Id;
-      console.log('esta es la data de date personal',this.user());
+      console.log('este es el id de marcelo arangue', id);
+
 
 
       // Si aún no hay user/Id, resetea y muestra spinner

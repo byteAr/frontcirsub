@@ -20,11 +20,11 @@ export interface UserClass {
 
 export interface UserData {
   Persona:     Persona[];
-  Socio:       Socio[];
-  Personal:    Personal[];
-  GpoFamiliar: GpoFamiliar[];
-  Beneficios:  Beneficio[];
-  Reintegros:  Reintegro[];
+  Socio?:       Socio[];
+  Personal?:    Personal[];
+  GpoFamiliar?: GpoFamiliar[];
+  Beneficios?:  Beneficio[];
+  Reintegros?:  Reintegro[];
 }
 
 export interface Beneficio {
@@ -35,14 +35,14 @@ export interface Beneficio {
 }
 
 export interface GpoFamiliar {
-  socioId:                  number;
-  Documento:                string;
-  Nombre:                   string;
+  socioId?:                  number;
+  Documento?:                string;
+  Nombre?:                   string;
   tipo_parentesco_Id?:      number;
-  Discapacitado:            string;
+  Discapacitado?:            string;
   Tipo_Parentesco_Detalle?: string;
-  Socio_Id_Titular:         number;
-  Consultado:               number;
+  Socio_Id_Titular?:         number;
+  Consultado?:               number;
 }
 
 export interface Persona {
@@ -53,24 +53,24 @@ export interface Persona {
 }
 
 export interface Personal {
-  Id:                 number;
-  Tipo_Area:          number;
-  Tipo_Cargo:         number;
-  Filial_Id:          number;
-  Filial_Detalle:     string;
-  Tipo_Cargo_Detalle: string;
-  es_Encargado_Area:  boolean;
+  Id?:                 number;
+  Tipo_Area?:          number;
+  Tipo_Cargo?:         number;
+  Filial_Id?:          number;
+  Filial_Detalle?:     string;
+  Tipo_Cargo_Detalle?: string;
+  es_Encargado_Area?:  boolean;
 }
 
 export interface Reintegro {
-  Id:                   number;
-  Personas_id:          number;
-  OrdenPago:            number;
-  FechaCargaReceta:     Date;
-  DescripcionReintegro: string;
-  Op_estado:            string;
-  Op_importe:           number;
-  Fechapago:            Date;
+  Id?:                   number;
+  Personas_id?:          number;
+  OrdenPago?:            number;
+  FechaCargaReceta?:     Date;
+  DescripcionReintegro?: string;
+  Op_estado?:            string;
+  Op_importe?:           number;
+  Fechapago?:            Date;
 }
 
 export interface Socio {
