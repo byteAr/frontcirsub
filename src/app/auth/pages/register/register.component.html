@@ -18,6 +18,8 @@
                   formControlName="dni"
                   placeholder="0123456789"
                   type="text"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
                   maxlength="10"
                   (keypress)="omitirNoNumeros($event)"
                 />
@@ -48,6 +50,8 @@
                   formControlName="telefono"
                   type="text"
                   placeholder="11111111"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
                   maxlength="12"
                   (keypress)="omitirNoNumeros($event)"
                 />
