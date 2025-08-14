@@ -10,7 +10,7 @@
             <legend class="fieldset-legend font-semibold bg-linear-to-r from-cyan-500 to-green-500 bg-clip-text text-transparent">Ingrese su número de DNI</legend>
             <label class="input input-success validator">
               <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></g></svg>
-              <input class="text-gray-400" formControlName="dni" autocomplete="new-password" type="text" placeholder="12345678" required/>
+              <input inputmode="numeric" pattern="[0-9]*" class="text-gray-400" formControlName="dni" autocomplete="new-password" type="text" placeholder="12345678" required/>
             </label>
           </fieldset>
           <fieldset class="fieldset mb-2">
