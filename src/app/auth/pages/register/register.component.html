@@ -1,6 +1,6 @@
 <section class="flex justify-center items-center h-screen bg-linear-to-r from-cyan-500 to-green-500">
   <div>
-    <div class="card card-border bg-base-100 w-80 border-2 pb-5 px-5 shadow-2xl">
+    <div class="card card-border bg-base-100 w-80 border-2 pb-5 px-3 shadow-2xl">
       <div class="card-body">
         <figure>
           <img class="w-30 mb-2" src="cirsub.png" alt="">
@@ -240,7 +240,7 @@
 
          <!-- captured image -->
 
-        <div *ngIf="!repass && avatar" class="p-6 max-w-md mx-auto bg-white rounded-xl  space-y-4">
+        <div *ngIf="!repass && avatar" class="bg-white rounded-full  space-y-4">
           <div class="flex justify-center">
             <!-- Video solo si no hay imagen capturada -->
             <video
@@ -249,7 +249,7 @@
               autoplay
               muted
               playsinline
-              class="rounded-lg w-full max-w-sm aspect-square object-cover -scale-x-100"
+              class="aspect-square object-cover rounded-full -scale-x-100"
             ></video>
 
             <!-- Imagen capturada -->
@@ -257,7 +257,7 @@
               *ngIf="capturedImage"
               [src]="capturedImage"
               alt="Avatar"
-              class="rounded-lg w-full max-w-sm aspect-square object-cover border"
+              class="rounded-full w-full aspect-square object-cover border"
             />
           </div>
 
@@ -308,7 +308,7 @@
             style="accent-color:#00C860"
             (change)="onToggle($event)"
           />
-          <span class="text-sm text-gray-00 leading-5">
+          <span class="text-xs text-gray-00 leading-5">
             Acepto los <a class="text-cyan-600 font-semibold" href="pdf/TERMINOS_Y_CONDICIONES_DE_USO_DE_LA_APP_CREDENCIAL_DIGITAL.pdf">términos y condiciones</a>
           </span>
           </label>
