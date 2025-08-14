@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { AdherirseComponent } from "../adherirse/adherirse.component";
 import { AuthService } from '../../../auth/services/auth.service';
 import { CommonModule } from '@angular/common';
@@ -9,10 +9,17 @@ import { CommonModule } from '@angular/common';
   templateUrl: './estadia.component.html',
   styleUrl: './estadia.component.css'
 })
-export default class EstadiaComponent {
+export default class EstadiaComponent implements OnInit{
+
 
   evacuacion = inject(AuthService);
 
-  user = this.evacuacion.user
+  user = this.evacuacion.user;
+
+  ngOnInit(): void {
+    console.log('estes es el User', this.user());
+    ;
+  }
+
 
 }

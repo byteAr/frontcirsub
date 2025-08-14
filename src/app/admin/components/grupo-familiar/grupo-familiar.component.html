@@ -1,19 +1,19 @@
-<ng-container *ngIf="familia; else elseTemplate">
+<ng-container *ngIf="user()?.Beneficios?.length !==0; else elseTemplate">
   <div class="flex flex-col h-28  overflow-hidden mx-1 mt-2">
   <div class="overflow-y-auto flex-grow custom-scrollbar">
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50 sticky top-0 z-10">
         <tr>
-          <th scope="col" class="px-3 py-2 text-left font-semibold text-[0.4rem] text-gray-500 uppercase tracking-wider">
+          <th scope="col" class="px-3 py-2 text-left font-semibold text-[0.5rem] text-cyan-600 uppercase tracking-wider">
             PARENTESCO
           </th>
-          <th scope="col" class="px-3 py-2 text-left font-semibold text-[0.4rem] text-gray-500 uppercase tracking-wider">
-            NOMBRE Y APELLIDO
+          <th scope="col" class="px-3 py-2 text-left font-semibold text-[0.5rem] text-cyan-600 uppercase tracking-wider">
+            APELLIDO Y NOMBRE
           </th>
-          <th scope="col" class="px-3 py-2 text-left font-semibold text-[0.4rem] text-gray-500 uppercase tracking-wider">
+          <th scope="col" class="px-3 py-2 text-left font-semibold text-[0.5rem] text-cyan-600 uppercase tracking-wider">
             DNI
           </th>
-          <th scope="col" class="px-3 py-2 text-left font-semibold text-[0.4rem] text-gray-500 uppercase tracking-wider">
+          <th scope="col" class="px-3 py-2 text-left font-semibold text-[0.5rem] text-cyan-600 uppercase tracking-wider">
 
           </th>
         </tr>
@@ -33,7 +33,12 @@
 </div>
 </ng-container>
 <ng-template #elseTemplate>
-  <p class="text-gray-400">Sin datos</p>
+  <div class="w-full px-2 h-28 flex flex-col justify-center items-center mt-2">
+    <p class="text-gray-400 text-xs">Usted no cuenta con familiares asociados</p>
+    <a href="https://wa.me/+5491126526532?text=hola deseo adherir a alguien a mi grupo familiar">
+      <button class="text-white bg-accent px-2 py-1 rounded-3xl mt-2 text-xs">Adherir familiar</button>
+    </a>
+  </div>
 </ng-template>
 
 

@@ -1,3 +1,4 @@
-<div class="max-w-screen">
-  <router-outlet></router-outlet>
+<div class="relative min-h-screen overflow-hidden"
+     [@routeAnimations]="prepareRoute(outlet)">
+  <router-outlet #outlet="outlet"></router-outlet>
 </div>

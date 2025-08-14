@@ -1,4 +1,5 @@
-<div class="flex flex-col justify-center items-center h-32">
+<ng-container *ngIf="calificado; else elseTemplate">
+  <div class="flex flex-col justify-center items-center h-32">
   <p class="text-gray-400 text-xs">¿Cómo calificarías este servicio?</p>
   <div class="flex space-x-1 cursor-pointer">
     <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
@@ -41,4 +42,11 @@
     <button (click)="calificar()" [ngClass]="rating == 0 || rating2 === 0 ? 'bg-gray-500':'bg-cyan-600 cursor-pointer'"  class="text-xs  text-white p-1 mt-2 rounded-2xl px-2">Calificar</button>
   </div>
 </div>
+</ng-container>
+<ng-template #elseTemplate>
+  <div class="w-full flex justify-center items-center h-32">
+    <p class="text-cyan-600 font-semibold">Gracias por calificarnos !!!</p>
+  </div>
+</ng-template>
+
 

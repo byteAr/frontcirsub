@@ -15,6 +15,8 @@ export default class EncuestaComponent {
 
   disabled=true
 
+  calificado=true
+
   setRating(value: number): void {
     this.rating = value;
   }
@@ -41,7 +43,7 @@ export default class EncuestaComponent {
   calificar(){
     if(this.rating === 0 || this.rating2 === 0) return
 
-    console.log('hice ckick pa');
+    this.calificado = false
   }
 
 }
