@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { AuthService } from '../../../auth/services/auth.service';
+import { AdherirseComponent } from "../adherirse/adherirse.component";
 
 interface Seguro {
   tipoSeguro: string;
@@ -10,7 +11,7 @@ interface Seguro {
 
 @Component({
   selector: 'app-sepelio',
-  imports: [CommonModule],
+  imports: [CommonModule, AdherirseComponent],
   templateUrl: './sepelio.component.html',
   styleUrl: './sepelio.component.css'
 })
