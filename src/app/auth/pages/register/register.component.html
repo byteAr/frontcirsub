@@ -106,6 +106,8 @@
                <input #input1
                      type="text"
                      maxlength="1"
+                      inputmode="numeric"
+                      pattern="[0-9]*"
                      formControlName="digit1"
                      (keyup)="onKeyUp($event, 1, input2)"
                      class="w-12 h-12 text-center text-3xl font-bold bg-gray-100 border-2 border-gray-300 rounded-md focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-300 transition-all duration-300 ease-in-out">
@@ -114,12 +116,16 @@
                      type="text"
                      maxlength="1"
                      formControlName="digit2"
+                      inputmode="numeric"
+                      pattern="[0-9]*"
                      (keyup)="onKeyUp($event, 2, input3, input1)"
                      class="w-12 h-12 text-center text-3xl font-bold bg-gray-100 border-2 border-gray-300 rounded-md focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-300 transition-all duration-300 ease-in-out">
 
                <input #input3
                      type="text"
                      maxlength="1"
+                      inputmode="numeric"
+                      pattern="[0-9]*"
                      formControlName="digit3"
                      (keyup)="onKeyUp($event, 3, input4, input2)"
                      class="w-12 h-12 text-center text-3xl font-bold bg-gray-100 border-2 border-gray-300 rounded-md focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-300 transition-all duration-300 ease-in-out">
@@ -127,6 +133,8 @@
                <input #input4
                      type="text"
                      maxlength="1"
+                      inputmode="numeric"
+                      pattern="[0-9]*"
                      formControlName="digit4"
                      (keyup)="onKeyUp($event, 4, null, input3)"
                      class="w-12 h-12 text-center text-3xl font-bold bg-gray-100 border-2 border-gray-300 rounded-md focus:outline-none focus:bordergreen-5000 focus:ring-2 focus:ring-green-300 transition-all duration-300 ease-in-out">
