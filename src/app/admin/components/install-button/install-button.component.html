@@ -1,0 +1,14 @@
+
+
+    <div *ngIf="iosHint()" style="font-size:.95rem;opacity:.8;margin-top:.5rem">
+      En iPhone/iPad: abre en Safari → comparte → <b>Añadir a pantalla de inicio</b>.
+    </div>
+
+
+
+ <div>
+  <button
+  *ngIf="canPrompt()"
+  (click)="install()"
+  class="cursor-pointer text-white bg-linear-to-r from-cyan-500 to-green-500 rounded-2xl px-5 py-2 font-semibold shadow-lg">Instalar app CIRSUBGN</button>
+ </div>

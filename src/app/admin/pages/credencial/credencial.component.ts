@@ -7,11 +7,12 @@ import { HeaderCardComponent } from "../../components/header-card/header-card.co
 import { CardFrontComponent } from "../../components/card-front/card-front.component";
 import { AuthService } from '../../../auth/services/auth.service';
 import { User, UserData } from '../../../auth/interfaces/user.interface';
+import { InstallButtonComponent } from "../../components/install-button/install-button.component";
 
 @Component({
   selector: 'app-credencial',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive ],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, InstallButtonComponent],
   templateUrl: './credencial.component.html',
   styleUrl: './credencial.component.css'
 })

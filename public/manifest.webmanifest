@@ -1,6 +1,6 @@
 {
-  "name": "cirsubfrontend",
-  "short_name": "cirsubfrontend",
+  "name": "CIRSUBGN",
+  "short_name": "CIRSUBGN",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",

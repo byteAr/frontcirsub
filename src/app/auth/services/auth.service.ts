@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment.development';
 import { User, UserData } from '../interfaces/user.interface';
 
 import { rxResource } from '@angular/core/rxjs-interop'
+
 interface Resp {
   ok: boolean;
   userId: number
@@ -111,8 +112,6 @@ export class AuthService {
     const token = localStorage.getItem('token');
 
     if(!token) {
-      console.log('paso por aca por eso borra el token');
-
       this.logout();
       return of(false)
     }
@@ -132,7 +131,6 @@ export class AuthService {
     this._User.set(null)
     this._token.set(null)
     this._authStatus.set('not-authenticated')
-
     localStorage.removeItem('token')
   }
 

@@ -47,6 +47,8 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "sharp": "^0.34.3",
+    "sharp-cli": "^5.2.0",
     "typescript": "~5.7.2"
   }
 }
