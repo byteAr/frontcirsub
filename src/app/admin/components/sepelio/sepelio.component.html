@@ -1,4 +1,4 @@
-<ng-container *ngIf="user()?.Beneficios?.length !==0; else elseTemplate">
+<ng-container *ngIf="user()?.Beneficios![0].SeguroVida !==0 || user()?.Beneficios![0].SeguroVida > 0; else elseTemplate">
   <p class="text-[0.7rem] text-cyan-600 font-semibold text-center mt-1">Seguros</p>
 <div class="flex flex-col h-24  overflow-hidden mx-4 mt-1 mb-2">
   <div class="overflow-y-auto flex-grow custom-scrollbar">
