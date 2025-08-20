@@ -161,8 +161,9 @@ export class RegisterComponent implements OnInit {
         console.log('DNI inválido. Errores:', this.dniControl.errors);
         return;
       }
-      const {dni, telefono, email} = this.formRegister.value
-      this.authService.verifyDni(dni!,telefono!, email!)
+      const {dni, telefono, email} = this.formRegister.value;
+
+      this.authService.verifyDni(dni!, email!, telefono!)
         .subscribe(resp => {
           if (resp.ok) {
             this.user = resp;
