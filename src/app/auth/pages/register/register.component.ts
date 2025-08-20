@@ -165,9 +165,10 @@ export class RegisterComponent implements OnInit {
 
       this.authService.verifyDni(dni!, email!, telefono!)
         .subscribe(resp => {
+
           if (resp.ok) {
             this.user = resp;
-            this.userId = resp.userId;
+            this.userId = resp.userData.Persona[0].Id;
             this.phoneNUmber = telefono!;
             this.email = email!;
             this.visible = false;
