@@ -162,7 +162,7 @@ export class RegisterComponent implements OnInit {
         return;
       }
       const {dni, telefono, email} = this.formRegister.value
-      this.authService.verifyDni(dni!)
+      this.authService.verifyDni(dni!,telefono!, email!)
         .subscribe(resp => {
           if (resp.ok) {
             this.user = resp;

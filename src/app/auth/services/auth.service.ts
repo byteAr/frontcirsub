@@ -62,8 +62,8 @@ export class AuthService {
     return this.http.post(`${this.url}/auth/addpersona`, dni)
   }
 
-  verifyDni(dni: string): Observable<any> {
-    return this.http.post(`${this.url}/auth/verify-dni`, {dni})
+  verifyDni(dni: string, email:string, telefono:string): Observable<any> {
+    return this.http.post(`${this.url}/auth/verify-dni`, {dni, email, telefono})
   }
 
   register(dni: string, password: string, telefono: string, userId: number, email: string): Observable<boolean> {

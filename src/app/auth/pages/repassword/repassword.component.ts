@@ -60,7 +60,7 @@ export class RepasswordComponent {
     return this.repasswordForm.get('repassword');
   }
 
-  onSubmit(){
+  /* onSubmit(){
     const password = this.password?.value
     const dni = this.dniControl?.value;
       if (this.repasswordForm.valid) {
@@ -80,7 +80,7 @@ export class RepasswordComponent {
       } else {
         this.repasswordForm.markAllAsTouched();
       }
-  }
+  } */
 
 
 
