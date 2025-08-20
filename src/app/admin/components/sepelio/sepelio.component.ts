@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { AuthService } from '../../../auth/services/auth.service';
 import { AdherirseComponent } from "../adherirse/adherirse.component";
 
@@ -20,4 +20,12 @@ export default class SepelioComponent {
 authService = inject(AuthService)
 
 user = this.authService.user
+
+tieneBeneficio3 = computed(() =>
+    (this.user()?.Beneficios ?? []).some(
+      (b) => b.Afi_Tipo_Beneficio_Id === 3
+    )
+  );
 }
+
+

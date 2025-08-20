@@ -33,6 +33,7 @@ export class RegisterComponent implements OnInit {
 
   @ViewChild('videoElement') videoElement!: ElementRef;
   @ViewChild('canvas') canvas!: ElementRef;
+  @ViewChild('modal', { static: true }) modal!: ElementRef<HTMLDialogElement>;
 
   capturedImage: string | null = null;
   private mediaStream: MediaStream | null = null;
@@ -153,19 +154,18 @@ export class RegisterComponent implements OnInit {
     }
   }
 
-  sendRegister() {    this.formSubmitted = true;
-
+  sendRegister() {
+    this.formSubmitted = true;
     if (this.visible) {
       if (this.dniControl.invalid) {
         console.log('DNI inválido. Errores:', this.dniControl.errors);
         return;
       }
       const {dni, telefono, email} = this.formRegister.value
-      console.log(`este es el dni enviado desde el front${dni}`);
       this.authService.verifyDni(dni!)
         .subscribe(resp => {
-          this.user = resp;
           if (resp.ok) {
+            this.user = resp;
             this.userId = resp.userId;
             this.phoneNUmber = telefono!;
             this.email = email!;
@@ -184,7 +184,8 @@ export class RegisterComponent implements OnInit {
                 }
               })
           } else {
-            this.error = 'DNI no encontrado o inválido';
+            this.openDialog();
+            this.error = 'Hubo un problema contactese con afiliaciones';
             console.log(this.error);
           }
           console.log(this.user);
@@ -382,6 +383,23 @@ export class RegisterComponent implements OnInit {
 
    onToggle(event: Event) {
     this.isChecked = (event.target as HTMLInputElement).checked;
+  }
+
+  openDialog() {
+    this.modal.nativeElement.showModal();
+  }
+
+  close(returnValue: string = '') {
+    this.modal.nativeElement.close(returnValue);
+  }
+
+  onClose(ev: Event) {
+    const dlg = ev.target as HTMLDialogElement;
+    console.log('closed with:', dlg.returnValue);
+  }
+
+  onCancel(ev: Event) {
+    // ev.preventDefault(); // descomenta para bloquear cierre por Esc
   }
 
   ngOnDestroy() {

@@ -1,4 +1,4 @@
-<ng-container *ngIf="!user()?.Beneficios![0]; else elseTemplate">
+<ng-container *ngIf="tieneBeneficio4(); else elseTemplate">
   <app-adherirse></app-adherirse>
 </ng-container>
 <ng-template #elseTemplate>

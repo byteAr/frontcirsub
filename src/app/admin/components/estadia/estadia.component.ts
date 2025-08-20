@@ -1,7 +1,9 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import { AdherirseComponent } from "../adherirse/adherirse.component";
 import { AuthService } from '../../../auth/services/auth.service';
 import { CommonModule } from '@angular/common';
+
+
 
 @Component({
   selector: 'app-estadia',
@@ -18,8 +20,15 @@ export default class EstadiaComponent implements OnInit{
 
   ngOnInit(): void {
     console.log('estes es el User', this.user());
+
     ;
   }
+
+  tieneBeneficio2 = computed(() =>
+    (this.user()?.Beneficios ?? []).some(
+      (b) => b.Afi_Tipo_Beneficio_Id === 2
+    )
+  );
 
 
 }

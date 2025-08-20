@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, inject } from '@angular/core';
+import { Component, computed, effect, inject } from '@angular/core';
 import { AuthService } from '../../../auth/services/auth.service';
 import { AdherirseComponent } from "../adherirse/adherirse.component";
 
@@ -38,6 +38,12 @@ export default class FarmaciaComponent {
   });
    this.authService.checkStatus().subscribe();
   }
+
+  tieneBeneficio4 = computed(() =>
+    (this.user()?.Beneficios ?? []).some(
+      (b) => b.Afi_Tipo_Beneficio_Id === 4
+    )
+  );
 
 
 
