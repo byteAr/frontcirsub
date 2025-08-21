@@ -66,8 +66,9 @@ export class AuthService {
     return this.http.post(`${this.url}/auth/verify-dni`, {dni, email, telefono})
   }
 
-  register(dni: string, password: string, telefono: string, userId: number, email: string): Observable<boolean> {
-    return this.http.post<User>(`${this.url}/auth/register`, {dni, password, telefono, userId, email})
+  register(dni: string, password: string): Observable<boolean> {
+
+    return this.http.post<User>(`${this.url}/auth/register`, {dni, password})
     .pipe(
       tap( resp=> console.log( 'esta es la respuesta al registrarme:',resp)),
       map(resp => this.handleAuthSuccess(resp)),
@@ -87,7 +88,6 @@ export class AuthService {
 
 
   sendOtp(phoneNumber:string, email:string): Observable<any> {
-
 
     return this.http.post(`${this.url}/auth/send-otp`, { phoneNumber, email } )
   }

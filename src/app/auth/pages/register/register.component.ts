@@ -165,7 +165,6 @@ export class RegisterComponent implements OnInit {
 
       this.authService.verifyDni(dni!, email!, telefono!)
         .subscribe(resp => {
-
           if (resp.ok) {
             this.user = resp;
             this.userId = resp.userData.Persona[0].Id;
@@ -182,7 +181,6 @@ export class RegisterComponent implements OnInit {
               .subscribe({
                 next: (resp)=> {
                   console.log('respuesta del backend al enviar el otp', resp);
-
                 }
               })
           } else {
@@ -190,7 +188,6 @@ export class RegisterComponent implements OnInit {
             this.error = 'Hubo un problema contactese con afiliaciones';
             console.log(this.error);
           }
-          console.log(this.user);
         }, error => {
           this.error = 'Error al verificar DNI. Intente nuevamente.';
           console.error(error);
@@ -347,8 +344,10 @@ export class RegisterComponent implements OnInit {
       formData.append('userId', this.userId.toString()); // 'userId' es el nombre del campo en el backend
 
       const {dni, telefono, email} = this.formRegister.value;
+      console.log('esta es la data que se va enviar en el register: ', dni, telefono, email);
 
-      this.authService.register(dni!, this.passwordUser, telefono!, this.userId, email!)
+
+      this.authService.register(dni!, this.passwordUser)
       .subscribe({
         next: (res) => {
           console.log('Registro exitoso', res);
