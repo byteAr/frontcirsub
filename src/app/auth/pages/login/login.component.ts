@@ -3,11 +3,15 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+
 @Component({
   selector: 'app-login',
-  imports: [RouterLink, ReactiveFormsModule],
+  imports: [RouterLink, ReactiveFormsModule, ToastModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrl: './login.component.css',
+  providers: [MessageService]
 })
 export class LoginComponent {
 
@@ -19,6 +23,8 @@ export class LoginComponent {
 
   router= inject(Router)
 
+  messageService= inject(MessageService)
+
 
   loginForm = this.fb.group({
     dni: ['', [Validators.required, Validators.minLength(7), Validators.pattern(/^\d+$/)]],
@@ -27,6 +33,7 @@ export class LoginComponent {
 
   onSubmit(){
     if(this.loginForm.invalid) {
+      this.showError();
       this.hasError.set(true);
       setTimeout(() => {
         this.hasError.set(false)
@@ -49,6 +56,10 @@ export class LoginComponent {
         }, 3000);
       });
   }
+
+  showError() {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Verifique los datos ingresados' });
+    }
 
 
 }

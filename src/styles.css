@@ -27,8 +27,8 @@
 .toast-white .p-toast-message,
 .toast-white .p-toast-message-info,
 .toast-white .p-toast-message-success,
-.toast-white .p-toast-message-warn,
-.toast-white .p-toast-message-error {
+.toast-white .p-toast-message-warn
+{
   background-color: #fff !important;  /* texto oscuro para contraste */
   border: 1px solid rgba(0,0,0,.08);
   box-shadow: 0 8px 24px rgba(0,0,0,.12);
@@ -48,4 +48,13 @@
 
 .toast-white .p-toast-message-success .p-toast-detail {
   color:#00C579
+}
+
+.toast-error .p-toast-message-error {
+  background-color: rgba(250, 7, 7, 0.5) !important;
+  color: #ffff
+}
+
+.toast-error .p-toast-message-error .p-toast-detail {
+  color: #ffff
 }

@@ -25,6 +25,7 @@ export class PassrecoveryComponent implements OnInit {
     @ViewChild('videoElement') videoElement!: ElementRef;
     @ViewChild('canvas') canvas!: ElementRef;
     @ViewChild('modal', { static: true }) modal!: ElementRef<HTMLDialogElement>;
+    @ViewChild('input1') input1?: ElementRef<HTMLInputElement>;
 
     capturedImage: string | null = null;
     private mediaStream: MediaStream | null = null;
@@ -46,6 +47,7 @@ export class PassrecoveryComponent implements OnInit {
     repass: boolean = false;
     avatar: boolean = false;
     isChecked = false;
+    showOtp = false;
 
     message='';
     errorMessage: boolean= false
@@ -258,5 +260,12 @@ export class PassrecoveryComponent implements OnInit {
     ngOnDestroy() {
       // Detener la cámara al destruir el componente
     }
+
+
+
+  focusInput() {
+    this.showOtp = true;                       // activa el *ngIf
+    queueMicrotask(() => this.input1?.nativeElement.focus());
+  }
 
 }
