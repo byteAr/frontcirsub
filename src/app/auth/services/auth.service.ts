@@ -66,6 +66,10 @@ export class AuthService {
     return this.http.post(`${this.url}/auth/verify-dni`, {dni, email, telefono})
   }
 
+  verifyDniRecoveryPass(dni: string, email:string, telefono:string): Observable<any> {
+    return this.http.post(`${this.url}/auth/verify-repass`, {dni, email, telefono})
+  }
+
   register(dni: string, password: string): Observable<boolean> {
 
     return this.http.post<User>(`${this.url}/auth/register`, {dni, password})
@@ -96,7 +100,7 @@ export class AuthService {
     return this.http.post(`${this.url}/auth/verify-otp`, {phoneNumber, otp})
   }
 
-  resetPassword(id: number, password: string) {
+  resetPassword(id: number, password: string): Observable<any> {
     return this.http.post(`${this.url}/auth/resetPassword`, {
       id,
       password

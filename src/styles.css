@@ -23,3 +23,29 @@
     will-change: transform, opacity;
   }
 }
+
+.toast-white .p-toast-message,
+.toast-white .p-toast-message-info,
+.toast-white .p-toast-message-success,
+.toast-white .p-toast-message-warn,
+.toast-white .p-toast-message-error {
+  background-color: #fff !important;  /* texto oscuro para contraste */
+  border: 1px solid rgba(0,0,0,.08);
+  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  color: #00BBCF
+}
+
+/* Opcional: quitar/ajustar la barra lateral de severidad */
+.toast-white .p-toast-message {
+  border-left: 8px solid #00BBCF;   /* o 'none' si no la querés */
+}
+
+/* Icono de cerrar y de severidad */
+.toast-white .p-toast-icon-close { color: #111; opacity: .6; }
+.toast-white .p-toast-icon-close:hover { opacity: 1; }
+/* color del ícono a gusto (puedes diferenciar por severidad si quieres) */
+.toast-white .p-toast-message .p-toast-message-icon { color: #00C579; }
+
+.toast-white .p-toast-message-success .p-toast-detail {
+  color:#00C579
+}

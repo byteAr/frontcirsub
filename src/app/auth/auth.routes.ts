@@ -21,7 +21,7 @@ export default [
   },
   {
     path: 'password-reset',
-    loadComponent:() => import('./pages/repassword/repassword.component').then(m => m.RepasswordComponent)
+    loadComponent:() => import('./pages/passrecovery/passrecovery.component').then(m => m.PassrecoveryComponent)
   },
   {
     path:'**',
