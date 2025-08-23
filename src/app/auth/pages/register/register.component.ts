@@ -1,8 +1,8 @@
 // src/app/register/register.component.ts
+import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 
 import { InputTextModule } from 'primeng/inputtext';
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators, FormControl,  AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -245,7 +245,6 @@ export class RegisterComponent implements OnInit {
       .subscribe( resp => {
         console.log(resp);
         this.repass = true
-
       })
   }
 
