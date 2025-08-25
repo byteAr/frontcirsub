@@ -45,20 +45,19 @@ export class LoginComponent {
 
     this.authService.login(dni!, password!)
       .subscribe(isAuthenticated => {
+        console.log(isAuthenticated);
+
         if(isAuthenticated) {
           this.router.navigateByUrl('/dashboard/credencial')
           return
         }
-
         this.hasError.set(true);
-        setTimeout(() => {
-          this.hasError.set(false)
-        }, 3000);
+        this.showError();
       });
   }
 
   showError() {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Verifique los datos ingresados' });
+        this.messageService.add({ severity: 'error', summary: 'Error al iniciar sesión', detail: 'Verifique los datos ingresados' });
     }
 
 
