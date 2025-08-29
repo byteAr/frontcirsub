@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../../auth/services/auth.service';
+import { CredencialService } from '../../services/credencial.service';
 
 @Component({
   selector: 'app-encuesta',
@@ -7,7 +9,12 @@ import { CommonModule } from '@angular/common';
   templateUrl: './encuesta.component.html',
   styleUrl: './encuesta.component.css'
 })
-export default class EncuestaComponent {
+export default class EncuestaComponent implements OnInit {
+
+
+  user= inject(AuthService);
+  credencialService = inject(CredencialService)
+
   rating = 0;
   hover = 0;
   rating2 = 0;
@@ -15,7 +22,11 @@ export default class EncuestaComponent {
 
   disabled=true
 
-  calificado=true
+  calificado=true;
+
+  ngOnInit(): void {
+
+  }
 
   setRating(value: number): void {
     this.rating = value;
@@ -41,7 +52,15 @@ export default class EncuestaComponent {
   }
 
   calificar(){
-    if(this.rating === 0 || this.rating2 === 0) return
+    if(this.rating === 0 || this.rating2 === 0) return;
+    const id= this.user.user()?.Persona[0].Id;
+    if(!id) return;
+    this.credencialService.updateEncuesta(id, this.rating, this.rating2)
+      .subscribe({
+        next: resp => console.log(resp)
+
+
+      })
 
     this.calificado = false
   }

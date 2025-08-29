@@ -22,6 +22,8 @@ export default class CredencialComponen implements OnInit {
 
   user = this.autService.user;
 
+  encuesta = this.autService._encuesta
+
   isFlipped: boolean = false;
 
   currentRotation: number = 0;

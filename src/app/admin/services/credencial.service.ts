@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
+import { Observable } from 'rxjs';
 
 interface Cbu {
   cbu: string
@@ -27,5 +28,9 @@ export class CredencialService {
 
   updateCbuPhp(id: number, cbu:string) {
     return this.http.post(`https://gestion.cirsubgn.org.ar/Cirsub/CirsubApp/Transf/receptorcbu.php`, {id, cbu})
+  }
+
+  updateEncuesta(id: number, servicio: number, atencion: number ): Observable<any> {
+    return this.http.post(`${this.url}/credencial/encuesta`, {id, servicio, atencion})
   }
 }

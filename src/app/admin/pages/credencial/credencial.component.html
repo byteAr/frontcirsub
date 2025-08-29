@@ -261,7 +261,8 @@
 
                   <!-- Encuesta -->
                   <div
-                    [routerLink]="['.', { outlets: { back: ['encuesta'] } }]"
+                    *ngIf="autService.user()?.Persona?.[0]?.Encuesta === false"
+                    [routerLink]="['.', { outlets: { back: ['encuesta'] } }]"A
                     routerLinkActive="active"
                     [routerLinkActiveOptions]="{ exact: true }"
                     #rlaEnc="routerLinkActive"

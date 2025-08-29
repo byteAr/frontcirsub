@@ -19,6 +19,7 @@ export class AuthService {
   private _authStatus = signal<AuthStatus>('checking');
   private _User = signal<UserData | null>(null);
   private _token = signal<string | null>(null);
+  _encuesta = signal<boolean | null>(false)
 
   authStatus = computed<AuthStatus>(() => {
     if(this._authStatus() === 'checking') return 'checking';

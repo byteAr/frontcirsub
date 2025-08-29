@@ -30,6 +30,7 @@ export interface Persona {
   Validado:                   boolean;
   Socios_Personas_Id_Titular: number;
   Discapacitado:              boolean;
+  Encuesta:                   boolean;
   Usuario_Registrado:         boolean;
   Usuario_Bloqueado:          boolean;
 }

@@ -33,16 +33,10 @@ export default class CBUComponent implements OnInit {
 
   ) {
     this.form = this.fb.group({
-      cbu: [
-         { value: '', disabled: true },
-        [
-          Validators.required,
-          Validators.minLength(20)
-          ,
-          Validators.pattern(/^\d{22}$/) // solo 20 dígitos exactos
-        ]
-      ]
-    });
+  cbu: this.fb.control({ value: '', disabled: true }, [
+    Validators.pattern(/^$|^\d{22}$/)
+  ])
+});
   }
   ngOnInit(): void {
     const id= this.user()?.Persona[0].Id.toString();
