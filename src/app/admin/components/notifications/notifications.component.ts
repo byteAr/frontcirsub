@@ -45,7 +45,7 @@ export default class NotificationsComponent {
       de: 'Departamento Afiliaciones',
       asunto: 'Bienvenida',
       mensaje: `Estimado/a Socio/a  ${this.user()?.Persona[0].Apellido}, tenemos el gusto de registrarlo en la credencial digital, herramienta por medio de la cual  les haremos llegar  la información actualizada de nuestra MUTUAL y de esta forma lograr una comunicación permanente con usted, que es lo mas importante para la mutual.`,
-      fecha: '14/08/25'
+      fecha: '01/09/25'
     }
 
   ];
