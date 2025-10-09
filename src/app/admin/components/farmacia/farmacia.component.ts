@@ -41,7 +41,7 @@ export default class FarmaciaComponent {
 
   tieneBeneficio4 = computed(() =>
     (this.user()?.Beneficios ?? []).some(
-      (b) => b.Afi_Tipo_Beneficio_Id === 4
+      (b) => b.far === true
     )
   );
 

@@ -23,7 +23,7 @@ user = this.authService.user
 
 tieneBeneficio3 = computed(() =>
     (this.user()?.Beneficios ?? []).some(
-      (b) => b.Afi_Tipo_Beneficio_Id === 3
+      (b) => b.sep === true
     )
   );
 }

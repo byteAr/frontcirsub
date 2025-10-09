@@ -14,10 +14,10 @@ export interface UserData {
 }
 
 export interface Beneficio {
-  Id:                         number;
-  Personas_Id:                number;
-  Afi_Tipo_Beneficio_Id:      number;
-  afi_Tipo_Beneficio_Detalle: string;
+  eva: boolean;
+  far: boolean;
+  seg: boolean;
+  sep: boolean;
 }
 
 export interface Persona {
