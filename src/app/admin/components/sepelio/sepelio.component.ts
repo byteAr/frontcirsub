@@ -21,11 +21,25 @@ authService = inject(AuthService)
 
 user = this.authService.user
 
-tieneBeneficio3 = computed(() =>
+  tieneSeguroSepelio = computed(() =>
     (this.user()?.Beneficios ?? []).some(
       (b) => b.sep === true
     )
   );
+
+  tieneSeguroVida = computed(() =>
+    (this.user()?.Beneficios ?? []).some(
+      (b) => b.seg === true
+    )
+  );
+
+  notieneNada() {
+    if(this.tieneSeguroSepelio() || this.tieneSeguroVida()) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
 
 
