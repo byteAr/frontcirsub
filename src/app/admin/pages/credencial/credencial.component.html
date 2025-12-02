@@ -178,7 +178,13 @@
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24">
                       <path
-                        [attr.fill]="rlaGF.isActive ? '#0891B2' : '#61788f'"
+                        [attr.fill]="
+                          rlaGF.isActive
+                            ? colors.selected
+                            : familia
+                              ? colors.active
+                              : colors.inactive
+                        "
                         d="M18 6q-.825 0-1.412-.587T16 4t.588-1.412T18 2t1.413.588T20 4t-.587 1.413T18 6m-1 16V10.95h-1.825L16.5 7h3l3 9H20v6zm-4.5-10.5q-.625 0-1.062-.437T11 10t.438-1.062T12.5 8.5t1.063.438T14 10t-.437 1.063t-1.063.437M5.5 6q-.825 0-1.412-.587T3.5 4t.588-1.412T5.5 2t1.413.588T7.5 4t-.587 1.413T5.5 6m-2 16v-7H2V7h7v8H7.5v7zm7.5 0v-4h-1v-5.5h5V18h-1v4z"
                       />
                     </svg>
@@ -199,7 +205,13 @@
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24">
                       <path
-                        [attr.fill]="rlaFarm.isActive ? '#0891B2' : '#61788f'"
+                        [attr.fill]="
+                          rlaFarm.isActive
+                            ? colors.selected
+                            : benefits.farmacia
+                              ? colors.active
+                              : colors.inactive
+                        "
                         d="M17 5v2a3 3 0 0 1 3 3v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V10a3 3 0 0 1 3-3V5zm-4 6h-2v2H9v2h1.999L11 17h2l-.001-2H15v-2h-2zm6-9v2H5V2z"
                       />
                     </svg>
@@ -217,7 +229,13 @@
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24">
                       <path
-                        [attr.fill]="rlaEvac.isActive ? '#0891B2' : '#61788f'"
+                        [attr.fill]="
+                          rlaEvac.isActive
+                            ? colors.selected
+                            : benefits.evacuacion
+                              ? colors.active
+                              : colors.inactive
+                        "
                         d="M1 19V4h2v10h8V6h12v13h-2v-3H3v3zm6-6q-1.25 0-2.125-.875T4 10t.875-2.125T7 7t2.125.875T10 10t-.875 2.125T7 13m0-2q.425 0 .713-.288T8 10t-.288-.712T7 9t-.712.288T6 10t.288.713T7 11"
                       />
                     </svg>
@@ -235,7 +253,13 @@
                   >
                       <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 16 16">
                       <path
-                        [attr.fill]="rlaSep.isActive ? '#0891B2' : '#61788f'"
+                        [attr.fill]="
+                          rlaSep.isActive
+                            ? colors.selected
+                            : benefits.seguro
+                              ? colors.active
+                              : colors.inactive
+                        "
                         fill-rule="evenodd"
                         d="M13.5 8a5.5 5.5 0 1 1-11 0a5.5 5.5 0 0 1 11 0M15 8A7 7 0 1 1 1 8a7 7 0 0 1 14 0M8.054 4.502c-.708 0-1.34.18-1.811.558a1.95 1.95 0 0 0-.74 1.545c0 .764.474 1.265.94 1.559c.457.287 1.007.448 1.448.547c.462.102.844.191 1.119.341c.227.125.274.224.274.376c0 .102-.04.217-.248.341c-.224.135-.577.229-.982.229c-.344 0-.682-.114-.952-.29c-.282-.184-.42-.388-.457-.506a.75.75 0 1 0-1.43.452c.17.543.59 1 1.067 1.31a3.27 3.27 0 0 0 1.772.534c.602 0 1.24-.134 1.754-.443c.53-.319.976-.864.976-1.627c0-.864-.51-1.394-1.055-1.692c-.478-.26-1.056-.389-1.46-.478l-.053-.012c-.386-.086-.736-.202-.973-.352c-.227-.142-.24-.236-.24-.29a.45.45 0 0 1 .18-.375c.134-.108.403-.227.87-.227c.47 0 .742.11.9.218a.83.83 0 0 1 .316.41a.75.75 0 0 0 1.407-.52A2.33 2.33 0 0 0 9.8 4.98c-.455-.31-1.037-.478-1.745-.478" clip-rule="evenodd"
                       />

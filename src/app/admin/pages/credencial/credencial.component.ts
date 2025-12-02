@@ -135,6 +135,24 @@ export default class CredencialComponen implements OnInit {
         // event.preventDefault(); // Descomentar si quieres evitar el scroll al deslizar sobre la credencial
       }
 
+      colors = {
+        selected:  '#0891B2', // color cuando el icono está seleccionado (click)
+        active:    '#00C853', // color cuando el beneficio está activo
+        inactive:  '#BAC1CB', // color cuando el beneficio NO está activo
+      };
+
+      benefits = {
+        farmacia:   this.user()?.Beneficios?.[0]?.far ?? false,
+        evacuacion: this.user()?.Beneficios?.[0]?.eva ?? false,
+        seg:        this.user()?.Beneficios?.[0]?.seg ?? false,
+        sep:        this.user()?.Beneficios?.[0]?.sep ?? false,
+        // combinado:
+        seguro:    (this.user()?.Beneficios?.[0]?.seg ?? false)
+                || (this.user()?.Beneficios?.[0]?.sep ?? false),
+      };
+
+      familia = (this.user()?.GpoFamiliar?.length ?? 0) > 0;
+
 
 
 }
