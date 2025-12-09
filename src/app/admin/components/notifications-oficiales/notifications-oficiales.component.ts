@@ -30,7 +30,7 @@ export default class NotificationsOficialesComponent {
       de: 'Comisión Directiva',
       asunto: 'Bienvenida',
       mensaje: `Estimado socio, es un honor contar con su pertenencia a nuestra institución. A partir de hoy, ponemos a su disposición una nueva herramienta: la credencial digital.Con ella podremos mantener una comunicación permanente con usted y avanzar hacia una administración más transparente, ágil y cercana.¡Gracias por acompañarnos en este nuevo paso!`,
-      fecha: '01/09/25'
+      fecha: '10/12/25'
     },
 
   ];
