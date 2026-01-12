@@ -164,6 +164,7 @@ export class RegisterComponent implements OnInit {
 
       this.authService.verifyDni(dni!, telefono!)
         .subscribe(resp => {
+          console.log('Esta es la respuesta al verificar DNI desde registro:', resp);
           if (resp.ok) {
             this.user = resp;
             this.userId = resp.userData.Persona[0].Id;
@@ -173,7 +174,7 @@ export class RegisterComponent implements OnInit {
             this.formSubmitted = false;
             this.telefonoControl.markAsUntouched();
             this.telefonoControl.markAsPristine();
-            
+
           } else {
             this.openDialog();
             this.error = 'Hubo un problema contactese con afiliaciones';
@@ -200,7 +201,7 @@ export class RegisterComponent implements OnInit {
     return this.formRegister.get('telefono') as FormControl;
   }
 
-  
+
 
   onKeyUp(event: KeyboardEvent, index: number, nextInput: HTMLInputElement | null, prevInput: HTMLInputElement | null = null) {
     const input = event.target as HTMLInputElement;
