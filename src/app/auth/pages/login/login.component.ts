@@ -5,6 +5,7 @@ import { AuthService } from '../../services/auth.service';
 
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -25,6 +26,13 @@ export class LoginComponent {
 
   messageService= inject(MessageService)
 
+  showPassword = signal(false);
+
+  isLoading = signal(false);
+
+  togglePasswordVisibility() {
+    this.showPassword.set(!this.showPassword());
+  }
 
   loginForm = this.fb.group({
     dni: ['', [Validators.required, Validators.minLength(7), Validators.pattern(/^\d+$/)]],
@@ -43,7 +51,14 @@ export class LoginComponent {
 
     const { dni='', password='' } = this.loginForm.value
 
+    this.isLoading.set(true);
+
     this.authService.login(dni!, password!)
+      .pipe(
+        finalize(() => {
+          this.isLoading.set(false);
+        })
+      )
       .subscribe(isAuthenticated => {
         console.log(isAuthenticated);
 
