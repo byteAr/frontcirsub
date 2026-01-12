@@ -69,8 +69,7 @@ export class PassrecoveryComponent implements OnInit {
         Validators.pattern('^[0-9]*$'),
         Validators.minLength(8),
         Validators.maxLength(12)
-      ]],
-      email: ['', [Validators.required, Validators.email, Validators.minLength(8)]],
+      ]]
     });
 
     formOtp = this.fb.group({
@@ -149,23 +148,20 @@ export class PassrecoveryComponent implements OnInit {
           console.log('DNI inválido. Errores:', this.dniControl.errors);
           return;
         }
-        const {dni, telefono, email} = this.formRegister.value;
+        const {dni, telefono} = this.formRegister.value;
 
-        this.authService.verifyDniRecoveryPass(dni!, email!, telefono!)
+        this.authService.verifyDniRecoveryPass(dni!, telefono!)
           .subscribe(resp => {
             if (resp.ok) {
               this.user = true;
               this.userId = resp.userData.Persona[0].Id;
               this.phoneNUmber = telefono!;
-              this.email = email!;
               this.visible = false;
               this.error = '';
               this.formSubmitted = false;
               this.telefonoControl.markAsUntouched();
               this.telefonoControl.markAsPristine();
-              this.emailControl.markAsUntouched();
-              this.emailControl.markAsPristine();
-              this.authService.sendOtp(`+549${telefono}`,email!)
+              this.authService.sendOtp(`+549${telefono}`)
                 .subscribe({
                   next: (resp)=> {
                     console.log('respuesta del backend al enviar el otp', resp);
@@ -184,7 +180,6 @@ export class PassrecoveryComponent implements OnInit {
           } else {
             if (this.formRegister.invalid) {
               console.log('Formulario de contacto inválido. Errores Teléfono:', this.telefonoControl.errors);
-              console.log('Errores Email:', this.emailControl.errors);
               return;
             }
           }
@@ -198,9 +193,7 @@ export class PassrecoveryComponent implements OnInit {
       return this.formRegister.get('telefono') as FormControl;
     }
 
-    get emailControl(): FormControl {
-      return this.formRegister.get('email') as FormControl;
-    }
+    
 
     onKeyUp(event: KeyboardEvent, index: number, nextInput: HTMLInputElement | null, prevInput: HTMLInputElement | null = null) {
       const input = event.target as HTMLInputElement;

@@ -63,12 +63,12 @@ export class AuthService {
     return this.http.post(`${this.url}/auth/addpersona`, dni)
   }
 
-  verifyDni(dni: string, email:string, telefono:string): Observable<any> {
-    return this.http.post(`${this.url}/auth/verify-dni`, {dni, email, telefono})
+  verifyDni(dni: string, telefono:string): Observable<any> {
+    return this.http.post(`${this.url}/auth/verify-dni`, {dni, telefono})
   }
 
-  verifyDniRecoveryPass(dni: string, email:string, telefono:string): Observable<any> {
-    return this.http.post(`${this.url}/auth/verify-repass`, {dni, email, telefono})
+  verifyDniRecoveryPass(dni: string,  telefono:string): Observable<any> {
+    return this.http.post(`${this.url}/auth/verify-repass`, {dni, telefono})
   }
 
   register(dni: string, password: string): Observable<boolean> {
@@ -92,9 +92,9 @@ export class AuthService {
   }
 
 
-  sendOtp(phoneNumber:string, email:string): Observable<any> {
+  sendOtp(phoneNumber:string): Observable<any> {
 
-    return this.http.post(`${this.url}/auth/send-otp`, { phoneNumber, email } )
+    return this.http.post(`${this.url}/auth/send-otp`, { phoneNumber } )
   }
 
   verifyOtp( phoneNumber: string,otp: string) {
