@@ -51,6 +51,8 @@ export class LoginComponent {
 
     const { dni='', password='' } = this.loginForm.value
 
+    console.log('este es el user y el pass en el login angular', dni, password);
+
     this.isLoading.set(true);
 
     this.authService.login(dni!, password!)
