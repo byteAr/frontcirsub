@@ -76,8 +76,11 @@ export class RegisterComponent implements OnInit {
   private idUser:number = 0;
   private email : string = '';
   private passwordUser: string =''
+  private passwordSavedSuccessfully: boolean = false; // Nueva bandera para rastrear si la contraseña se guardó
 
   formSubmitted: boolean = false;
+  savingPassword: boolean = false; // Para mostrar estado de carga al guardar contraseña
+  passwordError: string = ''; // Para mostrar errores al guardar contraseña
 
   formRegister = this.fb.group({
     dni: ['', [Validators.required, Validators.minLength(7), Validators.pattern(/^\d+$/)]],
@@ -130,14 +133,31 @@ export class RegisterComponent implements OnInit {
       const password = this.password?.value
       if (this.formsetPassword.valid) {
         this.passwordUser = password!;
-        this.repass = false;
-        this.avatar = true
-        setTimeout(()=> {
-          this.capturePhoto();
-          this.retakePhoto()
-        }, 200)
-
-
+        this.savingPassword = true;
+        this.passwordError = '';
+        
+        const {dni} = this.formRegister.value;
+        
+        // Guardar la contraseña en la base de datos ANTES de pasar a la captura de foto
+        this.authService.register(dni!, this.passwordUser)
+          .subscribe({
+            next: (success) => {
+              console.log('Contraseña guardada exitosamente:', success);
+              this.passwordSavedSuccessfully = true;
+              this.savingPassword = false;
+              this.repass = false;
+              this.avatar = true;
+              setTimeout(()=> {
+                this.capturePhoto();
+                this.retakePhoto()
+              }, 200)
+            },
+            error: (err) => {
+              console.error('Error al guardar contraseña:', err);
+              this.savingPassword = false;
+              this.passwordError = 'Error al guardar la contraseña. Por favor, intente nuevamente.';
+            }
+          });
       } else {
         this.formsetPassword.markAllAsTouched();
       }
@@ -332,36 +352,37 @@ export class RegisterComponent implements OnInit {
       formData.append('userId', this.userId.toString()); // 'userId' es el nombre del campo en el backend
 
       const {dni, telefono} = this.formRegister.value;
-      console.log('esta es la data que se va enviar en el register: ', dni, telefono);
+      console.log('esta es la data que se va enviar en el updateProfile: ', dni, telefono);
 
+      // La contraseña ya fue guardada en onSubmitPassword(), solo subimos el avatar
+      if (!this.passwordSavedSuccessfully) {
+        console.error('Error: La contraseña no se guardó correctamente antes de llegar aquí.');
+        this.message = 'Error: Complete el proceso de registro correctamente.';
+        this.isLoading = false;
+        return;
+      }
 
-      this.authService.register(dni!, this.passwordUser)
-      .subscribe({
-        next: (res) => {
-          console.log('Registro exitoso', res);
-          this.authService.sendAvatar(formData)
-            .subscribe({
-              next: (res) => {
-                if(!res.ok){
-                  console.log('respuesta del rekognition',res);
-
-                  this.message = res.message;
-
-
-                } else {
-                  this.message='Felicidades, registro exitoso.'
-                  this.errorMessage=true;
-                  setTimeout(() => {
-                     this.router.navigateByUrl('/dashboard/credencial')
-                  }, 2000);
-                }
-              },
-              error: (err) => console.error('Error al subir avatar', err)
-            });
-
-        },
-        error: (err) => console.error('Error en registro', err)
-      });
+      this.authService.sendAvatar(formData)
+        .subscribe({
+          next: (res) => {
+            this.isLoading = false;
+            if(!res.ok){
+              console.log('respuesta del rekognition',res);
+              this.message = res.message;
+            } else {
+              this.message='Felicidades, registro exitoso.'
+              this.errorMessage=true;
+              setTimeout(() => {
+                 this.router.navigateByUrl('/dashboard/credencial')
+              }, 2000);
+            }
+          },
+          error: (err) => {
+            this.isLoading = false;
+            console.error('Error al subir avatar', err);
+            this.message = 'Error al subir la foto. Intente nuevamente.';
+          }
+        });
 
     } catch (blobError) {
       this.isLoading = false;
