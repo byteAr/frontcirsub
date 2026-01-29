@@ -29,17 +29,17 @@
 
 <!-- --- MODAL DE MENSAJE --- -->
 <!-- El modal solo se renderiza si isModalOpen es true -->
-<div *ngIf="isModalOpen" class="fixed inset-0  bg-opacity-50 flex items-center justify-center p-4 z-50">
-  <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto p-6">
+<div *ngIf="isModalOpen" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" (click)="closeModal()">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto p-6 max-h-[80vh] flex flex-col" (click)="$event.stopPropagation()">
     <!-- Encabezado del Modal -->
-    <div class="flex justify-between items-center mb-1">
+    <div class="flex justify-between items-center mb-2 flex-shrink-0">
       <h3 class="text-md font-bold text-cyan-600">{{ selectedMessage?.de }}</h3>
       <!-- Botón para cerrar el modal -->
       <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">&times;</button>
     </div>
 
-    <!-- Contenido del Mensaje -->
-    <div class="text-sm text-gray-700 mb-4 max-h-28 overflow-y-auto custom-scrollbar-modal">
+    <!-- Contenido del Mensaje - Scrollable en iOS -->
+    <div class="text-sm text-gray-700 mb-4 flex-grow overflow-y-auto custom-scrollbar-modal" style="-webkit-overflow-scrolling: touch; min-height: 100px; max-height: 50vh;">
       <p class="mb-1 text-xs">
         <span class="font-semibold">Asunto:</span> {{ selectedMessage?.asunto }}
       </p>
@@ -52,7 +52,7 @@
     </div>
 
     <!-- Pie del Modal -->
-    <div class="flex justify-end">
+    <div class="flex justify-end flex-shrink-0">
       <button (click)="closeModal()" class="cursor-pointer px-4 py-1 bg-cyan-600 text-white rounded hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:ring-opacity-50 text-sm">
         Cerrar
       </button>

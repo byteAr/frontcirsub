@@ -1,0 +1,45 @@
+.custom-scrollbar {
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Estilos para el scrollbar (solo funcionan en navegadores basados en WebKit como Chrome y Safari) */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background-color: #f1f5f9;
+  border-radius: 4px;
+}
+
+/* Estilos para el scrollbar del modal - IMPORTANTE para iOS */
+.custom-scrollbar-modal {
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
+}
+
+.custom-scrollbar-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar-modal::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 3px;
+}
+
+.custom-scrollbar-modal::-webkit-scrollbar-track {
+  background-color: #f1f5f9;
+  border-radius: 3px;
+}
