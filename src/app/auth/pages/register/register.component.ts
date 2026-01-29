@@ -116,6 +116,33 @@ export class RegisterComponent implements OnInit {
       return this.formsetPassword.get('confirmPassword');
     }
 
+    // Validaciones individuales de contraseña
+    get hasMinLength(): boolean {
+      return (this.password?.value?.length || 0) >= 8;
+    }
+
+    get hasUpperCase(): boolean {
+      return /[A-Z]/.test(this.password?.value || '');
+    }
+
+    get hasLowerCase(): boolean {
+      return /[a-z]/.test(this.password?.value || '');
+    }
+
+    get hasSpecialChar(): boolean {
+      return /[\W_]/.test(this.password?.value || '');
+    }
+
+    get passwordsMatch(): boolean {
+      return this.password?.value === this.confirmPassword?.value && 
+             (this.confirmPassword?.value?.length || 0) > 0;
+    }
+
+    get isPasswordValid(): boolean {
+      return this.hasMinLength && this.hasUpperCase && this.hasLowerCase && 
+             this.hasSpecialChar && this.passwordsMatch;
+    }
+
     togglePassword() {
       this.showPassword = !this.showPassword;
     }
@@ -130,37 +157,48 @@ export class RegisterComponent implements OnInit {
       return pass === confirm ? null : { passwordsMismatch: true };
     }
     onSubmitPassword() {
-      const password = this.password?.value
-      if (this.formsetPassword.valid) {
-        this.passwordUser = password!;
-        this.savingPassword = true;
-        this.passwordError = '';
-        
-        const {dni} = this.formRegister.value;
-        
-        // Guardar la contraseña en la base de datos ANTES de pasar a la captura de foto
-        this.authService.register(dni!, this.passwordUser)
-          .subscribe({
-            next: (success) => {
-              console.log('Contraseña guardada exitosamente:', success);
+      // Verificar validaciones antes de enviar
+      if (!this.isPasswordValid) {
+        this.formsetPassword.markAllAsTouched();
+        this.passwordError = 'Por favor, complete todos los requisitos de la contraseña.';
+        return;
+      }
+
+      const password = this.password?.value;
+      this.passwordUser = password!;
+      this.savingPassword = true;
+      this.passwordError = '';
+      
+      const {dni} = this.formRegister.value;
+      
+      // Guardar la contraseña en la base de datos ANTES de pasar a la captura de foto
+      this.authService.register(dni!, this.passwordUser)
+        .subscribe({
+          next: (success) => {
+            console.log('Contraseña guardada exitosamente:', success);
+            this.savingPassword = false;
+            
+            // Verificar si realmente fue exitoso (el servicio puede devolver false)
+            if (success) {
               this.passwordSavedSuccessfully = true;
-              this.savingPassword = false;
+              this.passwordError = '';
               this.repass = false;
               this.avatar = true;
               setTimeout(()=> {
                 this.capturePhoto();
                 this.retakePhoto()
               }, 200)
-            },
-            error: (err) => {
-              console.error('Error al guardar contraseña:', err);
-              this.savingPassword = false;
-              this.passwordError = 'Error al guardar la contraseña. Por favor, intente nuevamente.';
+            } else {
+              // El servicio devolvió false, hubo un error en el backend
+              this.passwordError = 'Error al guardar la contraseña. El usuario ya podría estar registrado o hubo un problema con el servidor.';
             }
-          });
-      } else {
-        this.formsetPassword.markAllAsTouched();
-      }
+          },
+          error: (err) => {
+            console.error('Error al guardar contraseña:', err);
+            this.savingPassword = false;
+            this.passwordError = 'Error al guardar la contraseña. Por favor, intente nuevamente.';
+          }
+        });
     }
 
   ngOnInit(): void {
