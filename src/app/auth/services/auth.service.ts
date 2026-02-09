@@ -71,13 +71,29 @@ export class AuthService {
     return this.http.post(`${this.url}/auth/verify-repass`, {dni, telefono})
   }
 
-  register(dni: string, password: string): Observable<boolean> {
+  register(dni: string, password: string): Observable<{success: boolean, error?: string}> {
 
     return this.http.post<User>(`${this.url}/auth/register`, {dni, password})
     .pipe(
-      tap( resp=> console.log( 'esta es la respuesta al registrarme:',resp)),
-      map(resp => this.handleAuthSuccess(resp)),
-      catchError((error: any) => this.handleAuthError(error))
+      tap( resp=> {
+        console.log('=== RESPUESTA REGISTRO EXITOSA ===');
+        console.log('Respuesta completa:', resp);
+        console.log('================================');
+      }),
+      map(resp => {
+        this.handleAuthSuccess(resp);
+        return { success: true };
+      }),
+      catchError((error: any) => {
+        console.error('=== ERROR EN REGISTRO ===');
+        console.error('Error completo:', error);
+        console.error('error.error:', error?.error);
+        console.error('error.status:', error?.status);
+        console.error('error.message:', error?.message);
+        console.error('=========================');
+        const errorMessage = error?.error?.message || error?.message || 'Error desconocido al registrar';
+        return of({ success: false, error: errorMessage });
+      })
     )
   }
 

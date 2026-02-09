@@ -40,14 +40,22 @@ export class RegisterComponent implements OnInit {
   isLoading: boolean = false;
 
   async ngAfterViewInit() {
-    this.canvas.nativeElement.width = 300;
-    this.canvas.nativeElement.height = 300;
+    // No inicializar la cámara aquí - solo se hace cuando se muestra la pantalla de avatar
+  }
+
+  async initializeCamera() {
+    if (this.canvas?.nativeElement) {
+      this.canvas.nativeElement.width = 300;
+      this.canvas.nativeElement.height = 300;
+    }
     await this.startCamera();
   }
 
   async captureProfileImage() {
-    this.canvas.nativeElement.width = 300;
-    this.canvas.nativeElement.height = 300;
+    if (this.canvas?.nativeElement) {
+      this.canvas.nativeElement.width = 300;
+      this.canvas.nativeElement.height = 300;
+    }
     await this.startCamera();
   }
 
@@ -165,40 +173,17 @@ export class RegisterComponent implements OnInit {
       }
 
       const password = this.password?.value;
+      // Solo almacenar la contraseña temporalmente, NO guardarla en BD todavía
+      // La contraseña se guardará DESPUÉS de que la foto se suba exitosamente
       this.passwordUser = password!;
-      this.savingPassword = true;
       this.passwordError = '';
       
-      const {dni} = this.formRegister.value;
-      
-      // Guardar la contraseña en la base de datos ANTES de pasar a la captura de foto
-      this.authService.register(dni!, this.passwordUser)
-        .subscribe({
-          next: (success) => {
-            console.log('Contraseña guardada exitosamente:', success);
-            this.savingPassword = false;
-            
-            // Verificar si realmente fue exitoso (el servicio puede devolver false)
-            if (success) {
-              this.passwordSavedSuccessfully = true;
-              this.passwordError = '';
-              this.repass = false;
-              this.avatar = true;
-              setTimeout(()=> {
-                this.capturePhoto();
-                this.retakePhoto()
-              }, 200)
-            } else {
-              // El servicio devolvió false, hubo un error en el backend
-              this.passwordError = 'Error al guardar la contraseña. El usuario ya podría estar registrado o hubo un problema con el servidor.';
-            }
-          },
-          error: (err) => {
-            console.error('Error al guardar contraseña:', err);
-            this.savingPassword = false;
-            this.passwordError = 'Error al guardar la contraseña. Por favor, intente nuevamente.';
-          }
-        });
+      // Avanzar directamente a la captura de foto
+      this.repass = false;
+      this.avatar = true;
+      setTimeout(() => {
+        this.initializeCamera();
+      }, 200);
     }
 
   ngOnInit(): void {
@@ -298,6 +283,10 @@ export class RegisterComponent implements OnInit {
   // logica captura de imagen
   async startCamera() {
     try {
+      if (!this.videoElement?.nativeElement) {
+        console.warn('Video element no disponible aún');
+        return;
+      }
       this.mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
       this.videoElement.nativeElement.srcObject = this.mediaStream;
       await this.videoElement.nativeElement.play();
@@ -315,6 +304,11 @@ export class RegisterComponent implements OnInit {
   }
 
   capturePhoto() {
+    if (!this.videoElement?.nativeElement || !this.canvas?.nativeElement) {
+      console.warn('Video o canvas no disponibles');
+      return;
+    }
+    
     const video = this.videoElement.nativeElement;
     const canvas = this.canvas.nativeElement;
     const context = canvas.getContext('2d');
@@ -360,10 +354,16 @@ export class RegisterComponent implements OnInit {
       return;
     }
 
+    // Verificar que tenemos la contraseña almacenada
+    if (!this.passwordUser) {
+      this.message = 'Error: No se encontró la contraseña. Vuelva a ingresarla.';
+      return;
+    }
+
     this.isLoading = true; // Activa el estado de carga
+    this.message = 'Subiendo foto...';
 
     // Convertir Data URL a Blob
-    // Esta función auxiliar convierte una data URL en un objeto Blob
     const dataURLtoBlob = (dataurl: string): Promise<Blob> => {
       return new Promise((resolve, reject) => {
         const arr = dataurl.split(',');
@@ -383,36 +383,53 @@ export class RegisterComponent implements OnInit {
       const imageBlob = await dataURLtoBlob(this.capturedImage);
 
       // Crear un FormData para enviar el archivo
-      // Esto es crucial para enviar archivos binarios en peticiones multipart/form-data
       const formData = new FormData();
       formData.append('profilePicture', imageBlob, 'profile.jpeg');
-      console.log(this.userId) // 'profilePicture' es el nombre del campo en el backend
-      formData.append('userId', this.userId.toString()); // 'userId' es el nombre del campo en el backend
+      console.log('userId para foto:', this.userId);
+      formData.append('userId', this.userId.toString());
 
-      const {dni, telefono} = this.formRegister.value;
-      console.log('esta es la data que se va enviar en el updateProfile: ', dni, telefono);
+      const {dni} = this.formRegister.value;
+      console.log('Subiendo foto para DNI:', dni);
 
-      // La contraseña ya fue guardada en onSubmitPassword(), solo subimos el avatar
-      if (!this.passwordSavedSuccessfully) {
-        console.error('Error: La contraseña no se guardó correctamente antes de llegar aquí.');
-        this.message = 'Error: Complete el proceso de registro correctamente.';
-        this.isLoading = false;
-        return;
-      }
-
+      // PASO 1: Primero subir la foto
       this.authService.sendAvatar(formData)
         .subscribe({
           next: (res) => {
-            this.isLoading = false;
             if(!res.ok){
-              console.log('respuesta del rekognition',res);
-              this.message = res.message;
+              // La foto no se subió correctamente (ej: no se detectó rostro)
+              this.isLoading = false;
+              console.log('Error al subir foto - respuesta del rekognition:', res);
+              this.message = res.message || 'Error al subir la foto. Intente nuevamente.';
             } else {
-              this.message='Felicidades, registro exitoso.'
-              this.errorMessage=true;
-              setTimeout(() => {
-                 this.router.navigateByUrl('/dashboard/credencial')
-              }, 2000);
+              // PASO 2: La foto se subió exitosamente, ahora guardar la contraseña
+              console.log('Foto subida exitosamente, ahora guardando contraseña...');
+              this.message = 'Foto guardada. Finalizando registro...';
+              
+              this.authService.register(dni!, this.passwordUser)
+                .subscribe({
+                  next: (response) => {
+                    this.isLoading = false;
+                    console.log('Respuesta del registro de contraseña:', response);
+                    
+                    if (response.success) {
+                      // Registro completo exitoso
+                      this.passwordSavedSuccessfully = true;
+                      this.message = 'Felicidades, registro exitoso.';
+                      this.errorMessage = true;
+                      setTimeout(() => {
+                        this.router.navigateByUrl('/dashboard/credencial');
+                      }, 2000);
+                    } else {
+                      // Error al guardar contraseña (pero la foto ya se guardó)
+                      this.message = 'Error al finalizar registro: ' + (response.error || 'Error desconocido');
+                    }
+                  },
+                  error: (err) => {
+                    this.isLoading = false;
+                    console.error('Error al guardar contraseña:', err);
+                    this.message = 'Error al finalizar registro. Intente nuevamente.';
+                  }
+                });
             }
           },
           error: (err) => {
