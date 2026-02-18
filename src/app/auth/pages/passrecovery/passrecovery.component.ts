@@ -115,15 +115,21 @@ export class PassrecoveryComponent implements OnInit {
           this.authService.resetPassword(this.userId, password!)
             .subscribe({
               next: resp => {
+                console.log('Respuesta de resetPassword:', resp);
                 if(resp.ok){
                   this.showSuccess();
                   setTimeout(() => {
-                    this.router.navigateByUrl('./auth')
+                    this.router.navigateByUrl('/auth/login')
                   }, 3500);
-
+                } else {
+                  console.log('resetPassword devolvió ok: false', resp);
+                  this.message = resp.message || 'Error al cambiar la contraseña';
                 }
               },
-              error: (err) => console.log(err)
+              error: (err) => {
+                console.error('Error en resetPassword:', err);
+                this.message = 'Error al cambiar la contraseña. Intente nuevamente.';
+              }
             })
 
         } else {

@@ -215,6 +215,9 @@
                 <button type="submit" class="w-full rounded-2xl max-w-xs px-4 py-3 mt-4 font-semibold text-whitebtn btn-success text-white bg-linear-to-r from-cyan-500 to-green-500 cursor-pointer disabled:bg-gray-400" [disabled]="formsetPassword.invalid">
                   Guardar contraseña
                 </button>
+                <div *ngIf="message" class="mt-3 text-red-500 text-sm font-semibold">
+                  {{ message }}
+                </div>
               </div>
             </form>
            </div>

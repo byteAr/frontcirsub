@@ -28,9 +28,7 @@
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
   overscroll-behavior-y: contain;
-}
-
-.custom-scrollbar-modal::-webkit-scrollbar {
+}.custom-scrollbar-modal::-webkit-scrollbar {
   width: 6px;
 }
 
