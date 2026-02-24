@@ -3,6 +3,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { catchError, finalize, map, Observable, of, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { User, UserData } from '../interfaces/user.interface';
+import { PushNotificationService } from '../../shared/services/push-notification.service';
 
 import { rxResource } from '@angular/core/rxjs-interop'
 
@@ -38,6 +39,7 @@ export class AuthService {
   url = environment.API_URL;
 
   http = inject(HttpClient);
+  private pushService = inject(PushNotificationService);
 
   checkStatusResources = rxResource({
     loader: () => this.checkStatus(),
@@ -161,7 +163,11 @@ export class AuthService {
     this._token.set(resp.token);
 
     localStorage.setItem('token', resp.token);
-    return true
+
+    const userId = resp.userData?.Persona?.[0]?.Id;
+    if (userId) this.pushService.subscribeAfterLogin(userId);
+
+    return true;
   }
 
   private handleAuthError( error: any ) {
