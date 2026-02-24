@@ -19,6 +19,7 @@ export class PushNotificationService {
         serverPublicKey: environment.vapidPublicKey,
       });
 
+      const token = localStorage.getItem('token');
       await firstValueFrom(
         this.http.post(`${this.url}/push/subscribe`, {
           userId,
@@ -27,6 +28,8 @@ export class PushNotificationService {
             p256dh: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('p256dh')!))),
             auth: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('auth')!))),
           },
+        }, {
+          headers: { Authorization: `Bearer ${token}` },
         }),
       );
     } catch {
