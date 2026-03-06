@@ -30,9 +30,7 @@
   overscroll-behavior-y: contain;
 }.custom-scrollbar-modal::-webkit-scrollbar {
   width: 6px;
-}
-
-.custom-scrollbar-modal::-webkit-scrollbar-thumb {
+}.custom-scrollbar-modal::-webkit-scrollbar-thumb {
   background-color: #cbd5e1;
   border-radius: 3px;
 }
