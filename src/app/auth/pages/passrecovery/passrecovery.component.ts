@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, ViewChild, AfterViewChecked } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -19,13 +19,18 @@ export interface tipoDni {
   styleUrl: './passrecovery.component.css',
   providers: [MessageService]
 })
-export class PassrecoveryComponent implements OnInit {
+export class PassrecoveryComponent implements OnInit, AfterViewChecked {
 
 
     @ViewChild('videoElement') videoElement!: ElementRef;
     @ViewChild('canvas') canvas!: ElementRef;
     @ViewChild('modal', { static: true }) modal!: ElementRef<HTMLDialogElement>;
     @ViewChild('input1') input1?: ElementRef<HTMLInputElement>;
+    @ViewChild('input2') input2?: ElementRef<HTMLInputElement>;
+    @ViewChild('input3') input3?: ElementRef<HTMLInputElement>;
+    @ViewChild('input4') input4?: ElementRef<HTMLInputElement>;
+
+    private otpFocusPending = false;
 
     capturedImage: string | null = null;
     private mediaStream: MediaStream | null = null;
@@ -201,38 +206,46 @@ export class PassrecoveryComponent implements OnInit {
 
     
 
-    onKeyUp(event: KeyboardEvent, index: number, nextInput: HTMLInputElement | null, prevInput: HTMLInputElement | null = null) {
+    onKeyUp(event: KeyboardEvent, nextInput: HTMLInputElement | null, prevInput: HTMLInputElement | null = null) {
       const input = event.target as HTMLInputElement;
 
-      // Si se presiona Backspace y el campo está vacío, mover al anterior
       if (event.key === 'Backspace' && !input.value && prevInput) {
         prevInput.focus();
         return;
       }
 
-      // Si se ingresa un número y hay un siguiente campo, mover al siguiente
       if (input.value.match(/[0-9]/) && nextInput) {
         nextInput.focus();
+      }
+
+      if (this.formOtp.valid) {
+        this.sendOtp();
+      }
+    }
+
+    onPaste(event: ClipboardEvent) {
+      event.preventDefault();
+      const digits = (event.clipboardData?.getData('text') ?? '').replace(/\D/g, '').slice(0, 4);
+      const controls = ['digit1', 'digit2', 'digit3', 'digit4'];
+      digits.split('').forEach((d, i) => this.formOtp.get(controls[i])?.setValue(d));
+      const inputs = [this.input1, this.input2, this.input3, this.input4];
+      if (digits.length > 0) {
+        inputs[Math.min(digits.length - 1, 3)]?.nativeElement.focus();
+      }
+      if (digits.length === 4) {
+        this.sendOtp();
       }
     }
 
     sendOtp() {
-      // Si el formulario no es válido, no hacemos nada.
-      if (this.formOtp.invalid) {
-        return;
-      }
-
-      // CAPTURA DE LA CLAVE: Unimos los valores de cada control para formar el OTP final.
+      if (this.formOtp.invalid) return;
       const { digit1, digit2, digit3, digit4 } = this.formOtp.value;
       const otpCompleto = `${digit1}${digit2}${digit3}${digit4}`;
-
-
-
-      this.authService.verifyOtp(`+549${this.phoneNUmber}`,otpCompleto)
-        .subscribe( resp => {
+      this.authService.verifyOtp(`+549${this.phoneNUmber}`, otpCompleto)
+        .subscribe(resp => {
           console.log('esta es la respuesta del servicio otp: ', resp);
-          this.repass = true
-        })
+          this.repass = true;
+        });
     }
 
     openDialog() {
@@ -263,8 +276,15 @@ export class PassrecoveryComponent implements OnInit {
 
 
   focusInput() {
-    this.showOtp = true;                       // activa el *ngIf
-    queueMicrotask(() => this.input1?.nativeElement.focus());
+    this.showOtp = true;
+    this.otpFocusPending = true;
+  }
+
+  ngAfterViewChecked(): void {
+    if (this.otpFocusPending && this.input1?.nativeElement) {
+      this.input1.nativeElement.focus();
+      this.otpFocusPending = false;
+    }
   }
 
 }
