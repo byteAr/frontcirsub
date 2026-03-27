@@ -71,8 +71,10 @@ export default class CBUComponent implements OnInit {
     if (!id) return;
     const cbuValue = this.cbuIngresado;
 
-    this.credencialService.updateCbu(id, cbuValue).subscribe();
-    this.credencialService.updateCbuPhp(id, cbuValue).subscribe();
+    this.credencialService.updateCbu(id, cbuValue).subscribe(resp => {
+      console.log('Respuesta updateCbu (api-cbu.php):', resp);
+    });
+    // this.credencialService.updateCbuPhp(id, cbuValue).subscribe();
 
     this.messageService.add({
       severity: 'success',
