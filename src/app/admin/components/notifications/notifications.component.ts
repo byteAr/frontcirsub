@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { AuthService } from '../../../auth/services/auth.service';
-import { Persona } from '../../../auth/interfaces/user.interface';
+import { AdminNotifService } from '../../../shared/services/admin-notif.service';
 
-interface Message { // Cambiado 'message' a 'Message' por convención de TypeScript
+interface Message {
   de: string;
   asunto: string;
   mensaje: string;
@@ -12,53 +12,72 @@ interface Message { // Cambiado 'message' a 'Message' por convención de TypeScr
 
 @Component({
   selector: 'app-notifications',
-  standalone: true, // Asegúrate de que tu componente sea standalone
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './notifications.component.html',
-  styleUrl: './notifications.component.css'
+  styleUrl: './notifications.component.css',
 })
-export default class NotificationsComponent {
-
-  constructor(){
-    effect(() => {
-    const u = this.user();
-    if (u) {
-      this.familia = u.Persona;
-    }
-  });
-   this.authService.checkStatus().subscribe();
-  }
-
-  authService=inject(AuthService)
+export default class NotificationsComponent implements OnInit {
+  authService = inject(AuthService);
+  adminNotifService = inject(AdminNotifService);
 
   user = this.authService.user;
 
-  familia:Persona[]=[];
-
-  // Variables para controlar el modal
   isModalOpen: boolean = false;
-  selectedMessage: Message | null = null; // Para almacenar el mensaje completo
+  selectedMessage: Message | null = null;
+  mensajes: Message[] = [];
 
-  // Datos de ejemplo (cambié el nombre a 'messages' para que coincida con la interfaz)
-  mensajes: Message[] = [ // Mantenemos 'mensajes' como nombre de la propiedad para que coincida con tu HTML
-    {
+  ngOnInit(): void {
+    const userId = this.user()?.Persona?.[0]?.Id;
+    const apellido = this.user()?.Persona?.[0]?.Apellido ?? '';
+
+    // Mensaje de bienvenida estático (siempre presente)
+    const bienvenida: Message = {
       de: 'Departamento Afiliaciones',
       asunto: 'Bienvenida',
-      mensaje: `Estimado/a Socio/a  ${this.user()?.Persona[0].Apellido}, tenemos el gusto de registrarlo en la credencial digital, herramienta por medio de la cual  les haremos llegar  la información actualizada de nuestra MUTUAL y de esta forma lograr una comunicación permanente con usted, que es lo mas importante para la mutual.`,
-      fecha: '06/03/26'
+      mensaje: `Estimado/a Socio/a ${apellido}, tenemos el gusto de registrarlo en la credencial digital, herramienta por medio de la cual les haremos llegar la información actualizada de nuestra MUTUAL y de esta forma lograr una comunicación permanente con usted, que es lo más importante para la mutual.`,
+      fecha: '06/03/26',
+    };
+
+    if (!userId) {
+      this.mensajes = [bienvenida];
+      return;
     }
 
-  ];
+    this.adminNotifService.getMessages(userId).subscribe({
+      next: ({ messages }) => {
+        // Mensajes del admin primero (más recientes), bienvenida al final
+        const adminMensajes: Message[] = messages.map((m) => ({
+          de: 'Departamento Afiliaciones',
+          asunto: m.titulo,
+          mensaje: m.cuerpo,
+          fecha: new Date(m.fecha).toLocaleDateString('es-AR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: '2-digit',
+          }),
+        }));
+        this.mensajes = [...adminMensajes, bienvenida];
 
-  // Función para abrir el modal con el mensaje seleccionado
+        // Marcar como leídos y limpiar badge
+        this.adminNotifService.markRead(userId).subscribe({
+          next: () => this.adminNotifService.unreadCount.set(0),
+          error: () => {},
+        });
+      },
+      error: () => {
+        this.mensajes = [bienvenida];
+      },
+    });
+  }
+
   openModal(message: Message): void {
     this.selectedMessage = message;
     this.isModalOpen = true;
   }
 
-  // Función para cerrar el modal
   closeModal(): void {
     this.isModalOpen = false;
-    this.selectedMessage = null; // Limpiar el mensaje seleccionado al cerrar
+    this.selectedMessage = null;
   }
 }
