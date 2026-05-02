@@ -1,3 +1,11 @@
+<!-- Modal de notificación push recibida -->
+<app-notif-view-modal
+  [visible]="showNotifModal()"
+  [titulo]="notifTitle()"
+  [cuerpo]="notifBody()"
+  (closed)="onCloseNotifModal()"
+/>
+
 <section class="flex justify-center items-center h-screen bg-linear-to-r from-cyan-500 to-green-500">
   <div>
     <div class="card card-border bg-base-100 w-80 border-2  pb-5 px-5 shadow-2xl">
