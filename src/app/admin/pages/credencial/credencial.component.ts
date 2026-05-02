@@ -11,10 +11,7 @@ import {
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import domtoimage from 'dom-to-image';
 import QRCode from 'qrcode';
-import { HeaderCardComponent } from '../../components/header-card/header-card.component';
-import { CardFrontComponent } from '../../components/card-front/card-front.component';
 import { AuthService } from '../../../auth/services/auth.service';
-import { User, UserData } from '../../../auth/interfaces/user.interface';
 import { InstallButtonComponent } from '../../components/install-button/install-button.component';
 import { AdminNotifService } from '../../../shared/services/admin-notif.service';
 import { NotifViewModalComponent } from '../../../shared/components/notif-view-modal/notif-view-modal.component';
@@ -119,7 +116,6 @@ export default class CredencialComponen implements OnInit {
   }
 
   @ViewChild('credencialCard', { static: false }) credencialCard!: ElementRef;
-  userId: number = 123;
   qrUrl: string = 'http://iugna.edu.ar';
 
   downloadImage() {
