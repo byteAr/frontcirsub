@@ -106,13 +106,8 @@ export default class CredencialComponen implements OnInit {
 
   onCloseNotifModal(): void {
     this.showNotifModal.set(false);
-    const userId = this.user()?.Persona?.[0]?.Id;
-    if (userId) {
-      this.adminNotifService.markRead(userId).subscribe({
-        next: () => this.adminNotifService.unreadCount.set(0),
-        error: () => {},
-      });
-    }
+    // No se llama markRead aquí — el badge persiste hasta que el usuario
+    // abre "Comunicaciones de Servicio", que es quien limpia el contador.
   }
 
   @ViewChild('credencialCard', { static: false }) credencialCard!: ElementRef;
