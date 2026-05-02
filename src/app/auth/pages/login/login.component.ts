@@ -42,8 +42,8 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
       if (params['notify']) {
-        this.notifTitle.set(decodeURIComponent(params['title'] ?? ''));
-        this.notifBody.set(decodeURIComponent(params['body'] ?? ''));
+        this.notifTitle.set(params['title'] ?? '');
+        this.notifBody.set(params['body'] ?? '');
         this.showNotifModal.set(true);
       }
     });

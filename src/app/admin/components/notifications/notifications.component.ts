@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
+import { switchMap } from 'rxjs';
 import { AuthService } from '../../../auth/services/auth.service';
 import { AdminNotifService } from '../../../shared/services/admin-notif.service';
 
@@ -44,9 +45,8 @@ export default class NotificationsComponent implements OnInit {
       return;
     }
 
-    this.adminNotifService.getMessages(userId).subscribe({
-      next: ({ messages }) => {
-        // Mensajes del admin primero (más recientes), bienvenida al final
+    this.adminNotifService.getMessages(userId).pipe(
+      switchMap(({ messages }) => {
         const adminMensajes: Message[] = messages.map((m) => ({
           de: 'Departamento Afiliaciones',
           asunto: m.titulo,
@@ -58,13 +58,10 @@ export default class NotificationsComponent implements OnInit {
           }),
         }));
         this.mensajes = [...adminMensajes, bienvenida];
-
-        // Marcar como leídos y limpiar badge
-        this.adminNotifService.markRead(userId).subscribe({
-          next: () => this.adminNotifService.unreadCount.set(0),
-          error: () => {},
-        });
-      },
+        return this.adminNotifService.markRead(userId);
+      }),
+    ).subscribe({
+      next: () => this.adminNotifService.unreadCount.set(0),
       error: () => {
         this.mensajes = [bienvenida];
       },
