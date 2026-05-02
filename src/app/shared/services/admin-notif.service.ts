@@ -8,6 +8,13 @@ export interface AdminMessage {
   titulo: string;
   cuerpo: string;
   fecha: string; // ISO 8601
+  senderName?: string;
+}
+
+export interface PermissionUser {
+  dni: string;
+  nombre: string;
+  apellido: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -52,10 +59,24 @@ export class AdminNotifService {
     );
   }
 
-  addPermission(dni: string): Observable<{ ok: boolean }> {
+  listPermissions(): Observable<PermissionUser[]> {
+    return this.http.get<PermissionUser[]>(
+      `${this.apiUrl}/admin-notifications/permissions`,
+      { headers: this.getHeaders() },
+    );
+  }
+
+  addPermission(data: { dni: string; nombre: string; apellido: string }): Observable<{ ok: boolean }> {
     return this.http.post<{ ok: boolean }>(
       `${this.apiUrl}/admin-notifications/permissions`,
-      { dni },
+      data,
+      { headers: this.getHeaders() },
+    );
+  }
+
+  removePermission(dni: string): Observable<{ ok: boolean }> {
+    return this.http.delete<{ ok: boolean }>(
+      `${this.apiUrl}/admin-notifications/permissions/${dni}`,
       { headers: this.getHeaders() },
     );
   }

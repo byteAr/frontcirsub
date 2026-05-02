@@ -26,7 +26,7 @@
     @if (role() === 'superadmin') {
       <div class="flex border-b border-gray-200">
         <button
-          (click)="activeTab.set('send')"
+          (click)="setTab('send')"
           class="flex-1 py-2 text-xs font-semibold transition-colors cursor-pointer"
           [class.text-cyan-600]="activeTab() === 'send'"
           [class.border-b-2]="activeTab() === 'send'"
@@ -34,7 +34,7 @@
           [class.text-gray-400]="activeTab() !== 'send'"
         >Enviar notificación</button>
         <button
-          (click)="activeTab.set('permissions')"
+          (click)="setTab('permissions')"
           class="flex-1 py-2 text-xs font-semibold transition-colors cursor-pointer"
           [class.text-cyan-600]="activeTab() === 'permissions'"
           [class.border-b-2]="activeTab() === 'permissions'"
@@ -127,33 +127,110 @@
     <!-- Panel: Gestionar accesos (solo superadmin) -->
     @if (activeTab() === 'permissions') {
       <div class="p-5 flex flex-col gap-4">
-        <p class="text-xs text-gray-500">
-          Ingresá el DNI de la persona que quiere autorizar para enviar notificaciones.
-        </p>
+
+        <!-- Agregar nuevo permiso -->
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">DNI a autorizar</label>
-          <div class="flex gap-2">
-            <input
-              type="text"
-              [ngModel]="permDni()"
-              (ngModelChange)="permDni.set($event)"
-              placeholder="Ej: 25000000"
-              class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              (keydown.enter)="agregarPermiso()"
-            />
-            <button
-              (click)="agregarPermiso()"
-              [disabled]="isAddingPerm() || !permDni().trim()"
-              class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:opacity-50 text-white text-xs font-semibold rounded-lg cursor-pointer transition-colors"
-            >
-              @if (isAddingPerm()) {
-                <span class="loading loading-spinner loading-xs"></span>
-              } @else {
-                Agregar
-              }
-            </button>
-          </div>
+          <p class="text-xs text-gray-500 mb-3">
+            Ingresá el DNI de la persona que querés autorizar para enviar notificaciones.
+          </p>
+
+          @if (!permConfirmMode()) {
+            <!-- Paso 1: Buscar por DNI -->
+            <label class="block text-xs font-semibold text-gray-600 mb-1">DNI a autorizar</label>
+            <div class="flex gap-2">
+              <input
+                type="text"
+                [ngModel]="permDni()"
+                (ngModelChange)="permDni.set($event)"
+                placeholder="Ej: 25000000"
+                class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                (keydown.enter)="buscarParaPermiso()"
+              />
+              <button
+                (click)="buscarParaPermiso()"
+                [disabled]="isSearchingPerm() || !permDni().trim()"
+                class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:opacity-50 text-white text-xs font-semibold rounded-lg cursor-pointer transition-colors"
+              >
+                @if (isSearchingPerm()) {
+                  <span class="loading loading-spinner loading-xs"></span>
+                } @else {
+                  Buscar
+                }
+              </button>
+            </div>
+            @if (permSearchError()) {
+              <p class="text-red-500 text-xs mt-1">{{ permSearchError() }}</p>
+            }
+          } @else {
+            <!-- Paso 2: Confirmar identidad -->
+            <div class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 flex flex-col gap-2">
+              <p class="text-xs text-amber-700 font-semibold">Confirmá antes de autorizar:</p>
+              <p class="text-sm font-bold text-gray-800">
+                {{ permSearchResult()!.nombre }} {{ permSearchResult()!.apellido }}
+              </p>
+              <p class="text-xs text-gray-500">DNI: {{ permDni() }}</p>
+              <div class="flex gap-2 mt-1">
+                <button
+                  (click)="confirmarPermiso()"
+                  [disabled]="isAddingPerm()"
+                  class="flex-1 py-2 bg-gradient-to-r from-[#00b8da] to-[#00c951] hover:opacity-90 disabled:opacity-50 text-white text-xs font-semibold rounded-lg cursor-pointer transition-opacity"
+                >
+                  @if (isAddingPerm()) {
+                    <span class="loading loading-spinner loading-xs"></span>
+                  } @else {
+                    Confirmar y autorizar
+                  }
+                </button>
+                <button
+                  (click)="cancelarBusquedaPerm()"
+                  [disabled]="isAddingPerm()"
+                  class="px-4 py-2 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-gray-600 text-xs font-semibold rounded-lg cursor-pointer transition-colors"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          }
         </div>
+
+        <!-- Separador -->
+        <div class="border-t border-gray-100"></div>
+
+        <!-- Lista de usuarios autorizados -->
+        <div>
+          <p class="text-xs font-semibold text-gray-600 mb-2">Usuarios autorizados para enviar notificaciones</p>
+
+          @if (isLoadingPermList()) {
+            <div class="flex justify-center py-4">
+              <span class="loading loading-spinner loading-sm text-cyan-500"></span>
+            </div>
+          } @else if (permList().length === 0) {
+            <p class="text-xs text-gray-400 text-center py-3">No hay usuarios autorizados aún.</p>
+          } @else {
+            <ul class="flex flex-col gap-2">
+              @for (user of permList(); track user.dni) {
+                <li class="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+                  <div>
+                    <p class="text-xs font-semibold text-gray-800">{{ user.nombre }} {{ user.apellido }}</p>
+                    <p class="text-xs text-gray-400">DNI: {{ user.dni }}</p>
+                  </div>
+                  <button
+                    (click)="eliminarPermiso(user.dni, user.nombre, user.apellido)"
+                    [disabled]="removingDni() === user.dni"
+                    class="px-3 py-1 bg-red-50 hover:bg-red-100 disabled:opacity-50 text-red-500 text-xs font-semibold rounded-lg cursor-pointer transition-colors"
+                  >
+                    @if (removingDni() === user.dni) {
+                      <span class="loading loading-spinner loading-xs"></span>
+                    } @else {
+                      Quitar
+                    }
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+
       </div>
     }
   </div>

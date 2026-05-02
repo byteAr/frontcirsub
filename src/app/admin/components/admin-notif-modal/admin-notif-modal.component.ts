@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { AdminNotifService } from '../../../shared/services/admin-notif.service';
+import { AdminNotifService, PermissionUser } from '../../../shared/services/admin-notif.service';
 
 @Component({
   selector: 'app-admin-notif-modal',
@@ -33,10 +33,26 @@ export class AdminNotifModalComponent {
 
   // Sección: gestionar accesos (solo superadmin)
   permDni = signal('');
+  permSearchResult = signal<{ id: number; nombre: string; apellido: string } | null>(null);
+  isSearchingPerm = signal(false);
+  permSearchError = signal('');
+  permConfirmMode = signal(false);
   isAddingPerm = signal(false);
+
+  // Lista de usuarios con permiso
+  permList = signal<PermissionUser[]>([]);
+  isLoadingPermList = signal(false);
+  removingDni = signal<string | null>(null);
 
   close() {
     this.closed.emit();
+  }
+
+  setTab(tab: 'send' | 'permissions') {
+    this.activeTab.set(tab);
+    if (tab === 'permissions') {
+      this.cargarPermisos();
+    }
   }
 
   buscarPorDni() {
@@ -98,27 +114,96 @@ export class AdminNotifModalComponent {
       });
   }
 
-  agregarPermiso() {
+  // Paso 1: buscar la persona antes de confirmar
+  buscarParaPermiso() {
     const dni = this.permDni().trim();
     if (!dni) return;
-    this.isAddingPerm.set(true);
+    this.isSearchingPerm.set(true);
+    this.permSearchResult.set(null);
+    this.permSearchError.set('');
+    this.permConfirmMode.set(false);
 
-    this.adminNotifService.addPermission(dni).subscribe({
-      next: () => {
-        this.isAddingPerm.set(false);
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Permiso agregado',
-          detail: `El DNI ${dni} ya puede enviar notificaciones.`,
-        });
-        this.permDni.set('');
+    this.adminNotifService.searchByDni(dni).subscribe({
+      next: (result) => {
+        this.permSearchResult.set(result);
+        this.permConfirmMode.set(true);
+        this.isSearchingPerm.set(false);
       },
       error: () => {
-        this.isAddingPerm.set(false);
+        this.permSearchError.set('No se encontró ningún socio con ese DNI.');
+        this.isSearchingPerm.set(false);
+      },
+    });
+  }
+
+  cancelarBusquedaPerm() {
+    this.permDni.set('');
+    this.permSearchResult.set(null);
+    this.permSearchError.set('');
+    this.permConfirmMode.set(false);
+  }
+
+  // Paso 2: confirmar y agregar el permiso
+  confirmarPermiso() {
+    const result = this.permSearchResult();
+    if (!result) return;
+    this.isAddingPerm.set(true);
+
+    this.adminNotifService
+      .addPermission({ dni: this.permDni().trim(), nombre: result.nombre, apellido: result.apellido })
+      .subscribe({
+        next: () => {
+          this.isAddingPerm.set(false);
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Permiso agregado',
+            detail: `${result.nombre} ${result.apellido} ya puede enviar notificaciones.`,
+          });
+          this.cancelarBusquedaPerm();
+          this.cargarPermisos();
+        },
+        error: () => {
+          this.isAddingPerm.set(false);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudo agregar el permiso.',
+          });
+        },
+      });
+  }
+
+  cargarPermisos() {
+    this.isLoadingPermList.set(true);
+    this.adminNotifService.listPermissions().subscribe({
+      next: (list) => {
+        this.permList.set(list);
+        this.isLoadingPermList.set(false);
+      },
+      error: () => {
+        this.isLoadingPermList.set(false);
+      },
+    });
+  }
+
+  eliminarPermiso(dni: string, nombre: string, apellido: string) {
+    this.removingDni.set(dni);
+    this.adminNotifService.removePermission(dni).subscribe({
+      next: () => {
+        this.removingDni.set(null);
+        this.permList.update((list) => list.filter((u) => u.dni !== dni));
+        this.messageService.add({
+          severity: 'info',
+          summary: 'Permiso removido',
+          detail: `Se quitó el permiso a ${nombre} ${apellido}.`,
+        });
+      },
+      error: () => {
+        this.removingDni.set(null);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'No se pudo agregar el permiso.',
+          detail: 'No se pudo quitar el permiso.',
         });
       },
     });
