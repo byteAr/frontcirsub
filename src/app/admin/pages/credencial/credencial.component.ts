@@ -1,158 +1,182 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild, ElementRef, HostListener , OnInit, inject} from '@angular/core';
+import {
+  Component,
+  ViewChild,
+  ElementRef,
+  HostListener,
+  OnInit,
+  inject,
+  signal,
+} from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import domtoimage from 'dom-to-image';
 import QRCode from 'qrcode';
-import { HeaderCardComponent } from "../../components/header-card/header-card.component";
-import { CardFrontComponent } from "../../components/card-front/card-front.component";
+import { HeaderCardComponent } from '../../components/header-card/header-card.component';
+import { CardFrontComponent } from '../../components/card-front/card-front.component';
 import { AuthService } from '../../../auth/services/auth.service';
 import { User, UserData } from '../../../auth/interfaces/user.interface';
-import { InstallButtonComponent } from "../../components/install-button/install-button.component";
+import { InstallButtonComponent } from '../../components/install-button/install-button.component';
+import { AdminNotifService } from '../../../shared/services/admin-notif.service';
+import { NotifViewModalComponent } from '../../../shared/components/notif-view-modal/notif-view-modal.component';
+import { AdminNotifModalComponent } from '../../components/admin-notif-modal/admin-notif-modal.component';
 
 @Component({
   selector: 'app-credencial',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, InstallButtonComponent],
+  imports: [
+    CommonModule,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    InstallButtonComponent,
+    NotifViewModalComponent,
+    AdminNotifModalComponent,
+  ],
   templateUrl: './credencial.component.html',
-  styleUrl: './credencial.component.css'
+  styleUrl: './credencial.component.css',
 })
 export default class CredencialComponen implements OnInit {
-
   autService = inject(AuthService);
+  adminNotifService = inject(AdminNotifService);
 
   user = this.autService.user;
-
-  encuesta = this.autService._encuesta
+  encuesta = this.autService._encuesta;
 
   isFlipped: boolean = false;
-
   currentRotation: number = 0;
   private touchStartX: number = 0;
   private touchEndX: number = 0;
   private swipeThreshold: number = 50;
 
-    toggleFlip(): void {
-      this.isFlipped = !this.isFlipped;
+  // Admin notifications
+  userRole = signal<'superadmin' | 'sender' | null>(null);
+  showAdminModal = signal(false);
+  showNotifModal = signal(false);
+  notifModalTitulo = signal('');
+  notifModalCuerpo = signal('');
+
+  toggleFlip(): void {
+    this.isFlipped = !this.isFlipped;
+  }
+
+  get cardRotationStyle(): { transform: string } {
+    return { transform: `rotateY(${this.currentRotation}deg)` };
+  }
+
+  flipCard(direction: 'left' | 'right'): void {
+    if (direction === 'left') {
+      this.currentRotation += 180;
+    } else {
+      this.currentRotation -= 180;
     }
+  }
 
-    get cardRotationStyle(): { transform: string } {
-      return { transform: `rotateY(${this.currentRotation}deg)` };
+  private handleSwipe(): void {
+    const deltaX = this.touchEndX - this.touchStartX;
+    if (Math.abs(deltaX) > this.swipeThreshold) {
+      this.flipCard(deltaX > 0 ? 'right' : 'left');
     }
+  }
 
-    flipCard(direction: 'left' | 'right'): void {
-      if (direction === 'left') {
-        // Si swipe a la izquierda, giramos 180 grados en sentido horario
-        this.currentRotation += 180;
-      } else { // direction === 'right'
-        // Si swipe a la derecha, giramos 180 grados en sentido antihorario
-        this.currentRotation -= 180;
-      }
-      // Opcional: Para mantener los grados dentro de 0-360 si lo necesitas,
-      // aunque CSS maneja rotaciones mayores a 360 sin problema.
-      // this.currentRotation = this.currentRotation % 360;
-    }
+  ngOnInit(): void {
+    this.generateQrCode();
+    this.autService.checkStatus().subscribe();
 
-    private handleSwipe(): void {
-      const deltaX = this.touchEndX - this.touchStartX;
+    const dni = this.user()?.Persona?.[0]?.Documento;
+    const userId = this.user()?.Persona?.[0]?.Id;
 
-      if (Math.abs(deltaX) > this.swipeThreshold) {
-        if (deltaX > 0) {
-          // Deslizamiento hacia la derecha
-          this.flipCard('right');
-        } else {
-          // Deslizamiento hacia la izquierda
-          this.flipCard('left');
-        }
-      }
-    }
-
-    ngOnInit(): void {
-      this.generateQrCode();
-      this.autService.checkStatus().subscribe();
-      console.log(this.user());
-    }
-
-    @ViewChild('credencialCard', { static: false }) credencialCard!: ElementRef;
-    userId: number = 123;  // Definimos el ID del usuario
-    qrUrl: string = 'http://iugna.edu.ar'; // URL del QR generada
-
-
-    downloadImage() {
-
-      if (!this.credencialCard) {
-        console.error("No se encontró la credencial.");
-        return;
-      }
-
-      const card = this.credencialCard.nativeElement;
-      // Generar la imagen
-      this.generateImage(card);
-    }
-
-    private generateImage(card: HTMLElement) {
-      setTimeout(() => {
-        domtoimage.toPng(card, {
-          quality: 1, // Máxima calidad
-          bgcolor: 'white', // Fondo blanco
-        })
-        .then((dataUrl) => {
-          // Crear un enlace para la descarga
-          const link = document.createElement('a');
-          link.href = dataUrl;
-          link.download = 'credencial.png'; // Nombre del archivo descargado
-          link.click(); // Simula el clic para descargar la imagen
-        })
-        .catch((error) => {
-          console.error('Error al generar la imagen:', error);
-        });
-      }, 500); // Esperar 500ms antes de capturar la imagen
-    }
-
-    generateQrCode() {
-      const userUrl = `https://iugna.edu.ar`; // URL dinámica con el ID del usuario
-      QRCode.toDataURL(userUrl, { errorCorrectionLevel: 'H' }, (err, url) => {
-        if (err) {
-          console.error('Error al generar el QR:', err);
-          return;
-        }
-        this.qrUrl = url; // Asignamos la URL del QR generada
+    if (dni) {
+      this.adminNotifService.getRole(dni).subscribe({
+        next: ({ role }) => this.userRole.set(role),
+        error: () => this.userRole.set(null),
       });
     }
 
-    @HostListener('touchstart', ['$event'])
-      onTouchStart(event: TouchEvent): void {
-        this.touchStartX = event.touches[0].clientX;
-      }
+    if (userId) {
+      this.adminNotifService.getMessages(userId).subscribe({
+        next: ({ messages, unread }) => {
+          this.adminNotifService.unreadCount.set(unread);
+          if (unread > 0 && messages.length > 0) {
+            this.notifModalTitulo.set(messages[0].titulo);
+            this.notifModalCuerpo.set(messages[0].cuerpo);
+            this.showNotifModal.set(true);
+          }
+        },
+        error: () => {},
+      });
+    }
+  }
 
-      @HostListener('touchend', ['$event'])
-      onTouchEnd(event: TouchEvent): void {
-        this.touchEndX = event.changedTouches[0].clientX;
-        this.handleSwipe();
-      }
+  onCloseNotifModal(): void {
+    this.showNotifModal.set(false);
+    const userId = this.user()?.Persona?.[0]?.Id;
+    if (userId) {
+      this.adminNotifService.markRead(userId).subscribe({
+        next: () => this.adminNotifService.unreadCount.set(0),
+        error: () => {},
+      });
+    }
+  }
 
-      @HostListener('touchmove', ['$event'])
-      onTouchMove(event: TouchEvent): void {
-        // event.preventDefault(); // Descomentar si quieres evitar el scroll al deslizar sobre la credencial
-      }
+  @ViewChild('credencialCard', { static: false }) credencialCard!: ElementRef;
+  userId: number = 123;
+  qrUrl: string = 'http://iugna.edu.ar';
 
-      colors = {
-        selected:  '#0891B2', // color cuando el icono está seleccionado (click)
-        active:    '#00C853', // color cuando el beneficio está activo
-        inactive:  '#BAC1CB', // color cuando el beneficio NO está activo
-      };
+  downloadImage() {
+    if (!this.credencialCard) return;
+    this.generateImage(this.credencialCard.nativeElement);
+  }
 
-      benefits = {
-        farmacia:   this.user()?.Beneficios?.[0]?.far ?? false,
-        evacuacion: this.user()?.Beneficios?.[0]?.eva ?? false,
-        seg:        this.user()?.Beneficios?.[0]?.seg ?? false,
-        sep:        this.user()?.Beneficios?.[0]?.sep ?? false,
-        // combinado:
-        seguro:    (this.user()?.Beneficios?.[0]?.seg ?? false)
-                || (this.user()?.Beneficios?.[0]?.sep ?? false),
-      };
+  private generateImage(card: HTMLElement) {
+    setTimeout(() => {
+      domtoimage
+        .toPng(card, { quality: 1, bgcolor: 'white' })
+        .then((dataUrl) => {
+          const link = document.createElement('a');
+          link.href = dataUrl;
+          link.download = 'credencial.png';
+          link.click();
+        })
+        .catch((error) => console.error('Error al generar la imagen:', error));
+    }, 500);
+  }
 
-      familia = (this.user()?.GpoFamiliar?.length ?? 0) > 0;
+  generateQrCode() {
+    QRCode.toDataURL('https://iugna.edu.ar', { errorCorrectionLevel: 'H' }, (err, url) => {
+      if (err) { console.error('Error al generar el QR:', err); return; }
+      this.qrUrl = url;
+    });
+  }
 
+  @HostListener('touchstart', ['$event'])
+  onTouchStart(event: TouchEvent): void {
+    this.touchStartX = event.touches[0].clientX;
+  }
 
+  @HostListener('touchend', ['$event'])
+  onTouchEnd(event: TouchEvent): void {
+    this.touchEndX = event.changedTouches[0].clientX;
+    this.handleSwipe();
+  }
 
+  @HostListener('touchmove', ['$event'])
+  onTouchMove(event: TouchEvent): void {}
+
+  colors = {
+    selected: '#0891B2',
+    active: '#00C853',
+    inactive: '#BAC1CB',
+  };
+
+  benefits = {
+    farmacia: this.user()?.Beneficios?.[0]?.far ?? false,
+    evacuacion: this.user()?.Beneficios?.[0]?.eva ?? false,
+    seg: this.user()?.Beneficios?.[0]?.seg ?? false,
+    sep: this.user()?.Beneficios?.[0]?.sep ?? false,
+    seguro:
+      (this.user()?.Beneficios?.[0]?.seg ?? false) ||
+      (this.user()?.Beneficios?.[0]?.sep ?? false),
+  };
+
+  familia = (this.user()?.GpoFamiliar?.length ?? 0) > 0;
 }
