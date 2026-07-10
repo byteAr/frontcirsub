@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { catchError, finalize, map, Observable, of, tap } from 'rxjs';
+import { catchError, finalize, map, Observable, of, shareReplay, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { User, UserData } from '../interfaces/user.interface';
 import { PushNotificationService } from '../../shared/services/push-notification.service';
@@ -21,6 +21,9 @@ export class AuthService {
   private _User = signal<UserData | null>(null);
   private _token = signal<string | null>(null);
   _encuesta = signal<boolean | null>(false)
+
+  private checkStatus$?: Observable<boolean>;
+  private profileImageUrls = new Map<number, string>();
 
   authStatus = computed<AuthStatus>(() => {
     if(this._authStatus() === 'checking') return 'checking';
@@ -139,15 +142,20 @@ export class AuthService {
       return of(false)
     }
 
-    return this.http.get<User>(`${this.url}/auth/check-status`, {
-      headers: {
-        Authorization: `Bearer ${ token }`
-      },
-      })
-      .pipe(
-        map(resp => this.handleAuthSuccess(resp)),
-        catchError((error: any) => this.handleAuthError(error))
-      )
+    if (!this.checkStatus$) {
+      this.checkStatus$ = this.http.get<User>(`${this.url}/auth/check-status`, {
+        headers: {
+          Authorization: `Bearer ${ token }`
+        },
+        })
+        .pipe(
+          map(resp => this.handleAuthSuccess(resp)),
+          catchError((error: any) => this.handleAuthError(error)),
+          shareReplay(1)
+        );
+    }
+
+    return this.checkStatus$;
   }
 
   logout() {
@@ -155,10 +163,15 @@ export class AuthService {
     this._token.set(null)
     this._authStatus.set('not-authenticated')
     localStorage.removeItem('token')
+    this.checkStatus$ = undefined;
+    this.clearProfileImageCache();
   }
 
   private handleAuthSuccess(resp: User) {
-    this._User.set(resp.userData);
+    const current = this._User();
+    if (!current || JSON.stringify(current) !== JSON.stringify(resp.userData)) {
+      this._User.set(resp.userData);
+    }
     this._authStatus.set('authenticated');
     this._token.set(resp.token);
 
@@ -177,6 +190,19 @@ export class AuthService {
 
   getProfileImageUrl(userId: number): string {
     return `${this.url}/auth/profile-image/${userId}`;
+  }
+
+  getCachedProfileImageUrl(userId: number): string | undefined {
+    return this.profileImageUrls.get(userId);
+  }
+
+  cacheProfileImageUrl(userId: number, objectUrl: string): void {
+    this.profileImageUrls.set(userId, objectUrl);
+  }
+
+  private clearProfileImageCache(): void {
+    this.profileImageUrls.forEach(url => URL.revokeObjectURL(url));
+    this.profileImageUrls.clear();
   }
 
 }
