@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { Observable } from 'rxjs';
+import { catchError, Observable, shareReplay, tap, throwError } from 'rxjs';
 
 interface Cbu {
   cbu: string
@@ -16,21 +16,39 @@ export class CredencialService {
 
   url = environment.API_URL;
 
+  private cbuCache = new Map<string, Observable<Cbu>>();
+
   constructor() { }
 
-  getCbu(id: string) {
-    return this.http.get<Cbu>(`${this.url}/credencial?id=${id}`)
+  getCbu(id: string): Observable<Cbu> {
+    const cached = this.cbuCache.get(id);
+    if (cached) return cached;
+
+    const request$ = this.http.get<Cbu>(`${this.url}/credencial?id=${id}`).pipe(
+      catchError(error => {
+        this.cbuCache.delete(id);
+        return throwError(() => error);
+      }),
+      shareReplay(1)
+    );
+
+    this.cbuCache.set(id, request$);
+    return request$;
   }
 
-  updateCbu(id: number, cbu:string) {
-    return this.http.patch(`${this.url}/credencial`, {id, cbu})
+  updateCbu(id: number, cbu: string) {
+    return this.http.patch(`${this.url}/credencial`, { id, cbu }).pipe(
+      tap(() => this.cbuCache.delete(id.toString()))
+    );
   }
 
-  updateCbuPhp(id: number, cbu:string) {
-    return this.http.post(`https://gestion.cirsubgn.org.ar/Cirsub/CirsubApp/Transf/receptorcbu.php`, {id, cbu})
+  updateCbuPhp(id: number, cbu: string) {
+    return this.http.post(`https://gestion.cirsubgn.org.ar/Cirsub/CirsubApp/Transf/receptorcbu.php`, { id, cbu }).pipe(
+      tap(() => this.cbuCache.delete(id.toString()))
+    );
   }
 
-  updateEncuesta(id: number, servicio: number, atencion: number ): Observable<any> {
-    return this.http.post(`${this.url}/credencial/encuesta`, {id, servicio, atencion})
+  updateEncuesta(id: number, servicio: number, atencion: number): Observable<any> {
+    return this.http.post(`${this.url}/credencial/encuesta`, { id, servicio, atencion })
   }
 }
