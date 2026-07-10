@@ -46,9 +46,7 @@
       <p class="mb-1 text-xs">
         <span class="font-semibold">Fecha:</span> {{ selectedMessage?.fecha }}
       </p>
-      <p class="text-xs">
-        <span class="font-semibold text-[0.5rem]"></span>Estimado/a Socio/a  <span class="text-cyan-600 font-semibold">{{this.authService.user()!.Persona[0].Nombre}} {{this.authService.user()!.Persona[0].Apellido}}</span>, tenemos el gusto de registrarlo en la credencial digital, herramienta por medio de la cual  les haremos llegar  la información actualizada de nuestra MUTUAL y de esta forma lograr una comunicación permanente con usted, que es lo mas importante para la mutual.
-      </p>
+      <p class="text-xs leading-relaxed">{{ selectedMessage?.mensaje }}</p>
     </div>
 
     <!-- Pie del Modal -->
