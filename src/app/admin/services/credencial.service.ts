@@ -16,6 +16,9 @@ export class CredencialService {
 
   url = environment.API_URL;
 
+  // Cacheado por Persona.Id (clave única por usuario autenticado), no por
+  // sesión de logout: distintas cuentas nunca comparten clave en la misma
+  // pestaña, así que no hace falta limpiar esto en AuthService.logout().
   private cbuCache = new Map<string, Observable<Cbu>>();
 
   constructor() { }

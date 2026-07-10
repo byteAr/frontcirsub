@@ -38,7 +38,8 @@ Fuera de alcance: interceptor HTTP genérico, persistencia en localStorage/sessi
 
 ## Errores / edge cases
 
-- Logout debe limpiar toda caché (checkStatus$, foto, CBU) para no filtrar datos entre sesiones/usuarios distintos en el mismo navegador.
+- Logout debe limpiar toda caché (checkStatus$, foto) para no filtrar datos entre sesiones/usuarios distintos en el mismo navegador. **Excepción deliberada: `cbuCache`** no se limpia en logout — su clave es `Persona.Id`, única por usuario autenticado, así que dos cuentas distintas en la misma pestaña nunca colisionan de clave. El único costo es una entrada `Map` residual por cada usuario que alguna vez usó esa pestaña (memoria despreciable), no una filtración de datos entre sesiones.
+- Hallazgo de code review (Task 3): actualizar la foto de perfil vía `avatar-profile.component.ts` (`updateAvatar`/`sendAvatar`) no invalida el cache de foto en `AuthService.profileImageUrls` — a diferencia del CBU, no hay invalidación al éxito de esa mutación. Hoy es bajo riesgo porque esa vista no está enlazada desde ninguna navegación in-app (sólo alcanzable por URL directa), pero si se conecta a la UI hay que agregar `invalidateProfileImageCache(userId)` siguiendo el mismo patrón que `updateCbu`. Fuera de alcance de este plan — pendiente como follow-up.
 - Si `getCbu` falla (error HTTP), no cachear la respuesta fallida — sólo cachear success.
 
 ## Testing
