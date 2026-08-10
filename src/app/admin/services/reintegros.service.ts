@@ -1,7 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, timeout } from 'rxjs';
 import { environment } from '../../../environments/environment';
+
+/**
+ * Tope de espera de la subida. Sin esto, una conexión que se corta a mitad
+ * de camino deja el observable colgado y el socio encerrado en el modal.
+ */
+const TIMEOUT_SUBIDA_MS = 120_000;
 
 export interface TipoDocumentoReintegro {
   codigo: string;
@@ -43,6 +49,8 @@ export class ReintegrosService {
       headers: {
         Authorization: `Bearer ${ token }`
       }
-    })
+    }).pipe(
+      timeout(TIMEOUT_SUBIDA_MS)
+    )
   }
 }

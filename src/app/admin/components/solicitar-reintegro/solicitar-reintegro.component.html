@@ -7,7 +7,7 @@
 </div>
 
 <!-- Formulario de carga -->
-<dialog #modalForm class="modal">
+<dialog #modalForm class="modal" (close)="onFormularioCerrado()">
   <div class="modal-box w-[90%] md:w-[45%] lg:w-[35%] max-w-2xl">
     <h3 class="font-bold text-base text-cyan-600">Solicitar reintegro</h3>
     <p class="text-xs text-gray-500 mt-1">
@@ -54,8 +54,15 @@
 
     <p class="text-[0.7rem] text-red-500 mt-2" *ngIf="errorValidacion()">{{ errorValidacion() }}</p>
 
+    <p class="text-[0.7rem] text-gray-400 mt-2" *ngIf="enviando()">
+      Enviando los documentos. Si la conexión es lenta puede demorar; podés cancelar en cualquier momento.
+    </p>
+
     <div class="modal-action">
-      <button class="btn btn-sm" (click)="cerrarFormulario()" [disabled]="enviando()">Cancelar</button>
+      <!-- Nunca se deshabilita: es la salida si la subida se cuelga. -->
+      <button class="btn btn-sm" (click)="cerrarFormulario()">
+        {{ enviando() ? 'Cancelar envío' : 'Cancelar' }}
+      </button>
       <button class="btn btn-sm text-white border-none"
         [ngClass]="archivos().length && !enviando() ? 'bg-cyan-600' : 'bg-gray-400'"
         [disabled]="!archivos().length || enviando()" (click)="enviar()">

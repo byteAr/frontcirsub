@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, inject, signal, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnDestroy, signal, ViewChild } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { ReintegrosService, TipoDocumentoReintegro } from '../../services/reintegros.service';
 
 const EXTENSIONES_PERMITIDAS = ['.pdf', '.doc', '.docx', '.png', '.jpg', '.jpeg'];
@@ -12,7 +13,7 @@ const MAX_TAMANIO = 10 * 1024 * 1024; // 10MB
   templateUrl: './solicitar-reintegro.component.html',
   styleUrl: './solicitar-reintegro.component.css'
 })
-export class SolicitarReintegroComponent {
+export class SolicitarReintegroComponent implements OnDestroy {
 
   @ViewChild('modalForm') modalForm!: ElementRef<HTMLDialogElement>;
   @ViewChild('modalResultado') modalResultado!: ElementRef<HTMLDialogElement>;
@@ -34,6 +35,16 @@ export class SolicitarReintegroComponent {
 
   extensionesPermitidas = EXTENSIONES_PERMITIDAS.join(',');
 
+  /** Se guarda para poder abortar la subida si el socio cancela. */
+  private subidaEnCurso?: Subscription;
+
+  /** Evita que el cierre automático tras un error borre los archivos elegidos. */
+  private conservarArchivosAlCerrar = false;
+
+  ngOnDestroy(): void {
+    this.subidaEnCurso?.unsubscribe();
+  }
+
   abrirFormulario() {
     this.reintegrosService.getTiposDocumento().subscribe({
       next: tipos => {
@@ -50,9 +61,25 @@ export class SolicitarReintegroComponent {
     this.modalForm.nativeElement.showModal();
   }
 
+  /**
+   * Cancelar tiene que funcionar siempre, incluso con una subida en curso:
+   * si no, una conexión que se cuelga deja al socio encerrado en el modal.
+   */
   cerrarFormulario() {
     this.modalForm.nativeElement.close();
-    this.limpiar();
+  }
+
+  /**
+   * Corre para cualquier cierre del formulario, sea por el botón o por Escape.
+   * Aborta la subida si quedó una en curso: mientras el modal no esté a la
+   * vista, no hay forma de avisarle el resultado al socio.
+   */
+  onFormularioCerrado() {
+    this.subidaEnCurso?.unsubscribe();
+    this.subidaEnCurso = undefined;
+    this.enviando.set(false);
+
+    if (!this.conservarArchivosAlCerrar) this.limpiar();
   }
 
   seleccionarTipo(event: Event) {
@@ -94,10 +121,11 @@ export class SolicitarReintegroComponent {
     this.enviando.set(true);
     this.errorValidacion.set(null);
 
-    this.reintegrosService.subirDocumentos(this.tipoSeleccionado(), this.archivos())
+    this.subidaEnCurso = this.reintegrosService.subirDocumentos(this.tipoSeleccionado(), this.archivos())
       .subscribe({
         next: resp => {
           this.enviando.set(false);
+          this.subidaEnCurso = undefined;
           const cantidad = resp?.archivos?.length ?? this.archivos().length;
           this.mostrarResultado(
             'exito',
@@ -108,13 +136,8 @@ export class SolicitarReintegroComponent {
         },
         error: error => {
           this.enviando.set(false);
-          const mensaje = error?.error?.message;
-          this.mostrarResultado(
-            'error',
-            Array.isArray(mensaje)
-              ? mensaje.join('. ')
-              : mensaje || 'No pudimos cargar los documentos. Intente nuevamente en unos minutos.'
-          );
+          this.subidaEnCurso = undefined;
+          this.mostrarResultado('error', this.mensajeDeError(error));
         }
       });
   }
@@ -124,6 +147,31 @@ export class SolicitarReintegroComponent {
     if (this.resultado() === 'error') {
       this.modalForm.nativeElement.showModal(); // vuelve al formulario para reintentar
     }
+  }
+
+  /** Traduce el error a algo que el socio pueda entender y accionar. */
+  private mensajeDeError(error: any): string {
+    if (error?.name === 'TimeoutError') {
+      return 'La carga está tardando demasiado. Revise su conexión e intente de nuevo, preferentemente con wifi.';
+    }
+
+    if (error?.status === 413) {
+      return 'El documento es demasiado grande para enviarlo. Pruebe con una foto de menor resolución.';
+    }
+
+    if (error?.status === 401) {
+      return 'Su sesión expiró. Vuelva a iniciar sesión e intente nuevamente.';
+    }
+
+    if (error?.status === 0) {
+      return 'No pudimos conectarnos con el servidor. Verifique su conexión a internet.';
+    }
+
+    const mensaje = error?.error?.message;
+    if (Array.isArray(mensaje)) return mensaje.join('. ');
+    if (mensaje) return mensaje;
+
+    return 'No pudimos cargar los documentos. Intente nuevamente en unos minutos.';
   }
 
   tamanioLegible(bytes: number): string {
@@ -169,7 +217,12 @@ export class SolicitarReintegroComponent {
   private mostrarResultado(estado: 'exito' | 'error', mensaje: string) {
     this.resultado.set(estado);
     this.mensajeResultado.set(mensaje);
+
+    // Este cierre dispara onFormularioCerrado(); en caso de error hay que
+    // conservar los archivos para que "Reintentar" no arranque de cero.
+    this.conservarArchivosAlCerrar = estado === 'error';
     this.modalForm.nativeElement.close();
+    this.conservarArchivosAlCerrar = false;
 
     if (estado === 'exito') this.limpiar();
 
