@@ -104,10 +104,12 @@ export class SolicitarReintegroComponent implements OnDestroy {
     if (!foto) return;
 
     // La cámara suele devolver un nombre genérico: le damos uno identificable.
+    // Se numera FOTO1, FOTO2... y no "receta" porque el tipo de documento ya
+    // va en el prefijo del archivo, y no siempre va a ser una receta.
     // El backend le agrega el timestamp que garantiza que no se repita en disco.
     const extension = foto.type === 'image/png' ? '.png' : '.jpg';
-    const numero = this.archivos().filter(a => a.name.startsWith('receta-')).length + 1;
-    const renombrada = new File([foto], `receta-${numero}${extension}`, {
+    const numero = this.archivos().filter(a => a.name.startsWith('FOTO')).length + 1;
+    const renombrada = new File([foto], `FOTO${numero}${extension}`, {
       type: foto.type === 'image/png' ? 'image/png' : 'image/jpeg'
     });
 
