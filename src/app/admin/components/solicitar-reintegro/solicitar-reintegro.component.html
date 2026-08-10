@@ -23,12 +23,12 @@
     </div>
 
     <div class="flex justify-center gap-2 mt-4">
-      <button type="button" (click)="inputArchivos.click()"
+      <button type="button" (click)="inputArchivos.click()" [disabled]="procesando() || enviando()"
         class="btn btn-sm bg-cyan-600 text-white border-none">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="#ffffff" d="m16.5 6l-5.79 5.79a1 1 0 1 0 1.42 1.42L18 7.34a3.5 3.5 0 0 0-4.95-4.95l-6.36 6.36a5.5 5.5 0 0 0 7.78 7.78l5.66-5.66l1.41 1.41l-5.66 5.66A7.5 7.5 0 0 1 5.28 7.34l6.36-6.36A5.5 5.5 0 0 1 19.4 8.76l-5.87 5.86a3 3 0 1 1-4.24-4.24L15.09 4.6z"/></svg>
         Adjuntar
       </button>
-      <button type="button" (click)="inputCamara.click()"
+      <button type="button" (click)="inputCamara.click()" [disabled]="procesando() || enviando()"
         class="btn btn-sm bg-green-600 text-white border-none">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="#ffffff" d="M12 15.2a3.2 3.2 0 1 0 0-6.4a3.2 3.2 0 0 0 0 6.4M9 2L7.17 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3.17L15 2zm3 5a5 5 0 1 1 0 10a5 5 0 0 1 0-10"/></svg>
         Sacar foto
@@ -52,6 +52,11 @@
       </li>
     </ul>
 
+    <p class="text-[0.7rem] text-cyan-600 mt-2 flex items-center gap-1" *ngIf="procesando()">
+      <span class="loading loading-spinner loading-xs"></span>
+      Optimizando la imagen para que la carga sea más rápida...
+    </p>
+
     <p class="text-[0.7rem] text-red-500 mt-2" *ngIf="errorValidacion()">{{ errorValidacion() }}</p>
 
     <p class="text-[0.7rem] text-gray-400 mt-2" *ngIf="enviando()">
@@ -64,8 +69,8 @@
         {{ enviando() ? 'Cancelar envío' : 'Cancelar' }}
       </button>
       <button class="btn btn-sm text-white border-none"
-        [ngClass]="archivos().length && !enviando() ? 'bg-cyan-600' : 'bg-gray-400'"
-        [disabled]="!archivos().length || enviando()" (click)="enviar()">
+        [ngClass]="archivos().length && !enviando() && !procesando() ? 'bg-cyan-600' : 'bg-gray-400'"
+        [disabled]="!archivos().length || enviando() || procesando()" (click)="enviar()">
         <span *ngIf="enviando()" class="loading loading-spinner loading-xs"></span>
         {{ enviando() ? 'Enviando...' : 'Enviar' }}
       </button>

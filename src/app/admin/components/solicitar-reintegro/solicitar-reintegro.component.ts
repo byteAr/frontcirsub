@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, inject, OnDestroy, signal, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { ImagenService } from '../../../shared/services/imagen.service';
 import { ReintegrosService, TipoDocumentoReintegro } from '../../services/reintegros.service';
 
 const EXTENSIONES_PERMITIDAS = ['.pdf', '.doc', '.docx', '.png', '.jpg', '.jpeg'];
@@ -21,6 +22,7 @@ export class SolicitarReintegroComponent implements OnDestroy {
   @ViewChild('inputCamara') inputCamara!: ElementRef<HTMLInputElement>;
 
   private reintegrosService = inject(ReintegrosService);
+  private imagenService = inject(ImagenService);
 
   // Por ahora sólo existe "Receta Médica" (RM), el backend expone el resto cuando se agreguen.
   tipos = signal<TipoDocumentoReintegro[]>([{ codigo: 'RM', descripcion: 'Receta Médica' }]);
@@ -28,6 +30,8 @@ export class SolicitarReintegroComponent implements OnDestroy {
 
   archivos = signal<File[]>([]);
   enviando = signal<boolean>(false);
+  /** Verdadero mientras se achican las fotos recién elegidas. */
+  procesando = signal<boolean>(false);
   errorValidacion = signal<string | null>(null);
 
   resultado = signal<'exito' | 'error' | null>(null);
@@ -180,26 +184,36 @@ export class SolicitarReintegroComponent implements OnDestroy {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
-  private agregarArchivos(nuevos: File[]) {
+  private async agregarArchivos(nuevos: File[]) {
     if (!nuevos.length) return;
 
     const aceptados: File[] = [];
     let error: string | null = null;
 
-    for (const archivo of nuevos) {
-      const extension = archivo.name.slice(archivo.name.lastIndexOf('.')).toLowerCase();
+    this.procesando.set(true);
 
-      if (!EXTENSIONES_PERMITIDAS.includes(extension)) {
-        error = `"${archivo.name}" no es un formato válido (PDF, Word, PNG o JPG).`;
-        continue;
+    try {
+      for (const original of nuevos) {
+        const extension = original.name.slice(original.name.lastIndexOf('.')).toLowerCase();
+
+        if (!EXTENSIONES_PERMITIDAS.includes(extension)) {
+          error = `"${original.name}" no es un formato válido (PDF, Word, PNG o JPG).`;
+          continue;
+        }
+
+        // Las fotos se achican acá y no al enviar, así el socio ve en la lista
+        // el peso real de lo que va a subir. Los PDF y Word pasan de largo.
+        const archivo = await this.imagenService.comprimir(original);
+
+        if (archivo.size > MAX_TAMANIO) {
+          error = `"${original.name}" supera los 10 MB permitidos.`;
+          continue;
+        }
+
+        aceptados.push(archivo);
       }
-
-      if (archivo.size > MAX_TAMANIO) {
-        error = `"${archivo.name}" supera los 10 MB permitidos.`;
-        continue;
-      }
-
-      aceptados.push(archivo);
+    } finally {
+      this.procesando.set(false);
     }
 
     this.archivos.update(actuales => {
