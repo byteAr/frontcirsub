@@ -169,6 +169,10 @@ export class SolicitarReintegroComponent implements OnDestroy {
       return 'Su sesión expiró. Vuelva a iniciar sesión e intente nuevamente.';
     }
 
+    if (error?.status === 403) {
+      return 'No figura como habilitado en este beneficio. Comuníquese por whatsapp al 11-58558733.';
+    }
+
     if (error?.status === 0) {
       return 'No pudimos conectarnos con el servidor. Verifique su conexión a internet.';
     }
