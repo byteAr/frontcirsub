@@ -13,10 +13,14 @@ RUN npm install
 # Copia el resto del código fuente de la aplicación Angular.
 COPY . .
 
-# Ejecuta el comando de construcción de Angular en modo producción.
-# Asegúrate de que 'cirsubfrontend' sea el nombre de tu proyecto Angular
-# si tienes un workspace con múltiples proyectos.
-RUN npm run build --prod --output-path=./dist/cirsubfrontend
+# Configuración de Angular con la que se compila. Por defecto producción, para
+# que el build de siempre no cambie; el compose de staging pasa "staging" y así
+# el bundle sale apuntando a la API de pruebas en vez de a la real.
+ARG BUILD_CONFIGURATION=production
+
+# Ejecuta el build de Angular. El doble guion es necesario para que los flags
+# lleguen a "ng" y no se los coma npm.
+RUN npm run build -- --configuration=$BUILD_CONFIGURATION
 
 # Etapa 2: servidor Nginx para servir Angular
 # Utiliza una imagen de Nginx ligera para servir los archivos estáticos.
