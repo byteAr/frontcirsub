@@ -13,6 +13,7 @@ import { FloatLabel } from 'primeng/floatlabel';
 import { TramitesService } from '../../../admin/services/tramites.service';
 import { SelectModule } from 'primeng/select';
 import { AuthService } from '../../services/auth.service';
+import { ImagenService } from '../../../shared/services/imagen.service';
 
 
 
@@ -64,6 +65,7 @@ export class RegisterComponent implements OnInit {
   fb = inject(FormBuilder);
   router = inject(Router);
   authService = inject(AuthService);
+  private imagenService = inject(ImagenService);
 
   user: any;
   userId: number = 0;
@@ -380,7 +382,11 @@ export class RegisterComponent implements OnInit {
     };
 
     try {
-      const imageBlob = await dataURLtoBlob(this.capturedImage);
+      const imagenOriginal = await dataURLtoBlob(this.capturedImage);
+
+      // La captura sale como PNG a resolución completa y termina en base64 en
+      // la base: sin achicarla son ~1,7 MB por socio.
+      const imageBlob = await this.imagenService.comprimirAvatar(imagenOriginal);
 
       // Crear un FormData para enviar el archivo
       const formData = new FormData();

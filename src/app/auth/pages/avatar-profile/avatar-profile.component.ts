@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ViewChild, ElementRef, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { ImagenService } from '../../../shared/services/imagen.service';
 
 @Component({
   selector: 'app-avatar-profile',
@@ -16,6 +17,7 @@ export default class AvatarProfileComponent {
 
   router = inject(Router);
   authService = inject(AuthService);
+  private imagenService = inject(ImagenService);
 
   isLoading: boolean = false;
 
@@ -110,8 +112,12 @@ export default class AvatarProfileComponent {
     };
 
     try {
-      const imageBlob = await dataURLtoBlob(this.capturedImage);
-      console.log('Blob de la imagen:', imageBlob);
+      const imagenOriginal = await dataURLtoBlob(this.capturedImage);
+
+      // La captura sale como PNG a resolución completa y termina en base64 en
+      // la base: sin achicarla son ~1,7 MB por socio, que después hay que
+      // transferir en cada carga de la credencial.
+      const imageBlob = await this.imagenService.comprimirAvatar(imagenOriginal);
 
       // Crear un FormData para enviar el archivo
       // Esto es crucial para enviar archivos binarios en peticiones multipart/form-data
