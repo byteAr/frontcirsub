@@ -4,7 +4,7 @@
   <app-app-header></app-app-header>
 
   <!-- Cada vista se renderiza acá, entre el header y el footer -->
-  <main class="flex-1 px-4 pb-6" [@routeAnimations]="prepareRoute(outlet)">
+  <main class="relative flex-1 px-4 pb-6" [@routeAnimations]="prepareRoute(outlet)">
     <router-outlet #outlet="outlet"></router-outlet>
   </main>
 

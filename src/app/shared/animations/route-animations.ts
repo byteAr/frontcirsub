@@ -1,29 +1,29 @@
-import { animate, query, style, transition, trigger } from '@angular/animations';
+import { animate, group, query, style, transition, trigger } from '@angular/animations';
 import { RouterOutlet } from '@angular/router';
 
 /**
- * Transición entre vistas: la que sale se desvanece hacia arriba y la que
- * entra aparece desde abajo.
+ * Transición entre vistas: fundido puro, sin desplazamiento.
  *
- * Va en secuencia y no en paralelo: durante el solapamiento conviven dos
- * vistas en el DOM, y superponerlas obliga a sacarlas del flujo con
- * position absolute, lo que descoloca el alto del contenedor. Primero sale
- * una, después entra la otra.
+ * Las dos vistas se solapan y la que sale va en position absolute sobre el
+ * contenedor (que por eso es relative). Hacerlo así evita el salto: si se
+ * hicieran una después de otra, entre medio el contenedor se queda sin
+ * contenido y el alto colapsa.
  */
 export const routeAnimations = trigger('routeAnimations', [
   transition('* <=> *', [
-    query(':enter', [
-      style({ opacity: 0, transform: 'translateY(10px)' }),
-    ], { optional: true }),
+    query(':enter', [style({ opacity: 0 })], { optional: true }),
 
-    query(':leave', [
-      style({ opacity: 1 }),
-      animate('150ms ease-in', style({ opacity: 0, transform: 'translateY(-6px)' })),
-    ], { optional: true }),
+    group([
+      query(':leave', [
+        style({ position: 'absolute', top: 0, left: 0, width: '100%', opacity: 1 }),
+        animate('180ms ease-out', style({ opacity: 0 })),
+      ], { optional: true }),
 
-    query(':enter', [
-      animate('220ms ease-out', style({ opacity: 1, transform: 'none' })),
-    ], { optional: true }),
+      // Arranca apenas después, para que no se vean las dos superpuestas.
+      query(':enter', [
+        animate('260ms 60ms ease-out', style({ opacity: 1 })),
+      ], { optional: true }),
+    ]),
   ]),
 ]);
 
