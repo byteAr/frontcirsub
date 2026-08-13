@@ -21,6 +21,12 @@ import { AdminNotifService } from '../../../shared/services/admin-notif.service'
 import { NotifViewModalComponent } from '../../../shared/components/notif-view-modal/notif-view-modal.component';
 import { AdminNotifModalComponent } from '../../components/admin-notif-modal/admin-notif-modal.component';
 
+/**
+ * El QR sobrevive al ciclo de vida del componente: se calcula una sola vez
+ * aunque el socio entre y salga de la credencial muchas veces.
+ */
+let qrCacheado: string | null = null;
+
 @Component({
   selector: 'app-credencial',
   standalone: true,
@@ -156,8 +162,17 @@ export default class CredencialComponen implements OnInit {
   }
 
   generateQrCode() {
+    // El QR apunta siempre a la misma URL, así que se genera una vez por
+    // sesión. Sin esto se regeneraba en cada visita a la credencial y la fila
+    // inferior de la tarjeta, que depende de qrUrl, parpadeaba al volver.
+    if (qrCacheado) {
+      this.qrUrl = qrCacheado;
+      return;
+    }
+
     QRCode.toDataURL('https://iugna.edu.ar', { errorCorrectionLevel: 'H' }, (err, url) => {
       if (err) { console.error('Error al generar el QR:', err); return; }
+      qrCacheado = url;
       this.qrUrl = url;
     });
   }
