@@ -1,19 +1,80 @@
-<div class="card mx-1 max-w-6xl bg-white rounded-2xl">
-  <p-table class="px-7 py-5 max-w-screen " [value]="notificaciones" selectionMode="single" [(selection)]="selectedProduct" [metaKeySelection]="metaKey" dataKey="id" [tableStyle]="{ 'min-width': '50rem' }">
-      <ng-template #header>
-          <tr>
-              <th>ORD</th>
-              <th>Detalle</th>
-              <th>Remitente</th>
-          </tr>
-      </ng-template>
-      <ng-template #body let-notificacion>
-          <tr [pSelectableRow]="notificacion">
-              <td>{{ notificacion.id }}</td>
-              <td>{{ notificacion.detalle }}</td>
-              <td class="font-semibold">{{ notificacion.remitente }}</td>
-          </tr>
-      </ng-template>
-  </p-table>
+<div class="w-full max-w-3xl mx-auto">
+
+  <p class="text-sm text-cyan-600 font-semibold px-1 mb-2">Notificaciones</p>
+
+  <!-- Filtros: tocar el activo lo desactiva y vuelven a verse todas -->
+  <div class="flex gap-2 mb-3">
+    <button (click)="alternarFiltro('oficial')"
+      class="px-3 py-1.5 rounded-2xl text-[0.7rem] font-semibold border transition-colors cursor-pointer"
+      [ngClass]="filtro() === 'oficial'
+        ? 'bg-cyan-600 text-white border-cyan-600'
+        : 'bg-white text-gray-500 border-gray-200'">
+      Comunicaciones Oficiales
+    </button>
+    <button (click)="alternarFiltro('servicio')"
+      class="px-3 py-1.5 rounded-2xl text-[0.7rem] font-semibold border transition-colors cursor-pointer"
+      [ngClass]="filtro() === 'servicio'
+        ? 'bg-green-600 text-white border-green-600'
+        : 'bg-white text-gray-500 border-gray-200'">
+      Comunicaciones de Servicio
+    </button>
+  </div>
+
+  <div *ngIf="cargando()" class="flex items-center justify-center gap-2 py-10 text-gray-400 text-xs">
+    <span class="loading loading-spinner loading-sm"></span>
+    Cargando notificaciones...
+  </div>
+
+  <div *ngIf="!cargando() && notificaciones().length === 0"
+    class="bg-white rounded-2xl shadow-sm py-10 text-center">
+    <p class="text-xs text-gray-500">No hay notificaciones para mostrar.</p>
+  </div>
+
+  <!-- Ocupa el alto disponible del viewport y scrollea -->
+  <div *ngIf="!cargando() && notificaciones().length > 0"
+    class="max-h-[70vh] overflow-y-auto custom-scrollbar flex flex-col gap-2 pr-1">
+
+    <article *ngFor="let notificacion of notificaciones()"
+      (click)="abrir(notificacion)"
+      class="bg-white rounded-2xl shadow-sm px-4 py-3 cursor-pointer hover:shadow-md transition-shadow">
+
+      <div class="flex items-start justify-between gap-2">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="text-[0.55rem] font-semibold px-2 py-0.5 rounded-full text-white shrink-0"
+              [ngClass]="notificacion.tipo === 'oficial' ? 'bg-cyan-600' : 'bg-green-600'">
+              {{ notificacion.tipo === 'oficial' ? 'Oficial' : 'Servicio' }}
+            </span>
+            <p class="text-[0.75rem] font-semibold text-gray-700 truncate">{{ notificacion.asunto }}</p>
+          </div>
+          <p class="text-[0.65rem] text-gray-400 mt-0.5">{{ notificacion.de }}</p>
+          <p class="text-[0.7rem] text-gray-500 mt-1 line-clamp-2">{{ notificacion.mensaje }}</p>
+        </div>
+        <span class="text-[0.6rem] text-gray-400 shrink-0">{{ notificacion.fecha }}</span>
+      </div>
+    </article>
+  </div>
 </div>
 
+<!-- Detalle -->
+<div *ngIf="seleccionada() as notificacion"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+  (click)="cerrar()">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[80vh] overflow-y-auto custom-scrollbar p-5"
+    (click)="$event.stopPropagation()">
+    <div class="flex items-center gap-2 mb-1">
+      <span class="text-[0.55rem] font-semibold px-2 py-0.5 rounded-full text-white"
+        [ngClass]="notificacion.tipo === 'oficial' ? 'bg-cyan-600' : 'bg-green-600'">
+        {{ notificacion.tipo === 'oficial' ? 'Oficial' : 'Servicio' }}
+      </span>
+      <span class="text-[0.65rem] text-gray-400">{{ notificacion.fecha }}</span>
+    </div>
+    <h3 class="font-bold text-base text-cyan-700">{{ notificacion.asunto }}</h3>
+    <p class="text-[0.7rem] text-gray-400 mb-3">{{ notificacion.de }}</p>
+    <p class="text-sm text-gray-600 whitespace-pre-line">{{ notificacion.mensaje }}</p>
+
+    <div class="flex justify-end mt-5">
+      <button (click)="cerrar()" class="btn btn-sm bg-cyan-600 text-white border-none">Cerrar</button>
+    </div>
+  </div>
+</div>

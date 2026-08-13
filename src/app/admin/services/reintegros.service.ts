@@ -25,6 +25,24 @@ export interface RespuestaReintegro {
   archivos: ArchivoReintegroGuardado[];
 }
 
+export type EstadoOrdenPago = 'pendiente' | 'aprobado' | 'otro';
+
+/**
+ * Espejo de OrdenPago del backend. Los campos de texto nunca vienen vacíos:
+ * si falta el dato llega "-", así la tabla los pinta sin condicionales.
+ */
+export interface OrdenPago {
+  comprobante: string;
+  fecha: string;
+  /** Sólo para ordenar, no se muestra. */
+  fechaIso: string | null;
+  estado: EstadoOrdenPago;
+  estadoDescripcion: string;
+  importe: number;
+  fechaPago: string;
+  detalle: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -36,6 +54,20 @@ export class ReintegrosService {
 
   getTiposDocumento(): Observable<TipoDocumentoReintegro[]> {
     return this.http.get<TipoDocumentoReintegro[]>(`${this.url}/reintegros/tipos-documento`)
+  }
+
+  /**
+   * Órdenes de pago del socio. No lleva parámetros: el backend saca el id y
+   * el DNI del token.
+   */
+  getOrdenesPago(): Observable<OrdenPago[]> {
+    const token = localStorage.getItem('token');
+
+    return this.http.get<OrdenPago[]>(`${this.url}/reintegros/ordenes-pago`, {
+      headers: {
+        Authorization: `Bearer ${ token }`
+      }
+    })
   }
 
   subirDocumentos(tipoDocumento: string, archivos: File[]): Observable<RespuestaReintegro> {

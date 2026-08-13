@@ -1,0 +1,97 @@
+<div class="w-full max-w-3xl mx-auto">
+
+  <div class="flex items-baseline justify-between px-1 mb-2">
+    <p class="text-sm text-cyan-600 font-semibold">Mis reintegros</p>
+    <p class="text-[0.65rem] text-gray-400" *ngIf="!cargando() && !error()">
+      {{ ordenes().length }} {{ ordenes().length === 1 ? 'movimiento' : 'movimientos' }}
+    </p>
+  </div>
+
+  <!-- Total pendiente: lo primero que el socio quiere saber -->
+  <div class="bg-cyan-50 border border-cyan-100 rounded-2xl px-4 py-2 mb-3"
+    *ngIf="!cargando() && !error() && totalPendiente() > 0">
+    <p class="text-[0.65rem] text-cyan-700 font-semibold uppercase tracking-wider">Pendiente de pago</p>
+    <p class="text-lg text-cyan-700 font-bold">{{ totalPendiente() | currency:'ARS':'symbol':'1.2-2' }}</p>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+
+    <div *ngIf="cargando()" class="flex items-center justify-center gap-2 py-10 text-gray-400 text-xs">
+      <span class="loading loading-spinner loading-sm"></span>
+      Cargando sus reintegros...
+    </div>
+
+    <div *ngIf="error()" class="py-10 px-5 text-center">
+      <p class="text-xs text-red-500">{{ error() }}</p>
+      <button (click)="cargar()"
+        class="mt-3 text-white bg-cyan-600 px-3 py-1 rounded-2xl text-xs cursor-pointer">
+        Reintentar
+      </button>
+    </div>
+
+    <div *ngIf="!cargando() && !error() && ordenes().length === 0" class="py-10 px-5 text-center">
+      <p class="text-xs text-gray-500">Todavía no registra reintegros.</p>
+    </div>
+
+    <!-- El scroll vive acá: al acercarse al final se suma otra tanda -->
+    <div *ngIf="!cargando() && !error() && ordenes().length > 0"
+      class="max-h-[65vh] overflow-y-auto custom-scrollbar" (scroll)="onScroll($event)">
+
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50 sticky top-0 z-10">
+          <tr>
+            <th scope="col" class="px-3 py-2 text-left font-semibold text-[0.5rem] text-gray-500 uppercase tracking-wider">
+              Orden
+            </th>
+            <th scope="col" class="px-3 py-2 text-left font-semibold text-[0.5rem] text-gray-500 uppercase tracking-wider">
+              Detalle
+            </th>
+            <th scope="col" class="px-3 py-2 text-left font-semibold text-[0.5rem] text-gray-500 uppercase tracking-wider">
+              Fecha
+            </th>
+            <th scope="col" class="px-3 py-2 text-right font-semibold text-[0.5rem] text-gray-500 uppercase tracking-wider">
+              Importe
+            </th>
+            <th scope="col" class="px-3 py-2 text-left font-semibold text-[0.5rem] text-gray-500 uppercase tracking-wider">
+              Fecha de pago
+            </th>
+            <th scope="col" class="px-3 py-2 text-left font-semibold text-[0.5rem] text-gray-500 uppercase tracking-wider">
+              Estado
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let orden of ordenesVisibles()" class="hover:bg-gray-50">
+            <td class="px-3 py-1.5 whitespace-nowrap text-[0.7rem] text-cyan-600 font-semibold">
+              {{ orden.comprobante }}
+            </td>
+            <td class="px-3 py-1.5 text-[0.7rem] text-gray-600">
+              {{ orden.detalle }}
+            </td>
+            <td class="px-3 py-1.5 whitespace-nowrap text-[0.7rem] text-gray-500">
+              {{ orden.fecha }}
+            </td>
+            <td class="px-3 py-1.5 whitespace-nowrap text-[0.7rem] text-gray-700 font-semibold text-right">
+              {{ orden.importe | currency:'ARS':'symbol':'1.2-2' }}
+            </td>
+            <td class="px-3 py-1.5 whitespace-nowrap text-[0.7rem] text-gray-500">
+              {{ orden.fechaPago }}
+            </td>
+            <td class="px-3 py-1.5 whitespace-nowrap">
+              <span class="text-white text-[0.5rem] rounded-2xl px-2 py-1 inline-flex items-center"
+                [ngClass]="orden.estado === 'aprobado' ? 'bg-green-600' : 'bg-amber-500'">
+                <svg *ngIf="orden.estado === 'aprobado'" class="mr-1" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24"><path fill="#ffffff" d="m9.55 18l-5.7-5.7l1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"/></svg>
+                <svg *ngIf="orden.estado !== 'aprobado'" class="mr-1" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24"><path fill="#ffffff" d="M12 20a8 8 0 1 1 0-16a8 8 0 0 1 0 16m0-14a6 6 0 1 0 0 12a6 6 0 0 0 0-12m.5 3v3.25l2.5 1.48l-.75 1.23L11 12.75V9z"/></svg>
+                {{ orden.estadoDescripcion }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="hayMas()" class="py-2 text-center text-[0.65rem] text-gray-400">
+        Siga bajando para ver más...
+      </div>
+    </div>
+  </div>
+</div>

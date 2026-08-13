@@ -1,7 +1,12 @@
-<section class="bg-linear-to-r shadow-sm px-5 py-5 box-border">
-  <!-- <app-header class=""></app-header> -->
-  <div>
+<app-sidebar-nav></app-sidebar-nav>
+
+<section class="min-h-screen flex flex-col">
+  <app-app-header></app-app-header>
+
+  <!-- Cada vista se renderiza acá, entre el header y el footer -->
+  <main class="flex-1 px-4 pb-6">
     <router-outlet></router-outlet>
-  </div>
-  <app-footer class=""></app-footer>
+  </main>
+
+  <app-footer></app-footer>
 </section>
