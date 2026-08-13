@@ -33,22 +33,25 @@
               </div>
                 <div class="w-full pr-3 pl-5 pb-3 mt-5">
                   <div class="flex justify-between">
-                  <div class="flex">
+                  <div class="flex items-center">
                     <!--
-                      Inicio: se muestra sólo cuando el frente está en "info".
-                      Se renderiza siempre y se anima con opacidad y
-                      desplazamiento, porque un *ngIf entraría de golpe.
+                      La flecha de inicio no ocupa lugar mientras está oculta:
+                      se le anima el ancho además de la opacidad. Así el ícono
+                      de info arranca pegado a la izquierda y se corre solo
+                      cuando la flecha entra, en vez de dejar un hueco.
                     -->
                     <div
-                      routerLink="/dashboard/credencial"
-                      class="mr-2 flex flex-col items-center cursor-pointer transition-all duration-300 ease-out"
-                      [ngClass]="mostrarInicio()
-                        ? 'opacity-100 translate-x-0'
-                        : 'opacity-0 -translate-x-2 pointer-events-none'"
+                      class="overflow-hidden transition-all duration-300 ease-out"
+                      [ngClass]="mostrarInicio() ? 'w-[35px] opacity-100' : 'w-0 opacity-0'"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24">
-                        <path fill="#61788f" d="M13 22L3 12L13 2v6h8v8h-8zM6 12l5 5v-3h8v-4h-8V7z"/>
-                      </svg>
+                      <div
+                        routerLink="/dashboard/credencial"
+                        class="mr-2 flex flex-col items-center cursor-pointer"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24">
+                          <path fill="#61788f" d="M13 22L3 12L13 2v6h8v8h-8zM6 12l5 5v-3h8v-4h-8V7z"/>
+                        </svg>
+                      </div>
                     </div>
 
                     <!-- Info -->
@@ -57,7 +60,7 @@
                       routerLinkActive="active"
                       [routerLinkActiveOptions]="{ exact: true }"
                       #rlaInfo="routerLinkActive"
-                      class="mr-2 flex flex-col items-center cursor-pointer"
+                      class="flex flex-col items-center cursor-pointer"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 16 16">
                         <path
