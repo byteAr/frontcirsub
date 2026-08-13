@@ -32,7 +32,7 @@ export default class ReintegrosComponent implements OnInit {
 
   totalPendiente = computed(() =>
     this.ordenes()
-      .filter(o => o.estado === 'pendiente')
+      .filter(o => !this.esAprobado(o))
       .reduce((total, o) => total + o.importe, 0)
   );
 
@@ -55,6 +55,31 @@ export default class ReintegrosComponent implements OnInit {
         this.cargando.set(false);
       }
     });
+  }
+
+  /**
+   * El backend ya normaliza el estado, pero la comparación se hace acá de
+   * forma tolerante: el PHP devuelve "apro" crudo y un cambio de su lado no
+   * debería dejar todas las filas pintadas como pendientes.
+   */
+  esAprobado(orden: OrdenPago): boolean {
+    const estado = (orden.estado ?? '').toString().trim().toLowerCase();
+
+    // "oprobado" es un error de tipeo de api-ops.php. Se acepta acá también
+    // para no depender de que el backend esté actualizado; sale cuando lo
+    // corrijan del lado del PHP.
+    return estado === 'aprobado' || estado === 'apro' || estado === 'oprobado';
+  }
+
+  etiquetaEstado(orden: OrdenPago): string {
+    if (this.esAprobado(orden)) return 'Aprobado';
+
+    const estado = (orden.estado ?? '').toString().trim().toLowerCase();
+    if (estado === 'pendiente' || estado === 'pdte') return 'Pendiente';
+
+    // Estado desconocido: se muestra lo que haya descrito el backend en vez de
+    // inventar uno, que sería mentirle al socio sobre si le pagaron o no.
+    return orden.estadoDescripcion || 'Pendiente';
   }
 
   /** Se dispara al llegar cerca del final del contenedor con scroll. */

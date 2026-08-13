@@ -1,5 +1,12 @@
 import { ApplicationConfig, provideZoneChangeDetection, isDevMode } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { registerLocaleData } from '@angular/common';
+import localeEsAr from '@angular/common/locales/es-AR';
+
+// Sólo registra los datos de es-AR para poder pedirlos explícitamente en un
+// pipe (por ejemplo el importe de los reintegros). No cambia el LOCALE_ID por
+// defecto, así ninguna otra vista cambia de formato.
+registerLocaleData(localeEsAr);
 
 
 import { providePrimeNG } from 'primeng/config';
