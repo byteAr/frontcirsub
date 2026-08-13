@@ -1,4 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { provideServiceWorker } from '@angular/service-worker';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { PassrecoveryComponent } from './passrecovery.component';
 
@@ -8,7 +12,8 @@ describe('PassrecoveryComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PassrecoveryComponent]
+      imports: [PassrecoveryComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideServiceWorker('ngsw-worker.js', { enabled: false }), provideRouter([])]
     })
     .compileComponents();
 

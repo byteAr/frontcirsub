@@ -40,6 +40,10 @@ const routeAnimations = trigger('routeAnimations', [
 @Component({
   selector: 'app-root',
   imports: [ButtonModule, InputOtpModule, RouterModule, RouterOutlet ],
+  // El trigger estaba declarado arriba pero no registrado acá, así que el
+  // template lo usaba contra una animación inexistente y las transiciones
+  // entre rutas nunca se ejecutaban.
+  animations: [routeAnimations],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

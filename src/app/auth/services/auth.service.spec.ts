@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { provideServiceWorker } from '@angular/service-worker';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { SwPush } from '@angular/service-worker';
 import { AuthService } from './auth.service';

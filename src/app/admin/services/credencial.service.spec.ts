@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { provideServiceWorker } from '@angular/service-worker';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { CredencialService } from './credencial.service';
@@ -11,7 +13,7 @@ describe('CredencialService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideServiceWorker('ngsw-worker.js', { enabled: false }), provideRouter([])],
     });
     service = TestBed.inject(CredencialService);
     httpMock = TestBed.inject(HttpTestingController);
