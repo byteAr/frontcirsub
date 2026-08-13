@@ -25,6 +25,20 @@ export class AuthService {
   private checkStatus$?: Observable<boolean>;
   private profileImageUrls = new Map<number, string>();
 
+  /**
+   * Estado de la foto de perfil. Vive acá y no en el componente que la
+   * dibuja porque la credencial necesita saber si ya está lista para
+   * mostrarse entera, y ese componente es hijo suyo: si la tarjeta espera
+   * sin renderizar, el hijo nunca se montaría y nadie pediría la foto.
+   */
+  private _imagenPerfilUrl = signal<string | null>(null);
+  private _imagenPerfilResuelta = signal<boolean>(false);
+  private imagenPerfilEnCurso = false;
+
+  imagenPerfilUrl = computed(() => this._imagenPerfilUrl());
+  /** true cuando terminó el intento, haya foto o no. */
+  imagenPerfilResuelta = computed(() => this._imagenPerfilResuelta());
+
   authStatus = computed<AuthStatus>(() => {
     if(this._authStatus() === 'checking') return 'checking';
 
@@ -196,6 +210,41 @@ export class AuthService {
     return this.profileImageUrls.get(userId);
   }
 
+  /**
+   * Descarga la foto una sola vez por sesión y deja el resultado en señales.
+   * Si ya está en caché resuelve al instante, así volver a la credencial no
+   * vuelve a mostrar el esqueleto.
+   */
+  cargarImagenPerfil(userId: number): void {
+    const cacheada = this.profileImageUrls.get(userId);
+
+    if (cacheada) {
+      this._imagenPerfilUrl.set(cacheada);
+      this._imagenPerfilResuelta.set(true);
+      return;
+    }
+
+    if (this.imagenPerfilEnCurso) return;
+    this.imagenPerfilEnCurso = true;
+
+    this.http.get(this.getProfileImageUrl(userId), { responseType: 'blob' })
+      .subscribe({
+        next: blob => {
+          const objectUrl = URL.createObjectURL(blob);
+          this.profileImageUrls.set(userId, objectUrl);
+          this._imagenPerfilUrl.set(objectUrl);
+          this._imagenPerfilResuelta.set(true);
+          this.imagenPerfilEnCurso = false;
+        },
+        error: () => {
+          // Sin foto también es un resultado: la credencial se muestra igual.
+          this._imagenPerfilUrl.set(null);
+          this._imagenPerfilResuelta.set(true);
+          this.imagenPerfilEnCurso = false;
+        }
+      });
+  }
+
   cacheProfileImageUrl(userId: number, objectUrl: string): void {
     this.profileImageUrls.set(userId, objectUrl);
   }
@@ -203,6 +252,9 @@ export class AuthService {
   private clearProfileImageCache(): void {
     this.profileImageUrls.forEach(url => URL.revokeObjectURL(url));
     this.profileImageUrls.clear();
+    this._imagenPerfilUrl.set(null);
+    this._imagenPerfilResuelta.set(false);
+    this.imagenPerfilEnCurso = false;
   }
 
 }

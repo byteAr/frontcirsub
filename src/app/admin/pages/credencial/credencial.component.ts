@@ -6,6 +6,7 @@ import {
   HostListener,
   OnInit,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -65,6 +66,15 @@ export default class CredencialComponen implements OnInit {
 
   mostrarInicio = computed(() => this.urlActual().includes('front:info'));
 
+  /**
+   * La tarjeta se muestra recién cuando no queda nada por cargar: datos del
+   * socio y foto de perfil resueltos. Mientras tanto se ve el esqueleto, para
+   * que la credencial nunca aparezca a medio armar.
+   */
+  credencialLista = computed(
+    () => !!this.user()?.Persona?.[0]?.Id && this.autService.imagenPerfilResuelta()
+  );
+
   user = this.autService.user;
   encuesta = this.autService._encuesta;
 
@@ -102,6 +112,16 @@ export default class CredencialComponen implements OnInit {
     if (Math.abs(deltaX) > this.swipeThreshold) {
       this.flipCard(deltaX > 0 ? 'right' : 'left');
     }
+  }
+
+  constructor() {
+    // Dispara la descarga de la foto en cuanto se conoce el socio. Va acá y no
+    // en el componente hijo porque ese no se monta hasta que la foto está
+    // lista, y quedaría esperándose a sí mismo.
+    effect(() => {
+      const userId = this.autService.user()?.Persona?.[0]?.Id;
+      if (userId) this.autService.cargarImagenPerfil(userId);
+    });
   }
 
   ngOnInit(): void {
