@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { NotificationsOficialesComponent } from './notifications-oficiales.component';
+import NotificationsOficialesComponent from './notifications-oficiales.component';
 
 describe('NotificationsOficialesComponent', () => {
   let component: NotificationsOficialesComponent;

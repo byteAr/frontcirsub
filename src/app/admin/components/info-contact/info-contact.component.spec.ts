@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { InfoContactComponent } from './info-contact.component';
+import InfoContactComponent from './info-contact.component';
 
 describe('InfoContactComponent', () => {
   let component: InfoContactComponent;

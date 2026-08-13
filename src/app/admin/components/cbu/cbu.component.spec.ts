@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CBUComponent } from './cbu.component';
+import CBUComponent from './cbu.component';
 
 describe('CBUComponent', () => {
   let component: CBUComponent;

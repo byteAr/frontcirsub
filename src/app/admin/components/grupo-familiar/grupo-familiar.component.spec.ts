@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GrupoFamiliarComponent } from './grupo-familiar.component';
+import GrupoFamiliarComponent from './grupo-familiar.component';
 
 describe('GrupoFamiliarComponent', () => {
   let component: GrupoFamiliarComponent;

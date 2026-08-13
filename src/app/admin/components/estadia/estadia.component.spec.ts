@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EstadiaComponent } from './estadia.component';
+import EstadiaComponent from './estadia.component';
 
 describe('EstadiaComponent', () => {
   let component: EstadiaComponent;

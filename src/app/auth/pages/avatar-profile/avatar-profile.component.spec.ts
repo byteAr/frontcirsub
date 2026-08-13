@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AvatarProfileComponent } from './avatar-profile.component';
+import AvatarProfileComponent from './avatar-profile.component';
 
 describe('AvatarProfileComponent', () => {
   let component: AvatarProfileComponent;

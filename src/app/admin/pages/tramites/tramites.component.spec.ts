@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TramitesComponent } from './tramites.component';
+import TramitesComponent from './tramites.component';
 
 describe('TramitesComponent', () => {
   let component: TramitesComponent;
