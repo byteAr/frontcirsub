@@ -1,52 +1,79 @@
-<ng-container *ngIf="calificado; else elseTemplate">
-  <div class="flex flex-col justify-center items-center h-32">
-  <p class="text-gray-400 text-xs">¿Cómo calificaría la Credencial Digital (CDI)?</p>
-  <div class="flex space-x-1 cursor-pointer">
-    <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
-      <svg
-        (click)="setRating(star)"
-        (mouseenter)="setHover(star)"
-        (mouseleave)="clearHover()"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        class="w-6 h-6"
-        [attr.fill]="star <= (hover || rating) ? '#ffd900' : 'transparent'"
-        [attr.stroke]="'#ffd900'"
-        stroke-width="2"
-      >
-        <!-- Estrella de puntas rectas -->
-        <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" />
-      </svg>
-    </ng-container>
-  </div>
-  <p class="text-gray-400 text-xs">¿Cómo calificaría la atención del operador?</p>
-  <div class="flex space-x-1 cursor-pointer">
-    <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
-      <svg
-        (click)="setRating2(star)"
-        (mouseenter)="setHover2(star)"
-        (mouseleave)="clearHover2()"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        class="w-6 h-6"
-        [attr.fill]="star <= (hover2 || rating2) ? '#ffd900' : 'transparent'"
-        [attr.stroke]="'#ffd900'"
-        stroke-width="2"
-      >
-        <!-- Estrella de puntas rectas -->
-        <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" />
-      </svg>
-    </ng-container>
-  </div>
-  <div>
-    <button (click)="calificar()" [ngClass]="rating == 0 || rating2 === 0 ? 'bg-gray-500':'bg-cyan-600 cursor-pointer'"  class="text-xs  text-white p-1 mt-2 rounded-2xl px-2">Calificar</button>
-  </div>
+<div class="w-full max-w-2xl mx-auto px-1 md:px-4">
+
+  <p class="text-base md:text-lg text-cyan-600 font-semibold mb-3">Encuesta</p>
+
+  <ng-container *ngIf="calificado; else elseTemplate">
+    <div class="bg-white rounded-2xl shadow-sm px-6 py-8 md:py-10">
+
+      <p class="text-sm md:text-base text-gray-500 text-center">
+        Su opinión nos ayuda a mejorar. Le lleva menos de un minuto.
+      </p>
+
+      <div class="mt-8 text-center">
+        <p class="text-sm md:text-base text-gray-600 font-semibold">
+          ¿Cómo calificaría la Credencial Digital?
+        </p>
+        <div class="flex justify-center space-x-2 cursor-pointer mt-3">
+          <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
+            <svg
+              (click)="setRating(star)"
+              (mouseenter)="setHover(star)"
+              (mouseleave)="clearHover()"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              class="w-10 h-10 transition-transform duration-150 hover:scale-110"
+              [attr.fill]="star <= (hover || rating) ? '#ffd900' : 'transparent'"
+              [attr.stroke]="'#ffd900'"
+              stroke-width="2"
+            >
+              <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" />
+            </svg>
+          </ng-container>
+        </div>
+      </div>
+
+      <div class="mt-8 text-center">
+        <p class="text-sm md:text-base text-gray-600 font-semibold">
+          ¿Cómo calificaría la atención del operador?
+        </p>
+        <div class="flex justify-center space-x-2 cursor-pointer mt-3">
+          <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
+            <svg
+              (click)="setRating2(star)"
+              (mouseenter)="setHover2(star)"
+              (mouseleave)="clearHover2()"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              class="w-10 h-10 transition-transform duration-150 hover:scale-110"
+              [attr.fill]="star <= (hover2 || rating2) ? '#ffd900' : 'transparent'"
+              [attr.stroke]="'#ffd900'"
+              stroke-width="2"
+            >
+              <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" />
+            </svg>
+          </ng-container>
+        </div>
+      </div>
+
+      <div class="flex justify-center mt-8">
+        <button (click)="calificar()"
+          [ngClass]="rating == 0 || rating2 === 0 ? 'bg-gray-400' : 'bg-cyan-600 cursor-pointer'"
+          class="text-sm text-white px-6 py-2 rounded-2xl shadow-md">
+          Calificar
+        </button>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #elseTemplate>
+    <div class="bg-white rounded-2xl shadow-sm px-6 py-12 text-center">
+      <div class="flex justify-center mb-4">
+        <div class="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="#16a34a" d="m9.55 18l-5.7-5.7l1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"/></svg>
+        </div>
+      </div>
+      <p class="text-base md:text-lg text-cyan-600 font-semibold">¡Gracias por calificarnos!</p>
+      <p class="text-sm text-gray-500 mt-2">Su respuesta ya fue registrada.</p>
+    </div>
+  </ng-template>
 </div>
-</ng-container>
-<ng-template #elseTemplate>
-  <div class="w-full flex justify-center items-center h-32">
-    <p class="text-cyan-600 font-semibold">Gracias por calificarnos !!!</p>
-  </div>
-</ng-template>
-
-

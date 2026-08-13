@@ -27,14 +27,14 @@ export default class ReintegrosComponent implements OnInit {
    */
   visibles = signal<number>(FILAS_POR_TANDA);
 
+  /**
+   * Comprobantes desplegados en la vista de celular. Se guarda el comprobante
+   * y no el índice para que no se descoloque al cargar otra tanda.
+   */
+  private desplegadas = signal<Set<string>>(new Set<string>());
+
   ordenesVisibles = computed(() => this.ordenes().slice(0, this.visibles()));
   hayMas = computed(() => this.visibles() < this.ordenes().length);
-
-  totalPendiente = computed(() =>
-    this.ordenes()
-      .filter(o => !this.esAprobado(o))
-      .reduce((total, o) => total + o.importe, 0)
-  );
 
   ngOnInit(): void {
     this.cargar();
@@ -48,12 +48,27 @@ export default class ReintegrosComponent implements OnInit {
       next: ordenes => {
         this.ordenes.set(ordenes ?? []);
         this.visibles.set(FILAS_POR_TANDA);
+        this.desplegadas.set(new Set<string>());
         this.cargando.set(false);
       },
       error: () => {
         this.error.set('No pudimos obtener sus reintegros. Intente nuevamente en unos minutos.');
         this.cargando.set(false);
       }
+    });
+  }
+
+  estaDesplegada(orden: OrdenPago): boolean {
+    return this.desplegadas().has(orden.comprobante);
+  }
+
+  alternarDespliegue(orden: OrdenPago): void {
+    this.desplegadas.update(actuales => {
+      const proximas = new Set(actuales);
+      proximas.has(orden.comprobante)
+        ? proximas.delete(orden.comprobante)
+        : proximas.add(orden.comprobante);
+      return proximas;
     });
   }
 
@@ -90,6 +105,20 @@ export default class ReintegrosComponent implements OnInit {
     const faltante = el.scrollHeight - el.scrollTop - el.clientHeight;
 
     if (faltante < 80) {
+      this.visibles.update(actual => actual + FILAS_POR_TANDA);
+    }
+  }
+
+  /** En celular el scroll es el de la página, no el de un contenedor. */
+  onScrollVentana(): void {
+    if (!this.hayMas()) return;
+
+    const faltante =
+      document.documentElement.scrollHeight -
+      window.scrollY -
+      window.innerHeight;
+
+    if (faltante < 120) {
       this.visibles.update(actual => actual + FILAS_POR_TANDA);
     }
   }
