@@ -7,6 +7,10 @@ export interface ConceptoDescuento {
   codigo: string;
   concepto: string;
   importe: number;
+  cuota?: number;
+  totalCuotas?: number;
+  /** "Cuota 1 de 6". Sólo viene en conceptos que se pagan en cuotas. */
+  etiquetaCuota?: string;
 }
 
 /** Espejo de PeriodoDescuentos del backend: un mes con sus conceptos. */
