@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject } from '@angular/core';
 import { AuthService } from '../../../auth/services/auth.service';
 import { AdherirseComponent } from "../adherirse/adherirse.component";
-import { SolicitarReintegroComponent } from "../solicitar-reintegro/solicitar-reintegro.component";
 
 interface reintegro {
   Id: number;
@@ -17,7 +16,7 @@ interface reintegro {
 
 @Component({
   selector: 'app-farmacia',
-  imports: [CommonModule, AdherirseComponent, SolicitarReintegroComponent],
+  imports: [CommonModule, AdherirseComponent],
   templateUrl: './farmacia.component.html',
   styleUrl: './farmacia.component.css'
 })
