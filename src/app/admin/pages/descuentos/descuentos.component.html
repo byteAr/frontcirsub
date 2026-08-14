@@ -34,7 +34,7 @@
       <button type="button" (click)="alternarDespliegue(periodo)"
         class="w-full flex items-center justify-between gap-3 px-4 md:px-5 py-3.5 text-left cursor-pointer">
 
-        <p class="text-sm md:text-base font-semibold text-gray-700 tracking-wide">
+        <p class="text-sm md:text-base font-semibold text-cyan-600 tracking-wide">
           {{ periodo.etiqueta }}
         </p>
 
@@ -70,6 +70,17 @@
                 </td>
               </tr>
             </tbody>
+            <!-- Total del mes: cierra la lista de conceptos -->
+            <tfoot>
+              <tr class="border-t-2 border-green-100 bg-green-50/60">
+                <td class="px-4 md:px-5 py-3 text-sm font-semibold text-green-700 uppercase tracking-wider">
+                  Total
+                </td>
+                <td class="px-4 md:px-5 py-3 whitespace-nowrap text-base font-bold text-green-600 text-right">
+                  {{ periodo.total | currency:'ARS':'symbol':'1.2-2':'es-AR' }}
+                </td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>
