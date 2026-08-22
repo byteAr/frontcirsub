@@ -52,7 +52,13 @@
           <table class="min-w-full border-t border-gray-100">
             <thead class="bg-gray-50">
               <tr>
-                <th scope="col" class="px-4 md:px-5 py-2 text-left font-semibold text-xs text-gray-500 uppercase tracking-wider">
+                <!-- Código interno del concepto (01, 02, 59...). Es el que usa
+                     administración para identificar el descuento, así que va
+                     primero y con ancho fijo para que la columna no baile. -->
+                <th scope="col" class="w-16 md:w-20 px-3 md:px-5 py-2 text-left font-semibold text-xs text-gray-500 uppercase tracking-wider">
+                  Código
+                </th>
+                <th scope="col" class="px-3 md:px-5 py-2 text-left font-semibold text-xs text-gray-500 uppercase tracking-wider">
                   Concepto
                 </th>
                 <th scope="col" class="px-4 md:px-5 py-2 text-right font-semibold text-xs text-gray-500 uppercase tracking-wider">
@@ -62,9 +68,12 @@
             </thead>
             <tbody class="divide-y divide-gray-100">
               <tr *ngFor="let concepto of periodo.conceptos" class="hover:bg-gray-50">
+                <td class="px-3 md:px-5 py-2.5 text-sm text-gray-400 tabular-nums whitespace-nowrap">
+                  {{ concepto.codigo }}
+                </td>
                 <!-- El concepto no corta línea: la etiqueta de la cuota tiene
                      que quedar al lado y no debajo -->
-                <td class="px-4 md:px-5 py-2.5 text-sm text-gray-600 whitespace-nowrap">
+                <td class="px-3 md:px-5 py-2.5 text-sm text-gray-600 whitespace-nowrap">
                   {{ concepto.concepto }}<!--
                --><span *ngIf="concepto.etiquetaCuota"
                     class="ml-1.5 text-[0.65rem] text-cyan-700 bg-cyan-50 rounded-full px-1.5 py-0.5 align-middle">{{ concepto.etiquetaCuota }}</span>
@@ -77,7 +86,7 @@
             <!-- Total del mes: cierra la lista de conceptos -->
             <tfoot>
               <tr class="border-t-2 border-green-100 bg-green-50/60">
-                <td class="px-4 md:px-5 py-3 text-sm font-semibold text-green-700 uppercase tracking-wider">
+                <td colspan="2" class="px-3 md:px-5 py-3 text-sm font-semibold text-green-700 uppercase tracking-wider">
                   Total
                 </td>
                 <td class="px-4 md:px-5 py-3 whitespace-nowrap text-base font-bold text-green-600 text-right">
