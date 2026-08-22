@@ -4,8 +4,12 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface ConceptoDescuento {
+  /** Ordena las filas dentro del mes; no se muestra. */
   codigo: string;
+  /** Columna CONCEPTO. */
   concepto: string;
+  /** Columna DETALLE: el texto descriptivo, ya sin la cuota. */
+  detalle: string;
   importe: number;
   cuota?: number;
   totalCuotas?: number;

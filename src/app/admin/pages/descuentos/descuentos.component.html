@@ -52,14 +52,13 @@
           <table class="min-w-full border-t border-gray-100">
             <thead class="bg-gray-50">
               <tr>
-                <!-- Código interno del concepto (01, 02, 59...). Es el que usa
-                     administración para identificar el descuento, así que va
-                     primero y con ancho fijo para que la columna no baile. -->
+                <!-- Ancho fijo para que la columna no baile de un mes a otro
+                     y los detalles queden alineados entre filas. -->
                 <th scope="col" class="w-16 md:w-20 px-3 md:px-5 py-2 text-left font-semibold text-xs text-gray-500 uppercase tracking-wider">
-                  Código
+                  Concepto
                 </th>
                 <th scope="col" class="px-3 md:px-5 py-2 text-left font-semibold text-xs text-gray-500 uppercase tracking-wider">
-                  Concepto
+                  Detalle
                 </th>
                 <th scope="col" class="px-4 md:px-5 py-2 text-right font-semibold text-xs text-gray-500 uppercase tracking-wider">
                   Importe
@@ -68,13 +67,13 @@
             </thead>
             <tbody class="divide-y divide-gray-100">
               <tr *ngFor="let concepto of periodo.conceptos" class="hover:bg-gray-50">
-                <td class="px-3 md:px-5 py-2.5 text-sm text-gray-400 tabular-nums whitespace-nowrap">
-                  {{ concepto.codigo }}
+                <td class="px-3 md:px-5 py-2.5 text-sm text-gray-500 tabular-nums whitespace-nowrap">
+                  {{ concepto.concepto }}
                 </td>
-                <!-- El concepto no corta línea: la etiqueta de la cuota tiene
+                <!-- El detalle no corta línea: la etiqueta de la cuota tiene
                      que quedar al lado y no debajo -->
                 <td class="px-3 md:px-5 py-2.5 text-sm text-gray-600 whitespace-nowrap">
-                  {{ concepto.concepto }}<!--
+                  {{ concepto.detalle }}<!--
                --><span *ngIf="concepto.etiquetaCuota"
                     class="ml-1.5 text-[0.65rem] text-cyan-700 bg-cyan-50 rounded-full px-1.5 py-0.5 align-middle">{{ concepto.etiquetaCuota }}</span>
                 </td>
