@@ -24,8 +24,12 @@ export class SolicitarReintegroComponent implements OnDestroy {
   private reintegrosService = inject(ReintegrosService);
   private imagenService = inject(ImagenService);
 
-  // Por ahora sólo existe "Receta Médica" (RM), el backend expone el resto cuando se agreguen.
-  tipos = signal<TipoDocumentoReintegro[]>([{ codigo: 'RM', descripcion: 'Receta Médica' }]);
+  // Fallback por si falla el pedido al backend, que es el que manda la lista
+  // real. El código es lo que importa: va como prefijo del archivo en disco y
+  // es con lo que el sistema de gestión clasifica lo que sube el socio.
+  tipos = signal<TipoDocumentoReintegro[]>([
+    { codigo: 'RM', descripcion: 'Reintegro de medicamentos' },
+  ]);
   tipoSeleccionado = signal<string>('RM');
 
   archivos = signal<File[]>([]);

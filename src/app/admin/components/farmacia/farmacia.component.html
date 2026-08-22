@@ -22,7 +22,11 @@
         Para más información comuníquese por WhatsApp al 11-58558733.
       </p>
 
-      <!-- Los dos botones comparten el mismo ancho para que no queden dispares -->
+      <!--
+        La solicitud de reintegro ya no vive acá: pasó a la pantalla de
+        Reintegros, que es general y cubre los cinco tipos de trámite. Este
+        botón quedó solo para consultas.
+      -->
       <div class="flex flex-col items-center gap-3 mt-5">
         <a href="https://wa.me/+5491158558733?text=Hola deseo obtener más información sobre el beneficio de farmacia">
           <button class="w-60 text-white bg-green-600 px-5 py-2 rounded-2xl text-sm inline-flex items-center justify-center cursor-pointer shadow-md">
@@ -30,8 +34,6 @@
             Contactarme
           </button>
         </a>
-
-        <app-solicitar-reintegro></app-solicitar-reintegro>
       </div>
     </div>
   </ng-template>

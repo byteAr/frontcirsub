@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { SolicitarReintegroComponent } from '../../components/solicitar-reintegro/solicitar-reintegro.component';
 import { OrdenPago, ReintegrosService } from '../../services/reintegros.service';
 
 /** Cuántas filas se agregan cada vez que el socio llega al final de la lista. */
@@ -8,7 +9,7 @@ const FILAS_POR_TANDA = 15;
 @Component({
   selector: 'app-reintegros',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, SolicitarReintegroComponent],
   templateUrl: './reintegros.component.html',
   styleUrl: './reintegros.component.css'
 })
@@ -73,28 +74,57 @@ export default class ReintegrosComponent implements OnInit {
   }
 
   /**
-   * El backend ya normaliza el estado, pero la comparación se hace acá de
-   * forma tolerante: el PHP devuelve "apro" crudo y un cambio de su lado no
-   * debería dejar todas las filas pintadas como pendientes.
+   * El backend ya normaliza el estado, pero acá se vuelve a resolver de forma
+   * tolerante: el PHP ya cambió sus literales dos veces sin aviso y un cambio
+   * de su lado no debería dejar toda la tabla pintada de un solo color.
    */
-  esAprobado(orden: OrdenPago): boolean {
+  private claveEstado(orden: OrdenPago): 'pendiente' | 'aprobado' | 'pagado' | 'otro' {
     const estado = (orden.estado ?? '').toString().trim().toLowerCase();
 
-    // "oprobado" es un error de tipeo de api-ops.php. Se acepta acá también
-    // para no depender de que el backend esté actualizado; sale cuando lo
-    // corrijan del lado del PHP.
-    return estado === 'aprobado' || estado === 'apro' || estado === 'oprobado';
+    if (estado === 'pendiente' || estado === 'pdte') return 'pendiente';
+
+    // "oprobado" fue un typo de api-ops.php; se sigue aceptando por las dudas.
+    if (estado === 'aprobado' || estado === 'apro' || estado === 'oprobado') {
+      return 'aprobado';
+    }
+
+    if (estado === 'pagado' || estado === 'pago') return 'pagado';
+
+    return 'otro';
+  }
+
+  /**
+   * Un color por paso del circuito: naranja lo que el socio todavía espera,
+   * celeste lo autorizado que aún no se transfirió, verde lo cobrado. El gris
+   * es para un literal desconocido, que no se pinta ni de bueno ni de malo.
+   */
+  claseEstado(orden: OrdenPago): string {
+    switch (this.claveEstado(orden)) {
+      case 'pendiente': return 'bg-orange-500';
+      case 'aprobado':  return 'bg-cyan-600';
+      case 'pagado':    return 'bg-green-600';
+      default:          return 'bg-gray-500';
+    }
+  }
+
+  /** Reloj, un tilde o doble tilde, al estilo de los mensajes de WhatsApp. */
+  iconoEstado(orden: OrdenPago): 'reloj' | 'tilde' | 'doble-tilde' {
+    switch (this.claveEstado(orden)) {
+      case 'aprobado': return 'tilde';
+      case 'pagado':   return 'doble-tilde';
+      default:         return 'reloj';
+    }
   }
 
   etiquetaEstado(orden: OrdenPago): string {
-    if (this.esAprobado(orden)) return 'Aprobado';
-
-    const estado = (orden.estado ?? '').toString().trim().toLowerCase();
-    if (estado === 'pendiente' || estado === 'pdte') return 'Pendiente';
-
-    // Estado desconocido: se muestra lo que haya descrito el backend en vez de
-    // inventar uno, que sería mentirle al socio sobre si le pagaron o no.
-    return orden.estadoDescripcion || 'Pendiente';
+    switch (this.claveEstado(orden)) {
+      case 'pendiente': return 'Pendiente';
+      case 'aprobado':  return 'Aprobado';
+      case 'pagado':    return 'Pagado';
+      // Estado desconocido: se muestra lo que haya descrito el backend en vez
+      // de inventar uno, que sería mentirle al socio sobre su plata.
+      default:          return orden.estadoDescripcion || 'Pendiente';
+    }
   }
 
   /** Se dispara al llegar cerca del final del contenedor con scroll. */

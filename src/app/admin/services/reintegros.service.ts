@@ -25,7 +25,12 @@ export interface RespuestaReintegro {
   archivos: ArchivoReintegroGuardado[];
 }
 
-export type EstadoOrdenPago = 'pendiente' | 'aprobado' | 'otro';
+/**
+ * Los tres pasos del circuito del reintegro: se solicita, se autoriza y se
+ * transfiere. "otro" llega cuando api-ops.php devuelve un literal que el
+ * backend no reconoce.
+ */
+export type EstadoOrdenPago = 'pendiente' | 'aprobado' | 'pagado' | 'otro';
 
 /**
  * Espejo de OrdenPago del backend. Los campos de texto nunca vienen vacíos:
