@@ -61,8 +61,14 @@
               <tr>
                 <!-- Ancho fijo para que la columna no baile de un mes a otro
                      y los detalles queden alineados entre filas. -->
-                <th scope="col" class="w-12 md:w-20 px-2 md:px-5 py-2 text-left font-semibold text-[0.65rem] md:text-xs text-gray-500 uppercase tracking-wider">
-                  Concepto
+                <!--
+                  "CONCEPTO" no entra en el ancho que necesita la columna en
+                  celular, y con table-fixed lo que sobra se monta encima de
+                  DETALLE en vez de recortarse. Se abrevia abajo de md.
+                -->
+                <th scope="col" class="w-12 md:w-32 px-2 md:px-5 py-2 text-left font-semibold text-[0.65rem] md:text-xs text-gray-500 uppercase tracking-wider">
+                  <span class="md:hidden">Con.</span>
+                  <span class="hidden md:inline">Concepto</span>
                 </th>
                 <th scope="col" class="px-2 md:px-5 py-2 text-left font-semibold text-[0.65rem] md:text-xs text-gray-500 uppercase tracking-wider">
                   Detalle
