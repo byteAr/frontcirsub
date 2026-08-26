@@ -49,35 +49,47 @@
       <div class="grid transition-all duration-300 ease-out"
         [ngClass]="estaDesplegado(periodo) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'">
         <div class="overflow-hidden">
-          <table class="min-w-full border-t border-gray-100">
+          <!--
+            table-fixed + w-full: el ancho lo mandan las clases de las
+            columnas y no el contenido, así la tabla no puede crecer más que
+            la pantalla. Con min-w-full crecía con el texto más largo y el
+            sobrante lo comía el overflow-hidden del acordeón, que dejaba el
+            importe cortado en celular.
+          -->
+          <table class="w-full table-fixed border-t border-gray-100">
             <thead class="bg-gray-50">
               <tr>
                 <!-- Ancho fijo para que la columna no baile de un mes a otro
                      y los detalles queden alineados entre filas. -->
-                <th scope="col" class="w-16 md:w-20 px-3 md:px-5 py-2 text-left font-semibold text-xs text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="w-12 md:w-20 px-2 md:px-5 py-2 text-left font-semibold text-[0.65rem] md:text-xs text-gray-500 uppercase tracking-wider">
                   Concepto
                 </th>
-                <th scope="col" class="px-3 md:px-5 py-2 text-left font-semibold text-xs text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-2 md:px-5 py-2 text-left font-semibold text-[0.65rem] md:text-xs text-gray-500 uppercase tracking-wider">
                   Detalle
                 </th>
-                <th scope="col" class="px-4 md:px-5 py-2 text-right font-semibold text-xs text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="w-24 md:w-36 px-2 md:px-5 py-2 text-right font-semibold text-[0.65rem] md:text-xs text-gray-500 uppercase tracking-wider">
                   Importe
                 </th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
               <tr *ngFor="let concepto of periodo.conceptos" class="hover:bg-gray-50">
-                <td class="px-3 md:px-5 py-2.5 text-sm text-gray-500 tabular-nums whitespace-nowrap">
+                <td class="px-2 md:px-5 py-2.5 text-xs md:text-sm text-gray-500 tabular-nums whitespace-nowrap align-top">
                   {{ concepto.concepto }}
                 </td>
-                <!-- El detalle no corta línea: la etiqueta de la cuota tiene
-                     que quedar al lado y no debajo -->
-                <td class="px-3 md:px-5 py-2.5 text-sm text-gray-600 whitespace-nowrap">
+                <!--
+                  En desktop el detalle no corta línea, así la etiqueta de la
+                  cuota queda al lado. En celular sí corta: con tres columnas
+                  no hay ancho para nombres como "SERVICIO SEPELIO CUOTA", y
+                  antes la tabla se pasaba de la pantalla y el importe quedaba
+                  recortado por el overflow-hidden del acordeón.
+                -->
+                <td class="px-2 md:px-5 py-2.5 text-xs md:text-sm text-gray-600 whitespace-normal md:whitespace-nowrap align-top">
                   {{ concepto.detalle }}<!--
                --><span *ngIf="concepto.etiquetaCuota"
-                    class="ml-1.5 text-[0.65rem] text-cyan-700 bg-cyan-50 rounded-full px-1.5 py-0.5 align-middle">{{ concepto.etiquetaCuota }}</span>
+                    class="ml-1.5 text-[0.65rem] text-cyan-700 bg-cyan-50 rounded-full px-1.5 py-0.5 align-middle whitespace-nowrap">{{ concepto.etiquetaCuota }}</span>
                 </td>
-                <td class="px-4 md:px-5 py-2.5 whitespace-nowrap text-sm text-gray-700 font-semibold text-right">
+                <td class="px-2 md:px-5 py-2.5 whitespace-nowrap text-xs md:text-sm text-gray-700 font-semibold text-right align-top">
                   {{ concepto.importe | currency:'ARS':'symbol':'1.2-2':'es-AR' }}
                 </td>
               </tr>
@@ -85,10 +97,10 @@
             <!-- Total del mes: cierra la lista de conceptos -->
             <tfoot>
               <tr class="border-t-2 border-green-100 bg-green-50/60">
-                <td colspan="2" class="px-3 md:px-5 py-3 text-sm font-semibold text-green-700 uppercase tracking-wider">
+                <td colspan="2" class="px-2 md:px-5 py-3 text-xs md:text-sm font-semibold text-green-700 uppercase tracking-wider">
                   Total
                 </td>
-                <td class="px-4 md:px-5 py-3 whitespace-nowrap text-base font-bold text-green-600 text-right">
+                <td class="px-2 md:px-5 py-3 whitespace-nowrap text-sm md:text-base font-bold text-green-600 text-right">
                   {{ periodo.total | currency:'ARS':'symbol':'1.2-2':'es-AR' }}
                 </td>
               </tr>
