@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, inject, OnDestroy, signal, ViewChild } from '@angular/core';
+import { Component, computed, ElementRef, inject, OnDestroy, signal, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { AuthService } from '../../../auth/services/auth.service';
 import { ImagenService } from '../../../shared/services/imagen.service';
-import { ReintegrosService, TipoDocumentoReintegro } from '../../services/reintegros.service';
+import { GestionListasService, TipoTramite } from '../../services/gestion-listas.service';
+import { ReintegrosService } from '../../services/reintegros.service';
 
 const EXTENSIONES_PERMITIDAS = ['.pdf', '.doc', '.docx', '.png', '.jpg', '.jpeg'];
 const MAX_ARCHIVOS = 10;
@@ -22,15 +24,32 @@ export class SolicitarReintegroComponent implements OnDestroy {
   @ViewChild('inputCamara') inputCamara!: ElementRef<HTMLInputElement>;
 
   private reintegrosService = inject(ReintegrosService);
+  private gestionListasService = inject(GestionListasService);
+  private authService = inject(AuthService);
   private imagenService = inject(ImagenService);
 
-  // Fallback por si falla el pedido al backend, que es el que manda la lista
-  // real. El código es lo que importa: va como prefijo del archivo en disco y
-  // es con lo que el sistema de gestión clasifica lo que sube el socio.
-  tipos = signal<TipoDocumentoReintegro[]>([
-    { codigo: 'RM', descripcion: 'Reintegro de medicamentos' },
-  ]);
-  tipoSeleccionado = signal<string>('RM');
+  /**
+   * Tipos de trámite que puede pedir este socio. Salen de api-list_tramite.php:
+   * la lista la maneja gestión, no el front. La clave (RM, RN, TE...) es lo que
+   * importa, porque va como prefijo del archivo en disco y es con lo que el
+   * sistema de gestión clasifica lo que sube el socio.
+   */
+  tipos = signal<TipoTramite[]>([]);
+  tipoSeleccionado = signal<string>('');
+  cargandoTipos = signal<boolean>(false);
+  errorTipos = signal<boolean>(false);
+
+  /** Beneficios contratados, como los devuelve sp_Perfil_completo_detallado. */
+  private beneficios = computed(() => {
+    const contratados = this.authService.user()?.Beneficios ?? [];
+
+    return {
+      far: contratados.some(b => b.far === true),
+      eva: contratados.some(b => b.eva === true),
+      sep: contratados.some(b => b.sep === true),
+      seg: contratados.some(b => b.seg === true),
+    };
+  });
 
   archivos = signal<File[]>([]);
   enviando = signal<boolean>(false);
@@ -54,19 +73,46 @@ export class SolicitarReintegroComponent implements OnDestroy {
   }
 
   abrirFormulario() {
-    this.reintegrosService.getTiposDocumento().subscribe({
-      next: tipos => {
-        if (tipos?.length) {
-          this.tipos.set(tipos);
-          if (!tipos.some(t => t.codigo === this.tipoSeleccionado())) {
-            this.tipoSeleccionado.set(tipos[0].codigo);
-          }
+    this.cargarTipos();
+    this.modalForm.nativeElement.showModal();
+  }
+
+  /**
+   * Trae los tipos de trámite y deja sólo los que el socio puede pedir: los
+   * que exigen un beneficio (medicamentos pide farmacia, evacuación pide
+   * alojamiento) sólo aparecen si lo tiene contratado, y el resto es para
+   * todos. El filtro es para no ofrecer lo que se va a rechazar: la
+   * validación de verdad la hace el backend al recibir los documentos.
+   */
+  cargarTipos() {
+    if (this.tipos().length) return; // ya cargados en una apertura anterior
+
+    this.cargandoTipos.set(true);
+    this.errorTipos.set(false);
+
+    this.gestionListasService.getListas().subscribe({
+      next: ({ tipos }) => {
+        const disponibles = tipos.filter(tipo => this.puedePedir(tipo));
+
+        this.tipos.set(disponibles);
+        this.cargandoTipos.set(false);
+        this.errorTipos.set(disponibles.length === 0);
+
+        if (!disponibles.some(tipo => tipo.clave === this.tipoSeleccionado())) {
+          this.tipoSeleccionado.set(disponibles[0]?.clave ?? '');
         }
       },
-      error: () => {} // si falla, se usa el tipo por defecto
+      error: () => {
+        this.cargandoTipos.set(false);
+        this.errorTipos.set(true);
+      }
     });
+  }
 
-    this.modalForm.nativeElement.showModal();
+  private puedePedir(tipo: TipoTramite): boolean {
+    if (!tipo.beneficio) return true;
+
+    return this.beneficios()[tipo.beneficio];
   }
 
   /**
@@ -126,7 +172,7 @@ export class SolicitarReintegroComponent implements OnDestroy {
   }
 
   enviar() {
-    if (this.enviando() || !this.archivos().length) return;
+    if (this.enviando() || !this.archivos().length || !this.tipoSeleccionado()) return;
 
     this.enviando.set(true);
     this.errorValidacion.set(null);

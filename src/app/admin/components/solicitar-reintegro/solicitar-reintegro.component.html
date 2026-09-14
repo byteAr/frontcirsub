@@ -20,15 +20,31 @@
 
     <!--
       El tipo define el prefijo del archivo que recibe el sistema de gestión,
-      así que se pregunta primero. Si el backend devolviera un solo tipo el
-      select se oculta: no tiene sentido hacer elegir sin alternativas.
+      así que se pregunta primero. La lista la manda el sistema de gestión y ya
+      viene filtrada por los beneficios que el socio tiene contratados.
     -->
-    <div class="mt-3" *ngIf="tipos().length > 1">
+    <div class="mt-3">
       <label class="text-xs text-gray-500 font-semibold">Tipo de trámite</label>
-      <select class="select select-sm select-bordered w-full mt-1 text-xs"
+
+      <p *ngIf="cargandoTipos()" class="text-[0.7rem] text-gray-400 mt-1 flex items-center gap-1">
+        <span class="loading loading-spinner loading-xs"></span>
+        Cargando los tipos de trámite...
+      </p>
+
+      <select *ngIf="!cargandoTipos() && tipos().length"
+        class="select select-sm select-bordered w-full mt-1 text-xs"
         [value]="tipoSeleccionado()" (change)="seleccionarTipo($event)">
-        <option *ngFor="let tipo of tipos()" [value]="tipo.codigo">{{ tipo.descripcion }}</option>
+        <option *ngFor="let tipo of tipos()" [value]="tipo.clave">{{ tipo.descripcion }}</option>
       </select>
+
+      <!--
+        Sin tipos no se puede armar el nombre del archivo, así que tampoco se
+        puede enviar. Se dice por qué en vez de dejar el formulario mudo.
+      -->
+      <p *ngIf="!cargandoTipos() && errorTipos()" class="text-[0.7rem] text-red-500 mt-1">
+        No pudimos obtener los tipos de trámite disponibles.
+        <button type="button" (click)="cargarTipos()" class="underline cursor-pointer">Reintentar</button>
+      </p>
     </div>
 
     <div class="flex justify-center gap-2 mt-4">
@@ -78,8 +94,8 @@
         {{ enviando() ? 'Cancelar envío' : 'Cancelar' }}
       </button>
       <button class="btn btn-sm text-white border-none"
-        [ngClass]="archivos().length && !enviando() && !procesando() ? 'bg-cyan-600' : 'bg-gray-400'"
-        [disabled]="!archivos().length || enviando() || procesando()" (click)="enviar()">
+        [ngClass]="archivos().length && tipoSeleccionado() && !enviando() && !procesando() ? 'bg-cyan-600' : 'bg-gray-400'"
+        [disabled]="!archivos().length || !tipoSeleccionado() || enviando() || procesando()" (click)="enviar()">
         <span *ngIf="enviando()" class="loading loading-spinner loading-xs"></span>
         {{ enviando() ? 'Enviando...' : 'Enviar' }}
       </button>

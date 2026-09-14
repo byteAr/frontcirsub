@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { SolicitarReintegroComponent } from '../../components/solicitar-reintegro/solicitar-reintegro.component';
+import { ValoresMutualComponent } from '../../components/valores-mutual/valores-mutual.component';
 import { OrdenPago, ReintegrosService } from '../../services/reintegros.service';
 
 /** Cuántas filas se agregan cada vez que el socio llega al final de la lista. */
@@ -9,7 +10,7 @@ const FILAS_POR_TANDA = 15;
 @Component({
   selector: 'app-reintegros',
   standalone: true,
-  imports: [CommonModule, SolicitarReintegroComponent],
+  imports: [CommonModule, SolicitarReintegroComponent, ValoresMutualComponent],
   templateUrl: './reintegros.component.html',
   styleUrl: './reintegros.component.css'
 })
