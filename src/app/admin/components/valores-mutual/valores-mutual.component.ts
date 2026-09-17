@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, inject, signal, ViewChild } from '@angular/core';
+import { Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
 
-import { GestionListasService, ValoresMutual } from '../../services/gestion-listas.service';
+import { GestionListasService, ValorItem, ValoresMutual } from '../../services/gestion-listas.service';
 
 /** Una jerarquía de la columna GRADO de la planilla, con su número. */
 interface Jerarquia {
@@ -55,25 +55,6 @@ const GRUPOS_TIPO: GrupoTipo[] = [
   },
 ];
 
-/**
- * Período de la planilla y mes de actualización de cada columna.
- *
- * Estáticos por ahora: api-list_tramite.php manda los importes pero no desde
- * cuándo rigen. Quedan juntos y en un solo lugar para que actualizarlos sea
- * cambiar estas líneas, hasta que gestión los agregue a la respuesta.
- */
-const PERIODO = 'Agosto 2026';
-
-const MESES_ACTUALIZACION = {
-  cuotaSocial: 'ago-26',
-  sepelio: 'dic-25',
-  farmacia: 'ago-26',
-  evacuacion: 'ago-26',
-  seguroVida: 'dic-25',
-};
-
-const MES_SUBSIDIOS = 'ago-26';
-
 @Component({
   selector: 'app-valores-mutual',
   standalone: true,
@@ -92,12 +73,28 @@ export class ValoresMutualComponent {
   error = signal<string | null>(null);
 
   grupos = GRUPOS_TIPO;
-  periodo = PERIODO;
-  meses = MESES_ACTUALIZACION;
-  mesSubsidios = MES_SUBSIDIOS;
 
   /** Para el rowspan de las columnas que valen igual para todas las jerarquías. */
   totalJerarquias = GRUPOS_TIPO.reduce((total, grupo) => total + grupo.jerarquias.length, 0);
+
+  /** "Septiembre 2026". Sale del mes más nuevo que haya mandado el PHP. */
+  periodo = computed(() => this.valores()?.periodo ?? '');
+
+  /**
+   * Los tres tipos suelen actualizarse juntos, y ahí alcanza con una sola
+   * celda de mes abajo de la columna, como en el papel. Si alguna vez llegan
+   * con meses distintos, cada tipo muestra el suyo al lado del importe.
+   */
+  mesCuotaSocialUnico = computed<string | null>(() => {
+    const meses = Object.values(this.valores()?.cuotaPorTipo ?? {})
+      .map(cuota => cuota?.actualizado ?? null);
+
+    if (meses.some(mes => mes === null)) return null;
+
+    const distintos = new Set(meses);
+
+    return distintos.size === 1 ? [...distintos][0] : null;
+  });
 
   abrir(): void {
     this.modalValores.nativeElement.showModal();
@@ -139,7 +136,7 @@ export class ValoresMutualComponent {
   }
 
   /** Cuota social del tipo, o null si el PHP no la mandó. */
-  cuotaDe(tipo: string): number | null {
+  cuotaDe(tipo: string): ValorItem | null {
     return this.valores()?.cuotaPorTipo[tipo] ?? null;
   }
 }

@@ -85,6 +85,10 @@ export default [
         loadComponent: () => import('./pages/descuentos/descuentos.component')
       },
       {
+        path: 'ahorros',
+        loadComponent: () => import('./pages/ahorros/ahorros.component')
+      },
+      {
         path: 'notificaciones',
         loadComponent: () => import('./pages/notificaciones/notificaciones.component')
       },

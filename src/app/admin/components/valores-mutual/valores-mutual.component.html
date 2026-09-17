@@ -14,8 +14,8 @@
   <div class="modal-box w-[95%] md:w-[85%] max-w-5xl max-h-[88vh] overflow-y-auto custom-scrollbar">
 
     <h3 class="font-bold text-base text-cyan-600">Valores y subsidios</h3>
-    <p class="text-xs text-gray-500 mt-1">
-      Valores aplicables con haberes {{ periodo }}
+    <p class="text-xs text-gray-500 mt-1" *ngIf="periodo()">
+      Valores aplicables con haberes {{ periodo() }}
     </p>
 
     <div *ngIf="cargando()" class="flex items-center justify-center gap-2 py-12 text-gray-400 text-sm">
@@ -96,7 +96,16 @@
                 </td>
                 <td *ngIf="i === 0" [attr.rowspan]="grupo.jerarquias.length"
                   class="px-3 py-1.5 text-sm font-semibold text-gray-700 tabular-nums border border-gray-300 align-middle">
-                  {{ (cuotaDe(grupo.tipo) | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}
+                  {{ (cuotaDe(grupo.tipo)?.importe | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}
+                  <!--
+                    El mes va abajo del pie de la tabla cuando los tres tipos
+                    se actualizaron juntos, que es lo habitual. Si alguno quedó
+                    en otro mes, se aclara acá para no mostrar uno solo que no
+                    vale para los tres.
+                  -->
+                  <span *ngIf="!mesCuotaSocialUnico()" class="block text-[0.6rem] font-normal text-gray-400">
+                    act. {{ cuotaDe(grupo.tipo)?.actualizado || '-' }}
+                  </span>
                 </td>
 
                 <!--
@@ -105,34 +114,35 @@
                 -->
                 <td *ngIf="g === 0 && i === 0" [attr.rowspan]="totalJerarquias"
                   class="px-3 py-1.5 text-sm font-semibold text-gray-700 tabular-nums border border-gray-300 align-middle">
-                  {{ (v.servicios.sepelio | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}
+                  {{ (v.servicios.sepelio?.importe | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}
                 </td>
                 <td *ngIf="g === 0 && i === 0" [attr.rowspan]="totalJerarquias"
                   class="px-3 py-1.5 text-sm font-semibold text-gray-700 tabular-nums border border-gray-300 align-middle">
-                  {{ (v.servicios.farmacia | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}
+                  {{ (v.servicios.farmacia?.importe | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}
                 </td>
                 <td *ngIf="g === 0 && i === 0" [attr.rowspan]="totalJerarquias"
                   class="px-3 py-1.5 text-sm font-semibold text-gray-700 tabular-nums border border-gray-300 align-middle">
-                  {{ (v.servicios.evacuacion | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}
+                  {{ (v.servicios.evacuacion?.importe | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}
                 </td>
                 <td *ngIf="g === 0 && i === 0" [attr.rowspan]="totalJerarquias"
                   class="px-3 py-1.5 text-sm font-semibold text-gray-700 tabular-nums border border-gray-300 align-middle">
-                  {{ (v.servicios.seguroVida | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}
+                  {{ (v.servicios.seguroVida?.importe | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}
                 </td>
               </tr>
             </ng-container>
           </tbody>
 
+          <!-- Cada columna trae su propio mes desde el sistema de gestión -->
           <tfoot>
             <tr class="bg-green-100 text-green-900">
               <td class="px-3 py-1.5 text-left text-[0.7rem] font-semibold uppercase tracking-wider border border-gray-300" colspan="3">
                 Mes de actualización
               </td>
-              <td class="px-2 py-1.5 text-xs font-semibold border border-gray-300">{{ meses.cuotaSocial }}</td>
-              <td class="px-2 py-1.5 text-xs font-semibold border border-gray-300">{{ meses.sepelio }}</td>
-              <td class="px-2 py-1.5 text-xs font-semibold border border-gray-300">{{ meses.farmacia }}</td>
-              <td class="px-2 py-1.5 text-xs font-semibold border border-gray-300">{{ meses.evacuacion }}</td>
-              <td class="px-2 py-1.5 text-xs font-semibold border border-gray-300">{{ meses.seguroVida }}</td>
+              <td class="px-2 py-1.5 text-xs font-semibold border border-gray-300">{{ mesCuotaSocialUnico() || 'varios' }}</td>
+              <td class="px-2 py-1.5 text-xs font-semibold border border-gray-300">{{ v.servicios.sepelio?.actualizado || '-' }}</td>
+              <td class="px-2 py-1.5 text-xs font-semibold border border-gray-300">{{ v.servicios.farmacia?.actualizado || '-' }}</td>
+              <td class="px-2 py-1.5 text-xs font-semibold border border-gray-300">{{ v.servicios.evacuacion?.actualizado || '-' }}</td>
+              <td class="px-2 py-1.5 text-xs font-semibold border border-gray-300">{{ v.servicios.seguroVida?.actualizado || '-' }}</td>
             </tr>
           </tfoot>
         </table>
@@ -149,11 +159,13 @@
           <div class="flex items-center justify-between px-4 py-2" [ngClass]="grupo.clase">
             <p class="text-xs font-bold uppercase tracking-wider">Tipo {{ grupo.tipo }}</p>
             <p class="text-sm font-bold tabular-nums">
-              {{ (cuotaDe(grupo.tipo) | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}
+              {{ (cuotaDe(grupo.tipo)?.importe | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}
             </p>
           </div>
           <div class="px-4 py-2.5 bg-white">
-            <p class="text-[0.6rem] text-gray-400 uppercase tracking-wider">Cuota social · act. {{ meses.cuotaSocial }}</p>
+            <p class="text-[0.6rem] text-gray-400 uppercase tracking-wider">
+              Cuota social · act. {{ cuotaDe(grupo.tipo)?.actualizado || '-' }}
+            </p>
             <ul class="mt-1.5 flex flex-wrap gap-1.5">
               <li *ngFor="let jerarquia of grupo.jerarquias"
                 class="text-[0.65rem] text-gray-600 bg-gray-100 rounded-full px-2 py-0.5 whitespace-nowrap">
@@ -169,20 +181,20 @@
           </p>
           <dl class="divide-y divide-gray-100 bg-white">
             <div class="flex items-center justify-between px-4 py-2">
-              <dt class="text-xs text-gray-500">Sepelio <span class="text-gray-300">· {{ meses.sepelio }}</span></dt>
-              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ (v.servicios.sepelio | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}</dd>
+              <dt class="text-xs text-gray-500">Sepelio <span class="text-gray-300">· {{ v.servicios.sepelio?.actualizado || '-' }}</span></dt>
+              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ (v.servicios.sepelio?.importe | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}</dd>
             </div>
             <div class="flex items-center justify-between px-4 py-2">
-              <dt class="text-xs text-gray-500">Farmacia <span class="text-gray-300">· {{ meses.farmacia }}</span></dt>
-              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ (v.servicios.farmacia | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}</dd>
+              <dt class="text-xs text-gray-500">Farmacia <span class="text-gray-300">· {{ v.servicios.farmacia?.actualizado || '-' }}</span></dt>
+              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ (v.servicios.farmacia?.importe | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}</dd>
             </div>
             <div class="flex items-center justify-between px-4 py-2">
-              <dt class="text-xs text-gray-500">Evacuación <span class="text-gray-300">· {{ meses.evacuacion }}</span></dt>
-              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ (v.servicios.evacuacion | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}</dd>
+              <dt class="text-xs text-gray-500">Evacuación <span class="text-gray-300">· {{ v.servicios.evacuacion?.actualizado || '-' }}</span></dt>
+              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ (v.servicios.evacuacion?.importe | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}</dd>
             </div>
             <div class="flex items-center justify-between px-4 py-2">
-              <dt class="text-xs text-gray-500">Seguro de vida <span class="text-gray-300">· {{ meses.seguroVida }}</span></dt>
-              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ (v.servicios.seguroVida | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}</dd>
+              <dt class="text-xs text-gray-500">Seguro de vida <span class="text-gray-300">· {{ v.servicios.seguroVida?.actualizado || '-' }}</span></dt>
+              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ (v.servicios.seguroVida?.importe | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}</dd>
             </div>
           </dl>
         </article>
@@ -193,7 +205,11 @@
         Subsidios
       </p>
 
-      <!-- Escritorio: una columna por subsidio, como el papel -->
+      <!--
+        Escritorio: una columna por subsidio, como el papel. La columna única
+        "mes a aplicar" que tenía la planilla no sirve más: cada subsidio se
+        actualiza en su propio mes, así que el mes va debajo de cada importe.
+      -->
       <div class="hidden md:block border border-gray-200 border-t-0 rounded-b-xl overflow-hidden">
         <table class="w-full border-collapse text-center">
           <thead>
@@ -201,9 +217,6 @@
               <th *ngFor="let subsidio of v.subsidios"
                 class="px-2 py-2 text-[0.7rem] font-semibold text-gray-500 uppercase tracking-wider border border-gray-200">
                 {{ subsidio.descripcion }}
-              </th>
-              <th class="px-2 py-2 text-[0.7rem] font-semibold text-gray-500 uppercase tracking-wider border border-gray-200">
-                Mes a aplicar
               </th>
             </tr>
           </thead>
@@ -213,8 +226,11 @@
                 class="px-2 py-2 text-sm font-semibold text-gray-700 tabular-nums border border-gray-200">
                 {{ subsidio.importe | currency:'ARS':'symbol':'1.2-2':'es-AR' }}
               </td>
-              <td class="px-2 py-2 text-xs font-semibold text-green-700 bg-green-50 border border-gray-200">
-                {{ mesSubsidios }}
+            </tr>
+            <tr class="bg-green-50">
+              <td *ngFor="let subsidio of v.subsidios"
+                class="px-2 py-1.5 text-[0.7rem] font-semibold text-green-700 border border-gray-200">
+                {{ subsidio.actualizado }}
               </td>
             </tr>
           </tbody>
@@ -224,14 +240,12 @@
       <!-- Celular: uno abajo del otro -->
       <dl class="md:hidden border border-gray-200 border-t-0 rounded-b-xl divide-y divide-gray-100 bg-white">
         <div *ngFor="let subsidio of v.subsidios" class="flex items-center justify-between px-4 py-2">
-          <dt class="text-xs text-gray-500">{{ subsidio.descripcion }}</dt>
+          <dt class="text-xs text-gray-500">
+            {{ subsidio.descripcion }} <span class="text-gray-300">· {{ subsidio.actualizado }}</span>
+          </dt>
           <dd class="text-sm font-semibold text-gray-700 tabular-nums">
             {{ subsidio.importe | currency:'ARS':'symbol':'1.2-2':'es-AR' }}
           </dd>
-        </div>
-        <div class="flex items-center justify-between px-4 py-2 bg-green-50">
-          <dt class="text-[0.7rem] text-green-700 uppercase tracking-wider">Mes a aplicar</dt>
-          <dd class="text-xs font-semibold text-green-700">{{ mesSubsidios }}</dd>
         </div>
       </dl>
 
@@ -243,12 +257,16 @@
           </p>
           <dl class="divide-y divide-gray-100 bg-white">
             <div class="flex items-center justify-between px-4 py-2">
-              <dt class="text-xs text-gray-500 uppercase tracking-wider">Titular</dt>
-              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ (v.reintegroSepelio.titular | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}</dd>
+              <dt class="text-xs text-gray-500 uppercase tracking-wider">
+                Titular <span class="text-gray-300 normal-case">· {{ v.reintegroSepelio.titular?.actualizado || '-' }}</span>
+              </dt>
+              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ (v.reintegroSepelio.titular?.importe | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}</dd>
             </div>
             <div class="flex items-center justify-between px-4 py-2">
-              <dt class="text-xs text-gray-500 uppercase tracking-wider">Esposa</dt>
-              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ (v.reintegroSepelio.esposa | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}</dd>
+              <dt class="text-xs text-gray-500 uppercase tracking-wider">
+                Esposa <span class="text-gray-300 normal-case">· {{ v.reintegroSepelio.esposa?.actualizado || '-' }}</span>
+              </dt>
+              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ (v.reintegroSepelio.esposa?.importe | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}</dd>
             </div>
           </dl>
         </div>
@@ -259,12 +277,16 @@
           </p>
           <dl class="divide-y divide-gray-100 bg-white">
             <div class="flex items-center justify-between px-4 py-2">
-              <dt class="text-xs text-gray-500 uppercase tracking-wider">Titular</dt>
-              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ (v.seguroVida.titular | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}</dd>
+              <dt class="text-xs text-gray-500 uppercase tracking-wider">
+                Titular <span class="text-gray-300 normal-case">· {{ v.seguroVida.titular?.actualizado || '-' }}</span>
+              </dt>
+              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ (v.seguroVida.titular?.importe | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}</dd>
             </div>
             <div class="flex items-center justify-between px-4 py-2">
-              <dt class="text-xs text-gray-500 uppercase tracking-wider">Esposa</dt>
-              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ (v.seguroVida.esposa | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}</dd>
+              <dt class="text-xs text-gray-500 uppercase tracking-wider">
+                Esposa <span class="text-gray-300 normal-case">· {{ v.seguroVida.esposa?.actualizado || '-' }}</span>
+              </dt>
+              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ (v.seguroVida.esposa?.importe | currency:'ARS':'symbol':'1.2-2':'es-AR') || '-' }}</dd>
             </div>
           </dl>
         </div>
@@ -281,7 +303,9 @@
         </p>
         <dl class="divide-y divide-gray-100 bg-white">
           <div *ngFor="let otro of v.otros" class="flex items-center justify-between px-4 py-2">
-            <dt class="text-xs text-gray-500">{{ otro.descripcion }}</dt>
+            <dt class="text-xs text-gray-500">
+              {{ otro.descripcion }} <span class="text-gray-300">· {{ otro.actualizado }}</span>
+            </dt>
             <dd class="text-sm font-semibold text-gray-700 tabular-nums">
               {{ otro.importe | currency:'ARS':'symbol':'1.2-2':'es-AR' }}
             </dd>

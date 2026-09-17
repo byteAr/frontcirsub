@@ -14,6 +14,8 @@ export interface ValorPhp {
   descr: string;
   /** Llega como texto: "104073.00". */
   valor: string;
+  /** Mes desde el que rige el importe: "sep 26". Se agregó después. */
+  FechaUpd?: string;
 }
 
 /** Una fila del segundo array. Ojo con "descrp", que va sin la i. */
@@ -23,13 +25,38 @@ export interface TipoTramitePhp {
   descrp: string;
 }
 
-/** La respuesta completa: una tupla de dos arrays, no un objeto. */
-export type ListasPhp = [ValorPhp[], TipoTramitePhp[]];
+/** Una cuenta de ahorro del tercer elemento. */
+export interface AhorroPhp {
+  Tipo: string;
+  /** Llega como texto: "112825.19". */
+  Am_saldo: string;
+  /** AAAA-MM-DD. */
+  Am_fechamov: string;
+}
+
+/**
+ * El tercer elemento, que a diferencia de los otros dos es un objeto y no un
+ * array. `Muestra` dice si al socio hay que ofrecerle la sección.
+ */
+export interface AhorrosPhp {
+  Muestra?: boolean;
+  Ahorros?: AhorroPhp[];
+}
+
+/**
+ * La respuesta completa. Es una tupla, no un objeto, y le fueron agregando
+ * elementos con el tiempo: el tercero puede no venir.
+ */
+export type ListasPhp = [ValorPhp[], TipoTramitePhp[], AhorrosPhp?];
 
 export interface ValorItem {
   codigo: string;
   descripcion: string;
   importe: number;
+  /** Mes de actualización tal cual lo manda el PHP: "sep 26", o "-". */
+  actualizado: string;
+  /** "2026-09", sólo para ordenar y para sacar el período. */
+  actualizadoIso: string | null;
 }
 
 /**
@@ -39,17 +66,22 @@ export interface ValorItem {
  */
 export interface ValoresMutual {
   /** Cuota social por tipo de socio: la clave es "1", "2" o "3". */
-  cuotaPorTipo: Record<string, number | null>;
+  cuotaPorTipo: Record<string, ValorItem | null>;
   servicios: {
-    sepelio: number | null;
-    farmacia: number | null;
-    evacuacion: number | null;
-    seguroVida: number | null;
+    sepelio: ValorItem | null;
+    farmacia: ValorItem | null;
+    evacuacion: ValorItem | null;
+    seguroVida: ValorItem | null;
   };
   subsidios: ValorItem[];
-  reintegroSepelio: { titular: number | null; esposa: number | null };
-  seguroVida: { titular: number | null; esposa: number | null };
+  reintegroSepelio: { titular: ValorItem | null; esposa: ValorItem | null };
+  seguroVida: { titular: ValorItem | null; esposa: ValorItem | null };
   otros: ValorItem[];
+  /**
+   * Período de la planilla: el mes más reciente de todo lo que vino
+   * ("Septiembre 2026"). Sale de los datos, no de una constante.
+   */
+  periodo: string;
 }
 
 export interface TipoTramite {
@@ -63,9 +95,25 @@ export interface TipoTramite {
   beneficio?: 'far' | 'eva' | 'sep' | 'seg';
 }
 
+export interface Ahorro {
+  tipo: string;
+  saldo: number;
+  /** dd/mm/aaaa, listo para mostrar. */
+  fecha: string;
+  /** AAAA-MM-DD, sólo para ordenar. */
+  fechaIso: string | null;
+}
+
+export interface AhorrosSocio {
+  /** Si viene en false, la sección no se le ofrece al socio. */
+  muestra: boolean;
+  cuentas: Ahorro[];
+}
+
 export interface ListasGestion {
   valores: ValoresMutual;
   tipos: TipoTramite[];
+  ahorros: AhorrosSocio;
 }
 
 /**
@@ -73,21 +121,6 @@ export interface ListasGestion {
  * que la pantalla y el papel se lean igual.
  */
 const ORDEN_SUBSIDIOS = ['1', '5', '4', '3', '2'];
-
-/**
- * Nombres para mostrar de los tipos de trámite. El PHP los manda en mayúsculas
- * y con alguna abreviatura de más ("REINTEGRO DE MEDICAMTO"), que no es lo que
- * conviene ponerle adelante al socio. Si aparece una clave nueva se muestra lo
- * que haya mandado el PHP, no se esconde.
- */
-const NOMBRES_TIPO_TRAMITE: Record<string, string> = {
-  RM: 'Reintegro de medicamentos',
-  RN: 'Reintegro por nacimiento',
-  RE: 'Reintegro por escolaridad',
-  RC: 'Reintegro por casamiento',
-  TE: 'Trámite de evacuación',
-  TP: 'Trámite de préstamo',
-};
 
 /**
  * Qué beneficio exige cada trámite. Esto el PHP no lo manda, así que vive acá.
@@ -99,14 +132,28 @@ const BENEFICIO_POR_TRAMITE: Record<string, TipoTramite['beneficio']> = {
   TE: 'eva',
 };
 
+/** Abreviaturas con las que el PHP manda el mes en FechaUpd. */
+const MESES_ABREVIADOS: Record<string, number> = {
+  ene: 1, feb: 2, mar: 3, abr: 4, may: 5, jun: 6,
+  jul: 7, ago: 8, sep: 9, set: 9, oct: 10, nov: 11, dic: 12,
+};
+
+const MESES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+];
+
+/** Lo que se muestra cuando un dato no vino. */
+const SIN_DATO = '-';
+
 @Injectable({ providedIn: 'root' })
 export class GestionListasService {
 
   private http = inject(HttpClient);
 
   /**
-   * El listado es el mismo para todos los socios —es una tabla de referencia,
-   * no depende de quién pregunte— así que se pide una sola vez por sesión.
+   * Los valores y los tipos de trámite son iguales para todos los socios, así
+   * que se piden una sola vez por sesión.
    */
   private cache?: Observable<ListasGestion>;
 
@@ -132,8 +179,8 @@ export class GestionListasService {
    * Llamada directa al PHP desde el navegador.
    *
    * userId y dni van porque el PHP los exige para contestar, pero no filtra
-   * nada con ellos: devuelve la misma tabla para cualquier valor. Por eso se
-   * mandan en cero y no hace falta el token.
+   * nada con ellos: devuelve lo mismo para cualquier valor. Por eso se mandan
+   * en cero y no hace falta el token.
    */
   private pedirAlPhp(): Observable<ListasPhp> {
     return this.http.post<ListasPhp>(
@@ -173,6 +220,9 @@ export class GestionListasService {
   /**
    * El PHP contesta 200 con {ok:0} o con el texto crudo de un error de MySQL
    * cuando algo falla, así que no alcanza con que el request no tire error.
+   *
+   * Sólo se exigen las dos primeras ramas: el tercer elemento se agregó
+   * después y no queremos romper si en algún momento no viene.
    */
   private validar(respuesta: unknown): Observable<ListasPhp> {
     if (!Array.isArray(respuesta) || !Array.isArray(respuesta[0]) || !Array.isArray(respuesta[1])) {
@@ -182,10 +232,11 @@ export class GestionListasService {
     return of(respuesta as ListasPhp);
   }
 
-  private normalizar([valores, tipos]: ListasPhp): ListasGestion {
+  private normalizar([valores, tipos, ahorros]: ListasPhp): ListasGestion {
     return {
       valores: this.normalizarValores(valores ?? []),
       tipos: this.normalizarTipos(tipos ?? []),
+      ahorros: this.normalizarAhorros(ahorros),
     };
   }
 
@@ -197,6 +248,7 @@ export class GestionListasService {
       reintegroSepelio: { titular: null, esposa: null },
       seguroVida: { titular: null, esposa: null },
       otros: [],
+      periodo: '',
     };
 
     const subsidios = new Map<string, ValorItem>();
@@ -209,20 +261,20 @@ export class GestionListasService {
 
       switch (clave) {
         case 'val/1': case 'val/2': case 'val/3':
-          valores.cuotaPorTipo[item.codigo] = item.importe;
+          valores.cuotaPorTipo[item.codigo] = item;
           break;
-        case 'val/4': valores.servicios.farmacia = item.importe; break;
-        case 'val/5': valores.servicios.evacuacion = item.importe; break;
-        case 'val/6': valores.servicios.sepelio = item.importe; break;
-        case 'val/7': valores.servicios.seguroVida = item.importe; break;
+        case 'val/4': valores.servicios.farmacia = item; break;
+        case 'val/5': valores.servicios.evacuacion = item; break;
+        case 'val/6': valores.servicios.sepelio = item; break;
+        case 'val/7': valores.servicios.seguroVida = item; break;
 
         case 'sub/1': case 'sub/2': case 'sub/3': case 'sub/4': case 'sub/5':
           subsidios.set(item.codigo, item);
           break;
-        case 'sub/6': valores.reintegroSepelio.titular = item.importe; break;
-        case 'sub/7': valores.reintegroSepelio.esposa = item.importe; break;
-        case 'sub/12': valores.seguroVida.titular = item.importe; break;
-        case 'sub/14': valores.seguroVida.esposa = item.importe; break;
+        case 'sub/6': valores.reintegroSepelio.titular = item; break;
+        case 'sub/7': valores.reintegroSepelio.esposa = item; break;
+        case 'sub/12': valores.seguroVida.titular = item; break;
+        case 'sub/14': valores.seguroVida.esposa = item; break;
 
         default:
           valores.otros.push(item);
@@ -240,19 +292,59 @@ export class GestionListasService {
       .map(([, item]) => item);
 
     valores.subsidios = [...conocidos, ...nuevos];
+    valores.periodo = this.periodoDe(filas);
 
     return valores;
   }
 
+  /**
+   * Período de la planilla: el mes más reciente de todos los conceptos. Es lo
+   * que antes era una constante con "Agosto 2026" escrito a mano.
+   */
+  private periodoDe(filas: ValorPhp[]): string {
+    const isos = filas
+      .map(fila => this.mesAIso(fila.FechaUpd))
+      .filter((iso): iso is string => !!iso);
+
+    if (!isos.length) return '';
+
+    const ultimo = isos.sort().at(-1)!;
+    const [anio, mes] = ultimo.split('-');
+
+    return `${MESES[Number(mes) - 1]} ${anio}`;
+  }
+
   private aItem(fila: ValorPhp): ValorItem {
+    const actualizado = (fila.FechaUpd ?? '').trim();
+
     return {
       codigo: (fila.codigo ?? '').toString().trim(),
-      descripcion: (fila.descr ?? '').trim() || '-',
+      descripcion: (fila.descr ?? '').trim() || SIN_DATO,
       // Los importes llegan como texto: "1080000.00".
       importe: Number(fila.valor) || 0,
+      actualizado: actualizado || SIN_DATO,
+      actualizadoIso: this.mesAIso(actualizado),
     };
   }
 
+  /** "sep 26" -> "2026-09". Null si no matchea, para no inventar fechas. */
+  private mesAIso(crudo: string | null | undefined): string | null {
+    const match = /^([a-zá-ú]{3})\.?\s*(\d{2}|\d{4})$/i.exec((crudo ?? '').trim());
+    if (!match) return null;
+
+    const mes = MESES_ABREVIADOS[match[1].toLowerCase()];
+    if (!mes) return null;
+
+    const anio = match[2].length === 2 ? `20${match[2]}` : match[2];
+
+    return `${anio}-${String(mes).padStart(2, '0')}`;
+  }
+
+  /**
+   * Los nombres salen del PHP tal cual, que es quien maneja la lista. Sólo se
+   * les baja la mayúscula sostenida: el PHP los manda gritados
+   * ("REINTEGRO DE FARMACIA") y así no se leen en un selector.
+   */
   private normalizarTipos(filas: TipoTramitePhp[]): TipoTramite[] {
     return filas
       .filter(fila => (fila?.clave ?? '').trim())
@@ -261,17 +353,48 @@ export class GestionListasService {
 
         return {
           clave,
-          descripcion: NOMBRES_TIPO_TRAMITE[clave] ?? this.aTextoLegible(fila.descrp),
+          descripcion: this.aTextoLegible(fila.descrp),
           ...(BENEFICIO_POR_TRAMITE[clave] && { beneficio: BENEFICIO_POR_TRAMITE[clave] }),
         };
       });
   }
 
-  /** "REINTEGRO DE MEDICAMTO" -> "Reintegro de medicamto". */
+  /** "REINTEGRO DE FARMACIA" -> "Reintegro de farmacia". */
   private aTextoLegible(crudo: string | undefined): string {
     const texto = (crudo ?? '').trim().toLowerCase();
     if (!texto) return 'Trámite';
 
     return texto.charAt(0).toUpperCase() + texto.slice(1);
+  }
+
+  private normalizarAhorros(crudo: AhorrosPhp | undefined): AhorrosSocio {
+    const cuentas = (crudo?.Ahorros ?? [])
+      .map(cuenta => this.aAhorro(cuenta))
+      .sort((a, b) => a.tipo.localeCompare(b.tipo));
+
+    return {
+      // Si el PHP no manda el flag, se asume que sí se muestra: lo que decide
+      // de verdad es si hay cuentas.
+      muestra: crudo?.Muestra !== false,
+      cuentas,
+    };
+  }
+
+  private aAhorro(cuenta: AhorroPhp): Ahorro {
+    const fechaIso = this.fechaAIso(cuenta.Am_fechamov);
+
+    return {
+      tipo: (cuenta.Tipo ?? '').trim() || SIN_DATO,
+      saldo: Number(cuenta.Am_saldo) || 0,
+      fecha: fechaIso ? fechaIso.split('-').reverse().join('/') : SIN_DATO,
+      fechaIso,
+    };
+  }
+
+  /** "2026-09-17" -> el mismo texto si es válido, null si no. */
+  private fechaAIso(crudo: string | null | undefined): string | null {
+    const texto = (crudo ?? '').trim();
+
+    return /^\d{4}-\d{2}-\d{2}$/.test(texto) ? texto : null;
   }
 }
