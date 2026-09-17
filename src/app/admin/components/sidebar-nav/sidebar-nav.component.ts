@@ -6,6 +6,7 @@ import { filter, map, startWith } from 'rxjs';
 
 import { AuthService } from '../../../auth/services/auth.service';
 import { LayoutService } from '../../../shared/services/layout.service';
+import { GestionListasService } from '../../services/gestion-listas.service';
 
 @Component({
   selector: 'app-sidebar-nav',
@@ -18,10 +19,27 @@ export class SidebarNavComponent {
 
   private router = inject(Router);
   private authService = inject(AuthService);
+  private gestionListasService = inject(GestionListasService);
   layout = inject(LayoutService);
 
   /** Submenú de Beneficios: arranca cerrado y se abre al tocarlo. */
   beneficiosAbierto = signal<boolean>(false);
+
+  /**
+   * "Mis ahorros" se ofrece sólo si el sistema de gestión lo habilita para el
+   * socio. Arranca oculto y aparece cuando se confirma: es menos molesto que
+   * mostrarlo y sacarlo a los dos segundos.
+   */
+  mostrarAhorros = signal<boolean>(false);
+
+  constructor() {
+    this.gestionListasService.getListas().subscribe({
+      next: ({ ahorros }) => this.mostrarAhorros.set(ahorros.muestra),
+      // Si no se pudo consultar, se ofrece igual: la vista tiene su propio
+      // reintento, y es peor esconderle al socio algo que sí tiene.
+      error: () => this.mostrarAhorros.set(true),
+    });
+  }
 
   private urlActual = toSignal(
     this.router.events.pipe(

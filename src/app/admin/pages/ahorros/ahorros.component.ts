@@ -41,14 +41,25 @@ export default class AhorrosComponent implements OnInit {
   hayCuentas = computed(() => this.habilitado() && this.cuentas().length > 0);
 
   ngOnInit(): void {
-    this.cargar();
+    // El sidebar ya preguntó al entrar al dashboard para saber si ofrecer la
+    // vista, así que acá alcanza con lo cacheado.
+    this.pedir(false);
   }
 
+  /** Reintentar sí descarta lo cacheado: si falló, no hay nada que reusar. */
   cargar(): void {
+    this.pedir(true);
+  }
+
+  private pedir(descartarCache: boolean): void {
     this.cargando.set(true);
     this.error.set(null);
 
-    this.gestionListasService.recargar().subscribe({
+    const listas$ = descartarCache
+      ? this.gestionListasService.recargar()
+      : this.gestionListasService.getListas();
+
+    listas$.subscribe({
       next: ({ ahorros }) => {
         this.cuentas.set(ahorros.cuentas);
         this.habilitado.set(ahorros.muestra);
