@@ -68,6 +68,17 @@ describe('GestionListasService', () => {
     return listas;
   }
 
+  /**
+   * Igual que listasDelPhp pero descartando la caché, para poder pedir varias
+   * veces dentro del mismo test.
+   */
+  function listasRecargadas(payload: unknown): ListasGestion {
+    let listas!: ListasGestion;
+    service.recargar().subscribe(resultado => (listas = resultado));
+    httpMock.expectOne(URL_PHP).flush(payload as Object);
+    return listas;
+  }
+
   it('manda userId y dni en cero: el PHP los exige pero no filtra con ellos', () => {
     service.getListas().subscribe();
 
@@ -200,6 +211,29 @@ describe('GestionListasService', () => {
       ]);
 
       expect(ahorros.muestra).toBe(false);
+    });
+
+    /**
+     * El PHP manda hoy un booleano, pero el mismo dato salido de MySQL llega
+     * como 0 o "0". Si eso se colara como "sí mostrar", le estaríamos
+     * mostrando saldos a quien el sistema de gestión dijo que no.
+     */
+    it('también apaga la sección con los ceros que manda MySQL', () => {
+      for (const apagado of [0, '0', 'false', '']) {
+        const { ahorros } = listasRecargadas([[], [], { Muestra: apagado }]);
+        expect(ahorros.muestra)
+          .withContext(`Muestra: ${JSON.stringify(apagado)}`)
+          .toBe(false);
+      }
+    });
+
+    it('muestra la sección con los valores que significan sí', () => {
+      for (const encendido of [true, 1, '1']) {
+        const { ahorros } = listasRecargadas([[], [], { Muestra: encendido }]);
+        expect(ahorros.muestra)
+          .withContext(`Muestra: ${JSON.stringify(encendido)}`)
+          .toBe(true);
+      }
     });
 
     it('no rompe si el tercer elemento no viene: se agregó después', () => {

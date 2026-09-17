@@ -39,7 +39,11 @@ export interface AhorroPhp {
  * array. `Muestra` dice si al socio hay que ofrecerle la sección.
  */
 export interface AhorrosPhp {
-  Muestra?: boolean;
+  /**
+   * Puede llegar como booleano, como 0/1 o como "0"/"1": depende de si el PHP
+   * lo escribe a mano o lo saca de MySQL.
+   */
+  Muestra?: boolean | number | string;
   Ahorros?: AhorroPhp[];
 }
 
@@ -373,11 +377,29 @@ export class GestionListasService {
       .sort((a, b) => a.tipo.localeCompare(b.tipo));
 
     return {
-      // Si el PHP no manda el flag, se asume que sí se muestra: lo que decide
-      // de verdad es si hay cuentas.
-      muestra: crudo?.Muestra !== false,
+      muestra: this.muestraLaSeccion(crudo?.Muestra),
       cuentas,
     };
+  }
+
+  /**
+   * Si el flag no vino, se asume que sí se muestra: lo que decide de verdad es
+   * si hay cuentas.
+   *
+   * No alcanza con comparar contra `false`. El PHP manda hoy un booleano, pero
+   * cuando el dato sale de MySQL suele llegar como 0 o "0", y ahí un
+   * `!== false` daría verdadero y le mostraríamos los saldos a quien no
+   * corresponde. Se toma como apagado cualquier cosa que signifique cero.
+   */
+  private muestraLaSeccion(valor: boolean | number | string | undefined): boolean {
+    if (valor === undefined || valor === null) return true;
+
+    if (typeof valor === 'string') {
+      const texto = valor.trim().toLowerCase();
+      return texto !== '' && texto !== '0' && texto !== 'false';
+    }
+
+    return Boolean(valor);
   }
 
   private aAhorro(cuenta: AhorroPhp): Ahorro {
