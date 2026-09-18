@@ -3,6 +3,8 @@ import { Component, computed, ElementRef, inject, OnDestroy, signal, ViewChild }
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../auth/services/auth.service';
 import { ImagenService } from '../../../shared/services/imagen.service';
+import { BotonAdherirmeComponent } from '../boton-adherirme/boton-adherirme.component';
+import { NOMBRE_BENEFICIO } from '../../constants/beneficios';
 import { GestionListasService, TipoTramite } from '../../services/gestion-listas.service';
 import { ReintegrosService } from '../../services/reintegros.service';
 
@@ -12,7 +14,7 @@ const MAX_TAMANIO = 10 * 1024 * 1024; // 10MB
 
 @Component({
   selector: 'app-solicitar-reintegro',
-  imports: [CommonModule],
+  imports: [CommonModule, BotonAdherirmeComponent],
   templateUrl: './solicitar-reintegro.component.html',
   styleUrl: './solicitar-reintegro.component.css'
 })
@@ -20,6 +22,7 @@ export class SolicitarReintegroComponent implements OnDestroy {
 
   @ViewChild('modalForm') modalForm!: ElementRef<HTMLDialogElement>;
   @ViewChild('modalResultado') modalResultado!: ElementRef<HTMLDialogElement>;
+  @ViewChild('modalAdhesion') modalAdhesion!: ElementRef<HTMLDialogElement>;
   @ViewChild('inputArchivos') inputArchivos!: ElementRef<HTMLInputElement>;
   @ViewChild('inputCamara') inputCamara!: ElementRef<HTMLInputElement>;
 
@@ -29,15 +32,25 @@ export class SolicitarReintegroComponent implements OnDestroy {
   private imagenService = inject(ImagenService);
 
   /**
-   * Tipos de trámite que puede pedir este socio. Salen de api-list_tramite.php:
-   * la lista la maneja gestión, no el front. La clave (RM, RN, TE...) es lo que
-   * importa, porque va como prefijo del archivo en disco y es con lo que el
-   * sistema de gestión clasifica lo que sube el socio.
+   * Todos los tipos de trámite, tenga o no el beneficio que exigen: así el
+   * socio ve lo que existe, y si elige uno al que no está adherido se le
+   * explica por qué no puede y cómo adherirse. Salen de api-list_tramite.php:
+   * la lista la maneja gestión, no el front. La clave (RM, RN, TE...) va como
+   * prefijo del archivo en disco y es con lo que el sistema de gestión
+   * clasifica lo que sube el socio.
    */
   tipos = signal<TipoTramite[]>([]);
   tipoSeleccionado = signal<string>('');
   cargandoTipos = signal<boolean>(false);
   errorTipos = signal<boolean>(false);
+
+  /** El trámite que eligió sin estar adherido al beneficio que exige. */
+  tramiteSinAdhesion = signal<TipoTramite | null>(null);
+
+  nombreBeneficioFaltante = computed(() => {
+    const beneficio = this.tramiteSinAdhesion()?.beneficio;
+    return beneficio ? NOMBRE_BENEFICIO[beneficio] : '';
+  });
 
   /** Beneficios contratados, como los devuelve sp_Perfil_completo_detallado. */
   private beneficios = computed(() => {
@@ -78,11 +91,9 @@ export class SolicitarReintegroComponent implements OnDestroy {
   }
 
   /**
-   * Trae los tipos de trámite y deja sólo los que el socio puede pedir: los
-   * que exigen un beneficio (medicamentos pide farmacia, evacuación pide
-   * alojamiento) sólo aparecen si lo tiene contratado, y el resto es para
-   * todos. El filtro es para no ofrecer lo que se va a rechazar: la
-   * validación de verdad la hace el backend al recibir los documentos.
+   * Trae los tipos de trámite, todos. Arranca seleccionado el primero que el
+   * socio puede pedir, para que el formulario nunca abra con un trámite que
+   * le va a saltar el aviso de "no adherido" sin haber tocado nada.
    */
   cargarTipos() {
     if (this.tipos().length) return; // ya cargados en una apertura anterior
@@ -92,14 +103,13 @@ export class SolicitarReintegroComponent implements OnDestroy {
 
     this.gestionListasService.getListas().subscribe({
       next: ({ tipos }) => {
-        const disponibles = tipos.filter(tipo => this.puedePedir(tipo));
-
-        this.tipos.set(disponibles);
+        this.tipos.set(tipos);
         this.cargandoTipos.set(false);
-        this.errorTipos.set(disponibles.length === 0);
+        this.errorTipos.set(tipos.length === 0);
 
-        if (!disponibles.some(tipo => tipo.clave === this.tipoSeleccionado())) {
-          this.tipoSeleccionado.set(disponibles[0]?.clave ?? '');
+        const permitidos = tipos.filter(tipo => this.puedePedir(tipo));
+        if (!permitidos.some(tipo => tipo.clave === this.tipoSeleccionado())) {
+          this.tipoSeleccionado.set(permitidos[0]?.clave ?? '');
         }
       },
       error: () => {
@@ -137,7 +147,31 @@ export class SolicitarReintegroComponent implements OnDestroy {
   }
 
   seleccionarTipo(event: Event) {
-    this.tipoSeleccionado.set((event.target as HTMLSelectElement).value);
+    const selector = event.target as HTMLSelectElement;
+    const tipo = this.tipos().find(t => t.clave === selector.value);
+
+    if (tipo && !this.puedePedir(tipo)) {
+      // El selector vuelve a lo que estaba: si quedara marcado, el socio
+      // cargaría los documentos y recién al enviar se enteraría del rechazo.
+      selector.value = this.tipoSeleccionado();
+      this.avisarNoAdherido(tipo);
+      return;
+    }
+
+    this.tipoSeleccionado.set(selector.value);
+  }
+
+  /**
+   * Se abre encima del formulario, sin cerrarlo: al volver, el socio sigue
+   * con lo que tenía cargado.
+   */
+  private avisarNoAdherido(tipo: TipoTramite) {
+    this.tramiteSinAdhesion.set(tipo);
+    this.modalAdhesion.nativeElement.showModal();
+  }
+
+  cerrarAvisoAdhesion() {
+    this.modalAdhesion.nativeElement.close();
   }
 
   onArchivosSeleccionados(event: Event) {
@@ -173,6 +207,15 @@ export class SolicitarReintegroComponent implements OnDestroy {
 
   enviar() {
     if (this.enviando() || !this.archivos().length || !this.tipoSeleccionado()) return;
+
+    // Red de contención: el selector ya no deja elegir un trámite sin
+    // adhesión, pero si por algún camino quedara uno, se avisa en vez de
+    // mandar documentos que el backend va a rechazar con 403.
+    const tipo = this.tipos().find(t => t.clave === this.tipoSeleccionado());
+    if (tipo && !this.puedePedir(tipo)) {
+      this.avisarNoAdherido(tipo);
+      return;
+    }
 
     this.enviando.set(true);
     this.errorValidacion.set(null);

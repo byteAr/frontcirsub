@@ -20,8 +20,9 @@
 
     <!--
       El tipo define el prefijo del archivo que recibe el sistema de gestión,
-      así que se pregunta primero. La lista la manda el sistema de gestión y ya
-      viene filtrada por los beneficios que el socio tiene contratados.
+      así que se pregunta primero. La lista la manda el sistema de gestión y
+      muestra todos los trámites: si elige uno que exige un beneficio al que no
+      está adherido, se le avisa en un modal y el selector vuelve atrás.
     -->
     <div class="mt-3">
       <label class="text-xs text-gray-500 font-semibold">Tipo de trámite</label>
@@ -131,5 +132,34 @@
         {{ resultado() === 'exito' ? 'Aceptar' : 'Reintentar' }}
       </button>
     </div>
+  </div>
+</dialog>
+
+<!--
+  Aviso de "no adherido". Aparece cuando el socio elige un trámite que exige
+  un beneficio que no tiene. Se abre encima del formulario sin cerrarlo, así
+  al volver sigue con lo que tenía cargado. El botón es el mismo de la vista
+  de Beneficios.
+-->
+<dialog #modalAdhesion class="modal">
+  <div class="modal-box w-[88%] md:w-[40%] lg:w-[30%] max-w-md text-center">
+    <div class="w-14 h-14 mx-auto rounded-full bg-gray-100 flex items-center justify-center" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"><path fill="#6b7280" d="M11 17h2v-6h-2zm1-8q.425 0 .713-.288T13 8t-.288-.712T12 7t-.712.288T11 8t.288.713T12 9m0 13q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22"/></svg>
+    </div>
+
+    <h3 class="font-bold text-base text-gray-800 mt-3">
+      No está adherido al beneficio de {{ nombreBeneficioFaltante() }}
+    </h3>
+    <p class="text-sm text-gray-500 mt-2">
+      Para iniciar este trámite necesita estar adherido. Si desea adherirse,
+      escríbanos por WhatsApp y lo ayudamos.
+    </p>
+
+    <app-boton-adherirme *ngIf="tramiteSinAdhesion()?.beneficio as beneficio"
+      class="block mt-5" [beneficio]="beneficio"></app-boton-adherirme>
+
+    <button type="button" class="btn btn-sm btn-ghost w-full mt-2 text-gray-500" (click)="cerrarAvisoAdhesion()">
+      Volver
+    </button>
   </div>
 </dialog>

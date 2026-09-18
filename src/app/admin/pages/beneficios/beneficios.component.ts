@@ -2,9 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 
 import { AuthService } from '../../../auth/services/auth.service';
-
-/** Claves tal como vienen en userData.Beneficios de sp_Perfil_completo_detallado. */
-type ClaveBeneficio = 'far' | 'eva' | 'sep' | 'seg';
+import { BotonAdherirmeComponent } from '../../components/boton-adherirme/boton-adherirme.component';
+import { ClaveBeneficio, enlaceWhatsapp, NOMBRE_BENEFICIO } from '../../constants/beneficios';
 
 type Icono = 'farmacia' | 'evacuacion' | 'sepelio' | 'vida';
 
@@ -28,12 +27,8 @@ interface DefinicionBeneficio {
 
 export interface BeneficioVista extends DefinicionBeneficio {
   contratado: boolean;
-  enlaceAdhesion: string;
   enlaceConsultas: string | null;
 }
-
-/** Número de adhesiones. Es el mismo que usaba el botón "Adherirme" de antes. */
-const WHATSAPP_ADHESIONES = '5491126526532';
 
 /**
  * Orden base. En pantalla van primero los adheridos y después los que no,
@@ -43,7 +38,7 @@ const WHATSAPP_ADHESIONES = '5491126526532';
 const BENEFICIOS: DefinicionBeneficio[] = [
   {
     clave: 'far',
-    nombre: 'Farmacia',
+    nombre: NOMBRE_BENEFICIO.far,
     descripcion: 'Reintegro de gastos de medicamentos.',
     icono: 'farmacia',
     tono: { fondo: 'bg-cyan-50', icono: 'text-cyan-600', segmento: 'bg-cyan-500' },
@@ -51,7 +46,7 @@ const BENEFICIOS: DefinicionBeneficio[] = [
   },
   {
     clave: 'eva',
-    nombre: 'Evacuaciones',
+    nombre: NOMBRE_BENEFICIO.eva,
     descripcion: 'Alojamiento en caso de evacuación.',
     icono: 'evacuacion',
     tono: { fondo: 'bg-amber-50', icono: 'text-amber-600', segmento: 'bg-amber-500' },
@@ -59,7 +54,7 @@ const BENEFICIOS: DefinicionBeneficio[] = [
   },
   {
     clave: 'sep',
-    nombre: 'Seguro de sepelio',
+    nombre: NOMBRE_BENEFICIO.sep,
     descripcion: 'Cobertura del servicio de sepelio.',
     icono: 'sepelio',
     // Violeta y no gris: el gris es el color de "no adherido", y un sepelio
@@ -69,7 +64,7 @@ const BENEFICIOS: DefinicionBeneficio[] = [
   },
   {
     clave: 'seg',
-    nombre: 'Seguro de vida',
+    nombre: NOMBRE_BENEFICIO.seg,
     descripcion: 'Cobertura de seguro de vida.',
     icono: 'vida',
     tono: { fondo: 'bg-rose-50', icono: 'text-rose-600', segmento: 'bg-rose-500' },
@@ -79,7 +74,7 @@ const BENEFICIOS: DefinicionBeneficio[] = [
 @Component({
   selector: 'app-beneficios',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, BotonAdherirmeComponent],
   templateUrl: './beneficios.component.html',
   styleUrl: './beneficios.component.css',
 })
@@ -102,12 +97,8 @@ export default class BeneficiosComponent {
     const lista = BENEFICIOS.map(definicion => ({
       ...definicion,
       contratado: contratados.some(b => b[definicion.clave] === true),
-      enlaceAdhesion: this.whatsapp(
-        WHATSAPP_ADHESIONES,
-        `Hola, quiero adherirme al beneficio de ${definicion.nombre}.`,
-      ),
       enlaceConsultas: definicion.consultas
-        ? this.whatsapp(
+        ? enlaceWhatsapp(
             definicion.consultas,
             `Hola, quiero hacer una consulta sobre el beneficio de ${definicion.nombre}.`,
           )
@@ -136,11 +127,4 @@ export default class BeneficiosComponent {
     return `Está adherido a ${cantidad} de ${this.total} beneficios`;
   });
 
-  /**
-   * El mensaje ya nombra el beneficio: así quien atiende sabe de entrada qué
-   * quiere contratar el socio, en vez del texto genérico de antes.
-   */
-  private whatsapp(numero: string, mensaje: string): string {
-    return `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
-  }
 }

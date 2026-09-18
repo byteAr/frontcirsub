@@ -4,6 +4,7 @@ import { catchError, map, Observable, of, shareReplay, switchMap, throwError, ti
 
 import { environment } from '../../../environments/environment';
 import { buildGestionApiKey, GESTION_API_BASE } from '../../shared/utils/gestion-api-key';
+import { ClaveBeneficio } from '../constants/beneficios';
 
 const TIMEOUT_MS = 15_000;
 
@@ -93,10 +94,10 @@ export interface TipoTramite {
   clave: string;
   descripcion: string;
   /**
-   * Beneficio que el socio tiene que tener contratado para que este trámite
-   * le aparezca. Si no está, el trámite es para todos.
+   * Beneficio al que el socio tiene que estar adherido para iniciar este
+   * trámite. Si no está, el trámite es para todos.
    */
-  beneficio?: 'far' | 'eva' | 'sep' | 'seg';
+  beneficio?: ClaveBeneficio;
 }
 
 export interface Ahorro {
@@ -128,10 +129,10 @@ const ORDEN_SUBSIDIOS = ['1', '5', '4', '3', '2'];
 
 /**
  * Qué beneficio exige cada trámite. Esto el PHP no lo manda, así que vive acá.
- * Es sólo para no ofrecerle al socio algo que no puede pedir: la validación de
- * verdad la hace el backend al recibir los documentos.
+ * Sirve para avisarle al socio antes de que cargue documentos que se van a
+ * rechazar: la validación de verdad la hace el backend al recibirlos.
  */
-const BENEFICIO_POR_TRAMITE: Record<string, TipoTramite['beneficio']> = {
+const BENEFICIO_POR_TRAMITE: Record<string, ClaveBeneficio | undefined> = {
   RM: 'far',
   TE: 'eva',
 };

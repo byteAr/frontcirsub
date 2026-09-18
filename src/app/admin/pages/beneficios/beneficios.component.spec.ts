@@ -116,13 +116,17 @@ describe('BeneficiosComponent', () => {
       expect(adherirme.length).toBe(2);
     });
 
-    it('el mensaje nombra el beneficio, así quien atiende sabe qué quiere', () => {
-      conBeneficios({});
+    it('cada botón lleva al WhatsApp de adhesiones nombrando su beneficio', () => {
+      conBeneficios({ far: true, sep: true });
 
-      const farmacia = component.beneficios().find(b => b.clave === 'far')!;
-      expect(farmacia.enlaceAdhesion).toContain('wa.me/5491126526532');
-      expect(decodeURIComponent(farmacia.enlaceAdhesion))
-        .toContain('quiero adherirme al beneficio de Farmacia');
+      const destinos = enlaces()
+        .filter(a => a.textContent?.trim() === 'Adherirme')
+        .map(a => decodeURIComponent(a.href));
+
+      expect(destinos.length).toBe(2);
+      expect(destinos.every(d => d.includes('wa.me/5491126526532'))).toBeTrue();
+      expect(destinos[0]).toContain('quiero adherirme al beneficio de Evacuaciones');
+      expect(destinos[1]).toContain('quiero adherirme al beneficio de Seguro de vida');
     });
 
     it('a quien ya está adherido le ofrece consultas sólo donde el área tiene número', () => {
