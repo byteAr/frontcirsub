@@ -66,7 +66,7 @@
               <svg *ngSwitchCase="'evacuacion'" xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24"><path fill="currentColor" d="M1 19V4h2v10h8V6h12v13h-2v-3H3v3zm6-6q-1.25 0-2.125-.875T4 10t.875-2.125T7 7t2.125.875T10 10t-.875 2.125T7 13m0-2q.425 0 .713-.288T8 10t-.288-.712T7 9t-.712.288T6 10t.288.713T7 11"/></svg>
               <!-- Paloma con la ramita en el pico, símbolo habitual del sepelio -->
               <svg *ngSwitchCase="'sepelio'" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 512 512"><path fill="currentColor" d="M372 22.41c-6.4 33.89 6.8 54.39 32.6 66.3c4.6 8.17 8.4 16.29 11.4 24.39c-15.3-17.02-33.3-25.31-58-13.12c14.1 27.62 35.6 32.42 61.5 23.42c6.2 21 7.7 41.6 6.3 62.4c0 .2 0 .4-.1.6c1 .6 2 1.1 2.9 1.7c4.9 2.9 9.7 5.9 14.3 8.9c.4-3.3.7-6.7.9-10c1.2-17.6.4-35.4-3.3-53.5c26.8 5.1 43-8.6 52.8-33.62c-24.2-2.6-44.9 1.22-55.3 22.92c-2.6-9.4-6-18.9-10.3-28.46c23.7-15.85 37.7-36.07 26-67.62c-22.5 8.53-33.5 22.13-36.3 39.47C412.8 44.33 400.3 28 372 22.41M190.7 62.63C183.4 82.89 176.4 110 172 136.8c-3.2 19.9-5.3 39.7-5.7 56.9c30.4 25.9 63.3 44.6 99.8 46.3c-33.2-52.5-63-120-75.4-177.37M56.82 102.2c3.08 75.4 32.03 178.7 110.68 233.2l5.5 3.8l-2 6.3c-3.2 10.1-7.8 19-15 25.8c-7.3 6.8-16.9 11.2-28.7 13.3c-22.5 4-54.14.8-101.89-7.7c-9.6 24.1-8.29 50.6.43 72.1c8.72 21.3 24.29 36.6 42.1 40.6c24.85-31.8 62.26-70.4 113.56-68.1c52 2.3 111.5-12.1 146.9-47.6c12.5-12.4 23.2-42.3 29.4-68.6s8.7-49 8.7-49l.6-6.1l6-1.6c21.6-5.6 47.6-10.7 76.7-25.4c-8.6-5.8-18.7-12.6-30.4-19.6c-17.9-10.6-37.6-19.8-47.3-20.9c-16.6-1.7-26 1.3-32.5 6.1c-6.4 4.8-10.6 12.2-14.3 21.1c-3.6 8.9-6.4 19-11.4 28.1c-5.1 9.2-14 17.8-26.8 19.2c-56 6.5-103.8-22.9-143.9-60.1c-33-30.6-61.58-66.8-86.38-94.9m376.08 148c-7.1 2.6-13.9 4.9-20.4 6.8c-1.8 6.9-3.7 13.8-5.6 20.7l17.4 4.8c3-10.7 5.9-21.5 8.6-32.3"/></svg>
-              <svg *ngSwitchCase="'vida'" xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24"><path fill="currentColor" d="m12 21l-1.45-1.32q-2.525-2.3-4.175-3.965T3.75 12.812T2.325 10.4Q2 9.4 2 8.35q0-2.15 1.425-3.6T7 3.3q1.075 0 2.05.45t1.7 1.275L12 6.35l1.25-1.325q.725-.825 1.7-1.275T17 3.3q2.15 0 3.575 1.45T22 8.35q0 1.05-.325 2.05t-1.425 2.412t-2.625 3.9T13.45 19.7z"/></svg>
+              <svg *ngSwitchCase="'vida'" xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24"><path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54z"/></svg>
             </ng-container>
           </div>
 
@@ -85,12 +85,12 @@
             <span *ngIf="beneficio.contratado"
               class="mt-2.5 inline-flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-50 ring-1 ring-green-200 rounded-full pl-1.5 pr-2.5 py-1">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m9.55 18l-5.7-5.7l1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"/></svg>
-              Contratado
+              Adherido
             </span>
             <span *ngIf="!beneficio.contratado"
               class="mt-2.5 inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 bg-gray-100 rounded-full px-2.5 py-1">
               <span class="w-1.5 h-1.5 rounded-full bg-gray-400" aria-hidden="true"></span>
-              No contratado
+              No adherido
             </span>
           </div>
         </div>
@@ -99,19 +99,19 @@
         <div class="mt-auto">
 
           <!--
-            Sin contratar: el botón es la acción de la tarjeta. Grande y a lo
+            Sin adherir: el botón es la acción de la tarjeta. Grande y a lo
             ancho, fácil de acertar con el dedo.
           -->
           <a *ngIf="!beneficio.contratado"
             [href]="beneficio.enlaceAdhesion" target="_blank" rel="noopener noreferrer"
-            [attr.aria-label]="'Contratar el beneficio de ' + beneficio.nombre + ' por WhatsApp'"
+            [attr.aria-label]="'Adherirme al beneficio de ' + beneficio.nombre + ' por WhatsApp'"
             class="mt-4 w-full min-h-12 rounded-2xl bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-md transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21c5.46 0 9.91-4.45 9.91-9.91c0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.24 8.23c-1.48 0-2.93-.39-4.19-1.15l-.3-.17l-3.12.82l.83-3.04l-.2-.32a8.2 8.2 0 0 1-1.26-4.38c.01-4.54 3.7-8.24 8.25-8.24M8.53 7.33c-.16 0-.43.06-.66.31c-.22.25-.87.86-.87 2.07c0 1.22.89 2.39 1 2.56c.14.17 1.76 2.67 4.25 3.73c.59.27 1.05.42 1.41.53c.59.19 1.13.16 1.56.1c.48-.07 1.46-.6 1.67-1.18s.21-1.07.15-1.18c-.07-.1-.23-.16-.48-.27c-.25-.14-1.47-.74-1.69-.82c-.23-.08-.37-.12-.56.12c-.16.25-.64.81-.78.97c-.15.17-.29.19-.53.07c-.26-.13-1.06-.39-2-1.23c-.74-.66-1.23-1.47-1.38-1.72c-.12-.24-.01-.39.11-.5c.11-.11.27-.29.37-.44c.13-.14.17-.25.25-.41c.08-.17.04-.31-.02-.43c-.06-.11-.56-1.35-.77-1.84c-.2-.48-.4-.42-.56-.43c-.14 0-.3-.01-.47-.01"/></svg>
-            Contratar por WhatsApp
+            Adherirme
           </a>
 
           <!--
-            Contratado: sólo un acceso discreto a consultas, para las áreas que
+            Adherido: sólo un acceso discreto a consultas, para las áreas que
             tienen número propio. Es lo que antes ofrecía el botón "Contactarme".
           -->
           <a *ngIf="beneficio.contratado && beneficio.enlaceConsultas"

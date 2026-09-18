@@ -15,7 +15,7 @@ interface DefinicionBeneficio {
   icono: Icono;
   /**
    * Color propio del beneficio, para que se distingan de un vistazo. Ninguno
-   * es verde: el verde queda reservado para "Contratado".
+   * es verde: el verde queda reservado para "Adherido".
    */
   tono: {
     fondo: string;
@@ -36,8 +36,9 @@ export interface BeneficioVista extends DefinicionBeneficio {
 const WHATSAPP_ADHESIONES = '5491126526532';
 
 /**
- * El orden es fijo a propósito, contratado o no: el socio encuentra cada
- * beneficio siempre en el mismo lugar.
+ * Orden base. En pantalla van primero los adheridos y después los que no,
+ * pero dentro de cada grupo se respeta este orden, así dos socios con los
+ * mismos beneficios los ven siempre igual.
  */
 const BENEFICIOS: DefinicionBeneficio[] = [
   {
@@ -61,8 +62,8 @@ const BENEFICIOS: DefinicionBeneficio[] = [
     nombre: 'Seguro de sepelio',
     descripcion: 'Cobertura del servicio de sepelio.',
     icono: 'sepelio',
-    // Violeta y no gris: el gris es el color de "no contratado", y un sepelio
-    // contratado en pizarra se confundía con uno que no lo está. El violeta
+    // Violeta y no gris: el gris es el color de "no adherido", y un sepelio
+    // adherido en pizarra se confundía con uno que no lo está. El violeta
     // es el color tradicional del duelo, así que sigue siendo sobrio.
     tono: { fondo: 'bg-violet-50', icono: 'text-violet-600', segmento: 'bg-violet-500' },
   },
@@ -98,7 +99,7 @@ export default class BeneficiosComponent {
   beneficios = computed<BeneficioVista[]>(() => {
     const contratados = this.authService.user()?.Beneficios ?? [];
 
-    return BENEFICIOS.map(definicion => ({
+    const lista = BENEFICIOS.map(definicion => ({
       ...definicion,
       contratado: contratados.some(b => b[definicion.clave] === true),
       enlaceAdhesion: this.whatsapp(
@@ -112,6 +113,14 @@ export default class BeneficiosComponent {
           )
         : null,
     }));
+
+    // Primero lo que ya tiene, después lo que puede sumar. Se arman los dos
+    // grupos por separado en vez de ordenar, para que cada uno conserve el
+    // orden base sin depender de que el sort sea estable.
+    return [
+      ...lista.filter(beneficio => beneficio.contratado),
+      ...lista.filter(beneficio => !beneficio.contratado),
+    ];
   });
 
   cantidadContratados = computed(() => this.beneficios().filter(b => b.contratado).length);
@@ -121,10 +130,10 @@ export default class BeneficiosComponent {
   resumen = computed(() => {
     const cantidad = this.cantidadContratados();
 
-    if (cantidad === 0) return 'Todavía no tiene beneficios contratados';
-    if (cantidad === this.total) return 'Tiene todos los beneficios contratados';
+    if (cantidad === 0) return 'Todavía no está adherido a ningún beneficio';
+    if (cantidad === this.total) return 'Está adherido a todos los beneficios';
 
-    return `Tiene ${cantidad} de ${this.total} beneficios contratados`;
+    return `Está adherido a ${cantidad} de ${this.total} beneficios`;
   });
 
   /**
