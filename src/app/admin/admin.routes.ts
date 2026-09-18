@@ -47,26 +47,15 @@ export default [
         ]
       },
       {
+        // Los cuatro beneficios en una sola vista, uno por tarjeta.
         path: 'beneficios',
-        children: [
-          {
-            path: 'farmacia',
-            loadComponent: () => import('./components/farmacia/farmacia.component')
-          },
-          {
-            path: 'evacuaciones',
-            loadComponent: () => import('./components/estadia/estadia.component')
-          },
-          {
-            path: 'seguros',
-            loadComponent: () => import('./components/sepelio/sepelio.component')
-          },
-          {
-            path: '',
-            redirectTo: 'farmacia',
-            pathMatch: 'full'
-          }
-        ]
+        loadComponent: () => import('./pages/beneficios/beneficios.component')
+      },
+      {
+        // Las vistas sueltas de antes. Se redirigen en vez de borrarse para que
+        // no se rompa un acceso guardado ni la última ruta de la PWA instalada.
+        path: 'beneficios/:beneficio',
+        redirectTo: 'beneficios'
       },
       {
         path: 'cbu',

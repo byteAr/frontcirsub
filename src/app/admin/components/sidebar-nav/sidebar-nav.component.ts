@@ -22,9 +22,6 @@ export class SidebarNavComponent {
   private gestionListasService = inject(GestionListasService);
   layout = inject(LayoutService);
 
-  /** Submenú de Beneficios: arranca cerrado y se abre al tocarlo. */
-  beneficiosAbierto = signal<boolean>(false);
-
   /**
    * "Mis ahorros" se ofrece sólo si el sistema de gestión lo habilita para el
    * socio. Arranca oculto y aparece cuando se confirma: es menos molesto que
@@ -57,10 +54,6 @@ export class SidebarNavComponent {
   mostrarEncuesta = computed(
     () => this.authService.user()?.Persona?.[0]?.Encuesta === false
   );
-
-  alternarBeneficios(): void {
-    this.beneficiosAbierto.update(abierto => !abierto);
-  }
 
   /** Al navegar se cierra, si no tapa la vista que el socio acaba de elegir. */
   cerrar(): void {
