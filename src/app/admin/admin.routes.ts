@@ -78,6 +78,10 @@ export default [
         loadComponent: () => import('./pages/ahorros/ahorros.component')
       },
       {
+        path: 'ayuda-economica',
+        loadComponent: () => import('./pages/ayuda-economica/ayuda-economica.component')
+      },
+      {
         path: 'notificaciones',
         loadComponent: () => import('./pages/notificaciones/notificaciones.component')
       },

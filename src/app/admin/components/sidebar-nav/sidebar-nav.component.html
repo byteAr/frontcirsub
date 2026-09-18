@@ -61,6 +61,14 @@
       Mis ahorros
     </a>
 
+    <a routerLink="/dashboard/ayuda-economica" routerLinkActive="bg-cyan-50 text-cyan-700 font-semibold"
+      (click)="cerrar()"
+      class="flex items-center gap-3 px-4 py-3 text-sm text-gray-600 hover:bg-cyan-50 cursor-pointer">
+      <!-- Billete con moneda: plata que se recibe y se devuelve en cuotas -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="#0891b2" d="M19 14V6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2m-9-1c-1.66 0-3-1.34-3-3s1.34-3 3-3s3 1.34 3 3s-1.34 3-3 3m13-6v11c0 1.1-.9 2-2 2H4v-2h17V7z"/></svg>
+      Ayuda económica
+    </a>
+
     <a routerLink="/dashboard/cbu" routerLinkActive="bg-cyan-50 text-cyan-700 font-semibold"
       (click)="cerrar()"
       class="flex items-center gap-3 px-4 py-3 text-sm text-gray-600 hover:bg-cyan-50 cursor-pointer">

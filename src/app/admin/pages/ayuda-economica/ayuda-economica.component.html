@@ -1,0 +1,112 @@
+<div class="w-full max-w-3xl mx-auto px-1 md:px-4">
+
+  <p class="text-base md:text-lg text-cyan-600 font-semibold">Ayuda económica</p>
+  <p class="text-sm text-gray-500 mt-0.5">Simule su préstamo: elija cuánto necesita y en cuántas cuotas.</p>
+
+  <ng-container *ngIf="condiciones() as c">
+
+    <!-- ================= MONTO ================= -->
+    <section class="mt-3 bg-white rounded-2xl shadow-sm px-4 md:px-6 pt-5 pb-4">
+      <label for="monto" class="text-sm font-semibold text-gray-700">¿Cuánto necesita?</label>
+
+      <!--
+        El monto se puede escribir o arrastrar: el campo y el deslizador son la
+        misma cifra y se mueven juntos.
+      -->
+      <div class="mt-1.5 flex items-baseline gap-1.5 border-b-2 border-gray-200 focus-within:border-cyan-600 transition-colors">
+        <span class="text-2xl md:text-3xl font-bold text-gray-400">$</span>
+        <input id="monto" type="text" inputmode="numeric" autocomplete="off"
+          class="w-full min-w-0 text-3xl md:text-4xl font-bold text-gray-800 tabular-nums bg-transparent outline-none py-1"
+          [value]="montoTexto()" (input)="alEscribir($event)" (blur)="alSalirDelCampo()">
+      </div>
+      <p class="text-xs text-amber-600 mt-1.5 min-h-4" aria-live="polite">{{ aviso() }}</p>
+
+      <div class="relative mt-6">
+        <!-- Globito que acompaña al círculo mientras se arrastra -->
+        <div *ngIf="arrastrando()"
+          class="globo absolute -top-10 -translate-x-1/2 bg-gray-800 text-white text-xs font-semibold tabular-nums rounded-lg px-2.5 py-1 whitespace-nowrap pointer-events-none"
+          [style.left]="posicionGlobo()">
+          $ {{ formatear(montoEnRango()) }}
+        </div>
+
+        <input type="range" class="deslizador"
+          [min]="c.montoMinimo" [max]="c.montoMaximo" [step]="c.paso"
+          [value]="montoEnRango()"
+          [style.--lleno]="avance() + '%'"
+          (input)="alDeslizar($event)"
+          (pointerdown)="empezarArrastre()"
+          aria-label="Monto a solicitar"
+          [attr.aria-valuetext]="'$ ' + formatear(montoEnRango())">
+      </div>
+
+      <div class="flex justify-between text-xs text-gray-400 tabular-nums mt-1">
+        <span>$ {{ formatear(c.montoMinimo) }}</span>
+        <span>$ {{ formatear(c.montoMaximo) }}</span>
+      </div>
+    </section>
+
+    <!-- ================= PLAZOS ================= -->
+    <!--
+      Las cuatro cuotas a la vista: se ve de un golpe cuánto cambia la cuota
+      según el plazo, y se recalculan mientras se mueve el monto.
+    -->
+    <section class="mt-3 bg-white rounded-2xl shadow-sm px-4 md:px-6 py-5">
+      <p class="text-sm font-semibold text-gray-700" id="titulo-plazos">¿En cuántas cuotas?</p>
+
+      <div *ngIf="simulaciones().length" class="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2"
+        role="radiogroup" aria-labelledby="titulo-plazos">
+        <button *ngFor="let s of simulaciones()" type="button" role="radio"
+          [attr.aria-checked]="s.meses === mesesElegidos()"
+          (click)="elegirPlazo(s.meses)"
+          class="rounded-2xl border-2 px-3 py-3 text-left transition-colors cursor-pointer"
+          [ngClass]="s.meses === mesesElegidos()
+            ? 'border-cyan-600 bg-cyan-50'
+            : 'border-gray-200 bg-white hover:border-cyan-300'">
+          <span class="block text-xs font-semibold"
+            [ngClass]="s.meses === mesesElegidos() ? 'text-cyan-700' : 'text-gray-500'">
+            {{ s.meses }} cuotas
+          </span>
+          <span class="block text-base md:text-lg font-bold text-gray-800 tabular-nums mt-0.5">
+            {{ s.cuota | currency:'ARS':'symbol':'1.2-2':'es-AR' }}
+          </span>
+          <span class="block text-[0.7rem] text-gray-400">por mes</span>
+        </button>
+      </div>
+
+      <p *ngIf="!simulaciones().length" class="mt-3 text-sm text-gray-400">
+        Ingrese un monto entre $ {{ formatear(c.montoMinimo) }} y $ {{ formatear(c.montoMaximo) }} para ver las cuotas.
+      </p>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section *ngIf="elegida() as s" class="mt-3 rounded-2xl shadow-sm overflow-hidden">
+      <div class="bg-gradient-to-br from-cyan-600 to-cyan-700 text-white px-4 md:px-6 py-5">
+        <p class="text-sm text-cyan-50">Pagaría {{ s.meses }} cuotas fijas de</p>
+        <p class="text-3xl md:text-4xl font-bold tabular-nums mt-1">
+          {{ s.cuota | currency:'ARS':'symbol':'1.2-2':'es-AR' }}
+        </p>
+      </div>
+      <dl class="bg-white divide-y divide-gray-100 px-4 md:px-6">
+        <div class="flex items-center justify-between gap-3 py-3">
+          <dt class="text-sm text-gray-500">Monto solicitado</dt>
+          <dd class="text-sm font-semibold text-gray-800 tabular-nums">{{ monto() | currency:'ARS':'symbol':'1.2-2':'es-AR' }}</dd>
+        </div>
+        <div class="flex items-center justify-between gap-3 py-3">
+          <dt class="text-sm text-gray-500">Intereses</dt>
+          <dd class="text-sm font-semibold text-gray-800 tabular-nums">{{ s.intereses | currency:'ARS':'symbol':'1.2-2':'es-AR' }}</dd>
+        </div>
+        <div class="flex items-center justify-between gap-3 py-3">
+          <dt class="text-sm font-semibold text-gray-700">Total a devolver</dt>
+          <dd class="text-base font-bold text-gray-800 tabular-nums">{{ s.totalADevolver | currency:'ARS':'symbol':'1.2-2':'es-AR' }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <!-- ================= TASAS ================= -->
+    <p *ngIf="tasas() as t" class="mt-3 px-1 text-xs text-gray-400 leading-relaxed">
+      TNA {{ t.tna }}% · TEM {{ t.tem }}% · TEA {{ t.tea }}% · Sistema francés, cuota fija.
+      <br>
+      Simulación orientativa. Las condiciones definitivas se informan al aprobarse la solicitud.
+    </p>
+  </ng-container>
+</div>
