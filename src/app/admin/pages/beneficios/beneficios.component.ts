@@ -61,7 +61,10 @@ const BENEFICIOS: DefinicionBeneficio[] = [
     nombre: 'Seguro de sepelio',
     descripcion: 'Cobertura del servicio de sepelio.',
     icono: 'sepelio',
-    tono: { fondo: 'bg-slate-100', icono: 'text-slate-600', segmento: 'bg-slate-500' },
+    // Violeta y no gris: el gris es el color de "no contratado", y un sepelio
+    // contratado en pizarra se confundía con uno que no lo está. El violeta
+    // es el color tradicional del duelo, así que sigue siendo sobrio.
+    tono: { fondo: 'bg-violet-50', icono: 'text-violet-600', segmento: 'bg-violet-500' },
   },
   {
     clave: 'seg',
