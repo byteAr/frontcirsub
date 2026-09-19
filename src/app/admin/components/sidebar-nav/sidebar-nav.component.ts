@@ -23,18 +23,25 @@ export class SidebarNavComponent {
   layout = inject(LayoutService);
 
   /**
-   * "Mis ahorros" se ofrece sólo si el sistema de gestión lo habilita para el
-   * socio. Arranca oculto y aparece cuando se confirma: es menos molesto que
-   * mostrarlo y sacarlo a los dos segundos.
+   * "Mis ahorros" y "Ayuda económica" se ofrecen sólo si el sistema de gestión
+   * los habilita para el socio. Arrancan ocultos y aparecen cuando se
+   * confirma: es menos molesto que mostrarlos y sacarlos a los dos segundos.
    */
   mostrarAhorros = signal<boolean>(false);
+  mostrarAyudaEconomica = signal<boolean>(false);
 
   constructor() {
     this.gestionListasService.getListas().subscribe({
-      next: ({ ahorros }) => this.mostrarAhorros.set(ahorros.muestra),
-      // Si no se pudo consultar, se ofrece igual: la vista tiene su propio
+      next: ({ ahorros, ayudasEconomicas }) => {
+        this.mostrarAhorros.set(ahorros.muestra);
+        this.mostrarAyudaEconomica.set(ayudasEconomicas.muestra);
+      },
+      // Si no se pudo consultar, se ofrecen igual: cada vista tiene su propio
       // reintento, y es peor esconderle al socio algo que sí tiene.
-      error: () => this.mostrarAhorros.set(true),
+      error: () => {
+        this.mostrarAhorros.set(true);
+        this.mostrarAyudaEconomica.set(true);
+      },
     });
   }
 

@@ -1,112 +1,180 @@
 <div class="w-full max-w-3xl mx-auto px-1 md:px-4">
 
-  <p class="text-base md:text-lg text-cyan-600 font-semibold">Ayuda económica</p>
-  <p class="text-sm text-gray-500 mt-0.5">Simule su préstamo: elija cuánto necesita y en cuántas cuotas.</p>
-
-  <ng-container *ngIf="condiciones() as c">
-
-    <!-- ================= MONTO ================= -->
-    <section class="mt-3 bg-white rounded-2xl shadow-sm px-4 md:px-6 pt-5 pb-4">
-      <label for="monto" class="text-sm font-semibold text-gray-700">¿Cuánto necesita?</label>
-
-      <!--
-        El monto se puede escribir o arrastrar: el campo y el deslizador son la
-        misma cifra y se mueven juntos.
-      -->
-      <div class="mt-1.5 flex items-baseline gap-1.5 border-b-2 border-gray-200 focus-within:border-cyan-600 transition-colors">
-        <span class="text-2xl md:text-3xl font-bold text-gray-400">$</span>
-        <input id="monto" type="text" inputmode="numeric" autocomplete="off"
-          class="w-full min-w-0 text-3xl md:text-4xl font-bold text-gray-800 tabular-nums bg-transparent outline-none py-1"
-          [value]="montoTexto()" (input)="alEscribir($event)" (blur)="alSalirDelCampo()">
-      </div>
-      <p class="text-xs text-amber-600 mt-1.5 min-h-4" aria-live="polite">{{ aviso() }}</p>
-
-      <div class="relative mt-6">
-        <!-- Globito que acompaña al círculo mientras se arrastra -->
-        <div *ngIf="arrastrando()"
-          class="globo absolute -top-10 -translate-x-1/2 bg-gray-800 text-white text-xs font-semibold tabular-nums rounded-lg px-2.5 py-1 whitespace-nowrap pointer-events-none"
-          [style.left]="posicionGlobo()">
-          $ {{ formatear(montoEnRango()) }}
-        </div>
-
-        <input type="range" class="deslizador"
-          [min]="c.montoMinimo" [max]="c.montoMaximo" [step]="c.paso"
-          [value]="montoEnRango()"
-          [style.--lleno]="avance() + '%'"
-          (input)="alDeslizar($event)"
-          (pointerdown)="empezarArrastre()"
-          aria-label="Monto a solicitar"
-          [attr.aria-valuetext]="'$ ' + formatear(montoEnRango())">
-      </div>
-
-      <div class="flex justify-between text-xs text-gray-400 tabular-nums mt-1">
-        <span>$ {{ formatear(c.montoMinimo) }}</span>
-        <span>$ {{ formatear(c.montoMaximo) }}</span>
-      </div>
-    </section>
-
-    <!-- ================= PLAZOS ================= -->
-    <!--
-      Las cuatro cuotas a la vista: se ve de un golpe cuánto cambia la cuota
-      según el plazo, y se recalculan mientras se mueve el monto.
-    -->
-    <section class="mt-3 bg-white rounded-2xl shadow-sm px-4 md:px-6 py-5">
-      <p class="text-sm font-semibold text-gray-700" id="titulo-plazos">¿En cuántas cuotas?</p>
-
-      <div *ngIf="simulaciones().length" class="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2"
-        role="radiogroup" aria-labelledby="titulo-plazos">
-        <button *ngFor="let s of simulaciones()" type="button" role="radio"
-          [attr.aria-checked]="s.meses === mesesElegidos()"
-          (click)="elegirPlazo(s.meses)"
-          class="rounded-2xl border-2 px-3 py-3 text-left transition-colors cursor-pointer"
-          [ngClass]="s.meses === mesesElegidos()
-            ? 'border-cyan-600 bg-cyan-50'
-            : 'border-gray-200 bg-white hover:border-cyan-300'">
-          <span class="block text-xs font-semibold"
-            [ngClass]="s.meses === mesesElegidos() ? 'text-cyan-700' : 'text-gray-500'">
-            {{ s.meses }} cuotas
-          </span>
-          <span class="block text-base md:text-lg font-bold text-gray-800 tabular-nums mt-0.5">
-            {{ s.cuota | currency:'ARS':'symbol':'1.2-2':'es-AR' }}
-          </span>
-          <span class="block text-[0.7rem] text-gray-400">por mes</span>
-        </button>
-      </div>
-
-      <p *ngIf="!simulaciones().length" class="mt-3 text-sm text-gray-400">
-        Ingrese un monto entre $ {{ formatear(c.montoMinimo) }} y $ {{ formatear(c.montoMaximo) }} para ver las cuotas.
-      </p>
-    </section>
-
-    <!-- ================= RESUMEN ================= -->
-    <section *ngIf="elegida() as s" class="mt-3 rounded-2xl shadow-sm overflow-hidden">
-      <div class="bg-gradient-to-br from-cyan-600 to-cyan-700 text-white px-4 md:px-6 py-5">
-        <p class="text-sm text-cyan-50">Pagaría {{ s.meses }} cuotas fijas de</p>
-        <p class="text-3xl md:text-4xl font-bold tabular-nums mt-1">
-          {{ s.cuota | currency:'ARS':'symbol':'1.2-2':'es-AR' }}
-        </p>
-      </div>
-      <dl class="bg-white divide-y divide-gray-100 px-4 md:px-6">
-        <div class="flex items-center justify-between gap-3 py-3">
-          <dt class="text-sm text-gray-500">Monto solicitado</dt>
-          <dd class="text-sm font-semibold text-gray-800 tabular-nums">{{ monto() | currency:'ARS':'symbol':'1.2-2':'es-AR' }}</dd>
-        </div>
-        <div class="flex items-center justify-between gap-3 py-3">
-          <dt class="text-sm text-gray-500">Intereses</dt>
-          <dd class="text-sm font-semibold text-gray-800 tabular-nums">{{ s.intereses | currency:'ARS':'symbol':'1.2-2':'es-AR' }}</dd>
-        </div>
-        <div class="flex items-center justify-between gap-3 py-3">
-          <dt class="text-sm font-semibold text-gray-700">Total a devolver</dt>
-          <dd class="text-base font-bold text-gray-800 tabular-nums">{{ s.totalADevolver | currency:'ARS':'symbol':'1.2-2':'es-AR' }}</dd>
-        </div>
-      </dl>
-    </section>
-
-    <!-- ================= TASAS ================= -->
-    <p *ngIf="tasas() as t" class="mt-3 px-1 text-xs text-gray-400 leading-relaxed">
-      TNA {{ t.tna }}% · TEM {{ t.tem }}% · TEA {{ t.tea }}% · Sistema francés, cuota fija.
-      <br>
-      Simulación orientativa. Las condiciones definitivas se informan al aprobarse la solicitud.
+  <div class="flex items-baseline justify-between gap-3 mb-3">
+    <p class="text-base md:text-lg text-cyan-600 font-semibold">Ayuda económica</p>
+    <p class="text-xs text-gray-400" *ngIf="!cargando() && !error() && hayDatos()">
+      {{ solicitudes().length }} {{ solicitudes().length === 1 ? 'solicitud' : 'solicitudes' }}
     </p>
+  </div>
+
+  <div *ngIf="cargando()" class="flex items-center justify-center gap-2 py-12 text-gray-400 text-sm">
+    <span class="loading loading-spinner loading-sm"></span>
+    Cargando sus ayudas económicas...
+  </div>
+
+  <div *ngIf="error()" class="bg-white rounded-2xl shadow-sm py-12 px-5 text-center">
+    <p class="text-sm text-red-500">{{ error() }}</p>
+    <button (click)="cargar()"
+      class="mt-4 text-white bg-cyan-600 px-4 py-1.5 rounded-2xl text-sm cursor-pointer">
+      Reintentar
+    </button>
+  </div>
+
+  <div *ngIf="!cargando() && !error() && !hayDatos()"
+    class="bg-white rounded-2xl shadow-sm py-12 px-5 text-center">
+    <p class="text-sm text-gray-500">No registra solicitudes de ayuda económica.</p>
+  </div>
+
+  <ng-container *ngIf="!cargando() && !error() && hayDatos()">
+
+    <!--
+      Lo primero que quiere saber el socio que está pagando: cuánto le falta
+      en total. Sólo aparece si tiene más de una ayuda en curso; con una sola,
+      el dato ya está en su tarjeta y repetirlo sobra.
+    -->
+    <div *ngIf="enCurso().length > 1"
+      class="mb-3 rounded-2xl bg-gradient-to-br from-cyan-600 to-cyan-700 text-white px-4 md:px-6 py-4">
+      <p class="text-sm text-cyan-50">Saldo pendiente total</p>
+      <p class="text-2xl md:text-3xl font-bold tabular-nums mt-0.5">
+        {{ saldoTotal() | currency:'ARS':'symbol':'1.2-2':'es-AR' }}
+      </p>
+      <p class="text-xs text-cyan-100 mt-1">
+        En {{ enCurso().length }} ayudas económicas en curso
+      </p>
+    </div>
+
+    <div class="flex flex-col gap-3">
+      <article *ngFor="let solicitud of solicitudes()"
+        class="bg-white rounded-2xl shadow-sm overflow-hidden">
+
+        <div class="px-4 md:px-5 pt-4">
+
+          <!-- Encabezado: número, fecha y estado -->
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-sm md:text-base font-semibold text-gray-800">
+                Solicitud N° {{ solicitud.numeroSolicitud }}
+              </p>
+              <p class="text-xs text-gray-400 mt-0.5">Solicitada el {{ solicitud.fecha }}</p>
+            </div>
+
+            <span *ngIf="solicitud.enCurso"
+              class="shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-cyan-700 bg-cyan-50 ring-1 ring-cyan-200 rounded-full px-2.5 py-1">
+              En curso
+            </span>
+            <span *ngIf="!solicitud.enCurso"
+              class="shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-50 ring-1 ring-green-200 rounded-full pl-1.5 pr-2.5 py-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m9.55 18l-5.7-5.7l1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"/></svg>
+              Pagada
+            </span>
+          </div>
+
+          <!-- Lo que falta pagar y cuándo se descuenta la próxima cuota -->
+          <div *ngIf="solicitud.enCurso" class="mt-3 rounded-xl bg-cyan-50/70 px-3.5 py-3">
+            <div class="flex items-end justify-between gap-3 flex-wrap">
+              <div>
+                <p class="text-xs text-cyan-800/70">Saldo pendiente</p>
+                <p class="text-xl md:text-2xl font-bold text-cyan-800 tabular-nums">
+                  {{ solicitud.saldo | currency:'ARS':'symbol':'1.2-2':'es-AR' }}
+                </p>
+              </div>
+              <p *ngIf="solicitud.proximaCuota as proxima" class="text-xs text-cyan-800/80 text-right">
+                Próxima cuota {{ proxima.numero }}<br>
+                <span class="font-semibold tabular-nums">{{ proxima.importe | currency:'ARS':'symbol':'1.2-2':'es-AR' }}</span>
+                en {{ proxima.mes }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Avance de cuotas -->
+          <div class="mt-3.5">
+            <div class="flex items-center justify-between text-xs text-gray-500">
+              <span>
+                {{ solicitud.cuotasPagadas }} de {{ solicitud.plazos }}
+                {{ solicitud.plazos === 1 ? 'cuota pagada' : 'cuotas pagadas' }}
+              </span>
+              <span *ngIf="solicitud.enCurso" class="text-gray-400">
+                {{ solicitud.cuotasPendientes === 1 ? 'falta 1' : 'faltan ' + solicitud.cuotasPendientes }}
+              </span>
+            </div>
+            <div class="mt-1.5 h-2 rounded-full bg-gray-200 overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-300"
+                [ngClass]="solicitud.enCurso ? 'bg-cyan-600' : 'bg-green-600'"
+                [style.width.%]="progreso(solicitud)"></div>
+            </div>
+          </div>
+
+          <!-- Datos del préstamo -->
+          <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-2.5">
+            <div>
+              <dt class="text-[0.7rem] text-gray-400 uppercase tracking-wider">Capital</dt>
+              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ solicitud.capital | currency:'ARS':'symbol':'1.2-2':'es-AR' }}</dd>
+            </div>
+            <div>
+              <dt class="text-[0.7rem] text-gray-400 uppercase tracking-wider">Valor de cuota</dt>
+              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ solicitud.valorCuota | currency:'ARS':'symbol':'1.2-2':'es-AR' }}</dd>
+            </div>
+            <div>
+              <dt class="text-[0.7rem] text-gray-400 uppercase tracking-wider">Plazos</dt>
+              <dd class="text-sm font-semibold text-gray-700">{{ solicitud.plazos }} {{ solicitud.plazos === 1 ? 'cuota' : 'cuotas' }}</dd>
+            </div>
+            <div>
+              <dt class="text-[0.7rem] text-gray-400 uppercase tracking-wider">Total a reintegrar</dt>
+              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ solicitud.totalAReintegrar | currency:'ARS':'symbol':'1.2-2':'es-AR' }}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- Plan de pagos, desplegable -->
+        <button type="button" (click)="alternarDespliegue(solicitud)"
+          [attr.aria-expanded]="estaDesplegada(solicitud)"
+          class="w-full mt-3 flex items-center justify-between gap-2 px-4 md:px-5 py-3 border-t border-gray-100 text-sm text-cyan-700 font-medium cursor-pointer">
+          {{ estaDesplegada(solicitud) ? 'Ocultar plan de pagos' : 'Ver plan de pagos' }}
+          <svg class="transition-transform duration-200 shrink-0"
+            [ngClass]="estaDesplegada(solicitud) ? 'rotate-180' : ''"
+            xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 15.4L6.6 10L8 8.6l4 4l4-4l1.4 1.4z"/>
+          </svg>
+        </button>
+
+        <div class="grid transition-all duration-300 ease-out"
+          [ngClass]="estaDesplegada(solicitud) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'">
+          <div class="overflow-hidden">
+            <ul class="divide-y divide-gray-100 border-t border-gray-100">
+              <li *ngFor="let cuota of solicitud.cuotas"
+                class="flex items-center justify-between gap-3 px-4 md:px-5 py-2.5">
+                <div class="min-w-0">
+                  <p class="text-sm text-gray-700">Cuota {{ cuota.numero }}</p>
+                  <p class="text-[0.7rem] text-gray-400">{{ cuota.mes }}</p>
+                </div>
+                <div class="flex items-center gap-3 shrink-0">
+                  <span class="text-sm font-semibold text-gray-700 tabular-nums">
+                    {{ cuota.importe | currency:'ARS':'symbol':'1.2-2':'es-AR' }}
+                  </span>
+                  <!--
+                    Si el PHP manda un estado que no conocemos se muestra su
+                    texto en gris, en vez de darlo por impago.
+                  -->
+                  <span class="text-[0.65rem] font-semibold rounded-full px-2 py-0.5 w-20 text-center"
+                    [ngClass]="cuota.pagada ? 'text-green-700 bg-green-50' : 'text-gray-500 bg-gray-100'">
+                    {{ cuota.pagada ? 'Pagada' : cuota.estado }}
+                  </span>
+                </div>
+              </li>
+            </ul>
+
+            <!--
+              El sistema de gestión no siempre manda todas las cuotas de una
+              solicitud vieja. Se aclara para que el socio no crea que le falta
+              información por un error de la app.
+            -->
+            <p *ngIf="solicitud.cuotas.length < solicitud.plazos"
+              class="px-4 md:px-5 py-2.5 text-[0.7rem] text-gray-400 border-t border-gray-100">
+              El sistema de gestión informa {{ solicitud.cuotas.length }} de las {{ solicitud.plazos }} cuotas de esta solicitud.
+            </p>
+          </div>
+        </div>
+      </article>
+    </div>
   </ng-container>
 </div>

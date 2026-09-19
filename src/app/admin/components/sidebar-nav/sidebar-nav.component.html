@@ -61,7 +61,8 @@
       Mis ahorros
     </a>
 
-    <a routerLink="/dashboard/ayuda-economica" routerLinkActive="bg-cyan-50 text-cyan-700 font-semibold"
+    <a *ngIf="mostrarAyudaEconomica()"
+      routerLink="/dashboard/ayuda-economica" routerLinkActive="bg-cyan-50 text-cyan-700 font-semibold"
       (click)="cerrar()"
       class="flex items-center gap-3 px-4 py-3 text-sm text-gray-600 hover:bg-cyan-50 cursor-pointer">
       <!-- Billete con moneda: plata que se recibe y se devuelve en cuotas -->

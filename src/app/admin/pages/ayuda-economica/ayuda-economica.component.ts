@@ -1,14 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, HostListener, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 
-import { AyudaEconomicaService, CondicionesPrestamo } from '../../services/ayuda-economica.service';
-import { simular, Simulacion, tasaEfectivaAnual, tasaMensual } from '../../utils/prestamo';
-
-/** Ancho del círculo del deslizador, para ubicar el globito justo encima. */
-const ANCHO_CIRCULO_PX = 28;
-
-const numero = new Intl.NumberFormat('es-AR');
-const porcentaje = new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 });
+import { AyudaEconomica, GestionListasService } from '../../services/gestion-listas.service';
 
 @Component({
   selector: 'app-ayuda-economica',
@@ -17,159 +10,78 @@ const porcentaje = new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 });
   templateUrl: './ayuda-economica.component.html',
   styleUrl: './ayuda-economica.component.css',
 })
-export default class AyudaEconomicaComponent {
+export default class AyudaEconomicaComponent implements OnInit {
 
-  private ayudaEconomicaService = inject(AyudaEconomicaService);
+  private gestionListasService = inject(GestionListasService);
 
-  condiciones = signal<CondicionesPrestamo | null>(null);
+  solicitudes = signal<AyudaEconomica[]>([]);
+  cargando = signal<boolean>(true);
+  error = signal<string | null>(null);
 
-  /** El monto que se simula. Mientras se escribe puede quedar fuera de rango. */
-  monto = signal<number>(0);
+  /** El sistema de gestión decide si al socio se le muestra la sección. */
+  habilitado = signal<boolean>(true);
 
-  /** Lo que se ve en el campo: el monto con separador de miles. */
-  montoTexto = signal<string>('');
+  /** Solicitudes con el plan de pagos abierto, por número de solicitud. */
+  private desplegadas = signal<Set<string>>(new Set<string>());
 
-  mesesElegidos = signal<number>(0);
+  hayDatos = computed(() => this.habilitado() && this.solicitudes().length > 0);
 
-  /** Mientras se arrastra el deslizador se muestra el globito con el monto. */
-  arrastrando = signal<boolean>(false);
+  enCurso = computed(() => this.solicitudes().filter(s => s.enCurso));
 
-  aviso = signal<string | null>(null);
+  /** Lo que el socio debe hoy, sumando todas las ayudas que sigue pagando. */
+  saldoTotal = computed(() =>
+    // Sumar decimales en punto flotante arrastra basura (385986.42000000004).
+    Math.round(this.enCurso().reduce((total, s) => total + s.saldo, 0) * 100) / 100
+  );
 
-  constructor() {
-    this.ayudaEconomicaService.getCondiciones().subscribe(condiciones => {
-      this.condiciones.set(condiciones);
-      this.fijarMonto(condiciones.montoInicial);
-      // Arranca en el plazo más largo: es la cuota más baja, la que la
-      // mayoría viene a mirar primero.
-      this.mesesElegidos.set(condiciones.plazos.at(-1)?.meses ?? 0);
+  ngOnInit(): void {
+    this.pedir(false);
+  }
+
+  /** Reintentar sí descarta lo cacheado: si falló, no hay nada que reusar. */
+  cargar(): void {
+    this.pedir(true);
+  }
+
+  estaDesplegada(solicitud: AyudaEconomica): boolean {
+    return this.desplegadas().has(solicitud.numeroSolicitud);
+  }
+
+  alternarDespliegue(solicitud: AyudaEconomica): void {
+    this.desplegadas.update(actuales => {
+      const proximas = new Set(actuales);
+      proximas.has(solicitud.numeroSolicitud)
+        ? proximas.delete(solicitud.numeroSolicitud)
+        : proximas.add(solicitud.numeroSolicitud);
+      return proximas;
     });
   }
 
-  montoValido = computed(() => {
-    const c = this.condiciones();
-    return !!c && this.monto() >= c.montoMinimo && this.monto() <= c.montoMaximo;
-  });
-
-  /** Una simulación por plazo: se recalculan todas con cada cambio de monto. */
-  simulaciones = computed<Simulacion[]>(() => {
-    const c = this.condiciones();
-    if (!c || !this.montoValido()) return [];
-
-    return c.plazos.map(plazo => simular(this.monto(), plazo.tna, plazo.meses));
-  });
-
-  elegida = computed(() =>
-    this.simulaciones().find(s => s.meses === this.mesesElegidos()) ?? null
-  );
-
-  /** El deslizador no puede salir de su rango aunque el campo sí. */
-  montoEnRango = computed(() => {
-    const c = this.condiciones();
-    if (!c) return 0;
-    return Math.min(c.montoMaximo, Math.max(c.montoMinimo, this.monto()));
-  });
-
-  /** Cuánto del recorrido va lleno, de 0 a 100: pinta la barra y ubica el globito. */
-  avance = computed(() => {
-    const c = this.condiciones();
-    if (!c) return 0;
-    return ((this.montoEnRango() - c.montoMinimo) / (c.montoMaximo - c.montoMinimo)) * 100;
-  });
-
-  /**
-   * El centro del círculo no recorre todo el ancho: va de medio círculo a
-   * ancho menos medio círculo. Sin esta corrección el globito se despega del
-   * círculo hacia los extremos.
-   */
-  posicionGlobo = computed(() => {
-    const fraccion = this.avance() / 100;
-    const correccion = ANCHO_CIRCULO_PX / 2 - fraccion * ANCHO_CIRCULO_PX;
-    return `calc(${this.avance()}% + ${correccion}px)`;
-  });
-
-  /** Las tasas del plazo elegido, listas para el texto gris. */
-  tasas = computed(() => {
-    const c = this.condiciones();
-    const tna = this.elegida()?.tna ?? c?.plazos[0]?.tna;
-    if (tna === undefined) return null;
-
-    return {
-      tna: porcentaje.format(tna * 100),
-      tem: porcentaje.format(tasaMensual(tna) * 100),
-      tea: porcentaje.format(tasaEfectivaAnual(tna) * 100),
-    };
-  });
-
-  formatear(valor: number): string {
-    return numero.format(valor);
+  /** Qué parte del préstamo ya pagó, de 0 a 100. */
+  progreso(solicitud: AyudaEconomica): number {
+    if (!solicitud.plazos) return 0;
+    return (solicitud.cuotasPagadas / solicitud.plazos) * 100;
   }
 
-  elegirPlazo(meses: number): void {
-    this.mesesElegidos.set(meses);
-  }
+  private pedir(descartarCache: boolean): void {
+    this.cargando.set(true);
+    this.error.set(null);
 
-  alDeslizar(event: Event): void {
-    this.fijarMonto(Number((event.target as HTMLInputElement).value));
-  }
+    const listas$ = descartarCache
+      ? this.gestionListasService.recargar()
+      : this.gestionListasService.getListas();
 
-  /**
-   * Se formatea con separador de miles mientras se escribe: un número largo
-   * sin puntos es difícil de leer. Pasado el máximo se planta en el máximo;
-   * por debajo del mínimo se avisa pero no se corrige hasta que sale del
-   * campo, porque mientras escribe "5" para llegar a "500.000" es normal
-   * pasar por montos chicos.
-   */
-  alEscribir(event: Event): void {
-    const c = this.condiciones();
-    if (!c) return;
-
-    const campo = event.target as HTMLInputElement;
-    const digitos = campo.value.replace(/\D/g, '');
-    let valor = digitos ? Number(digitos) : 0;
-
-    if (valor > c.montoMaximo) {
-      valor = c.montoMaximo;
-      this.aviso.set(`El máximo es $ ${this.formatear(c.montoMaximo)}.`);
-    } else if (valor < c.montoMinimo) {
-      this.aviso.set(`El mínimo es $ ${this.formatear(c.montoMinimo)}.`);
-    } else {
-      this.aviso.set(null);
-    }
-
-    const texto = digitos ? this.formatear(valor) : '';
-    this.monto.set(valor);
-    this.montoTexto.set(texto);
-    // Se escribe a mano además de la señal: si el texto formateado coincide
-    // con el anterior, Angular no repinta y quedaría la letra que se tipeó.
-    campo.value = texto;
-  }
-
-  alSalirDelCampo(): void {
-    const c = this.condiciones();
-    if (!c) return;
-
-    this.fijarMonto(Math.min(c.montoMaximo, Math.max(c.montoMinimo, this.monto())));
-  }
-
-  empezarArrastre(): void {
-    this.arrastrando.set(true);
-  }
-
-  /**
-   * Se escucha en la ventana y no en el deslizador: si el dedo se suelta
-   * fuera de la barra, el evento no le llega a ella y el globito quedaría
-   * colgado.
-   */
-  @HostListener('window:pointerup')
-  @HostListener('window:pointercancel')
-  terminarArrastre(): void {
-    this.arrastrando.set(false);
-  }
-
-  private fijarMonto(valor: number): void {
-    this.monto.set(valor);
-    this.montoTexto.set(this.formatear(valor));
-    this.aviso.set(null);
+    listas$.subscribe({
+      next: ({ ayudasEconomicas }) => {
+        this.solicitudes.set(ayudasEconomicas.solicitudes);
+        this.habilitado.set(ayudasEconomicas.muestra);
+        this.desplegadas.set(new Set<string>());
+        this.cargando.set(false);
+      },
+      error: () => {
+        this.error.set('No pudimos obtener sus ayudas económicas. Intente nuevamente en unos minutos.');
+        this.cargando.set(false);
+      },
+    });
   }
 }

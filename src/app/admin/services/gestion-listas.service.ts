@@ -49,10 +49,39 @@ export interface AhorrosPhp {
 }
 
 /**
- * La respuesta completa. Es una tupla, no un objeto, y le fueron agregando
- * elementos con el tiempo: el tercero puede no venir.
+ * Una cuota de una ayuda económica, tal cual la manda el PHP: hay una fila
+ * por cuota, no por solicitud, y los datos de la solicitud se repiten en
+ * todas sus filas.
  */
-export type ListasPhp = [ValorPhp[], TipoTramitePhp[], AhorrosPhp?];
+export interface CuotaAyudaPhp {
+  NSolicitud: string;
+  /** AAAA-MM-DD. */
+  FSolicitud: string;
+  Capital: string;
+  Plazos: string;
+  /** Total a reintegrar, capital más intereses. */
+  reintegro: string;
+  ValorCuota: string;
+  /** Número de cuota dentro de la solicitud. */
+  Cuota: string;
+  /** Mes en que se descuenta: "sep 2026". */
+  MesDto: string;
+  saldo: string;
+  cobro: string;
+  saldoFinal: string;
+  Estado: string;
+}
+
+export interface AyudasEcPhp {
+  Muestra?: boolean | number | string;
+  AyudasEc?: CuotaAyudaPhp[];
+}
+
+/**
+ * La respuesta completa. Es una tupla, no un objeto, y le fueron agregando
+ * elementos con el tiempo: del tercero en adelante pueden no venir.
+ */
+export type ListasPhp = [ValorPhp[], TipoTramitePhp[], AhorrosPhp?, AyudasEcPhp?];
 
 export interface ValorItem {
   codigo: string;
@@ -115,10 +144,51 @@ export interface AhorrosSocio {
   cuentas: Ahorro[];
 }
 
+export interface CuotaAyuda {
+  numero: number;
+  /** "sep 2026", tal cual lo manda el PHP. */
+  mes: string;
+  importe: number;
+  /** Lo que se debía antes de pagar esta cuota. */
+  saldo: number;
+  /** Lo que queda después de pagarla. */
+  saldoFinal: number;
+  pagada: boolean;
+  /** El literal del PHP, para mostrarlo si aparece uno que no conocemos. */
+  estado: string;
+}
+
+export interface AyudaEconomica {
+  numeroSolicitud: string;
+  /** dd/mm/aaaa, listo para mostrar. */
+  fecha: string;
+  /** AAAA-MM-DD, sólo para ordenar. */
+  fechaIso: string | null;
+  capital: number;
+  plazos: number;
+  valorCuota: number;
+  /** Capital más intereses. */
+  totalAReintegrar: number;
+  cuotas: CuotaAyuda[];
+  cuotasPagadas: number;
+  cuotasPendientes: number;
+  enCurso: boolean;
+  /** Lo que falta pagar. Cero si está saldada. */
+  saldo: number;
+  /** La primera cuota que todavía no se pagó. */
+  proximaCuota: CuotaAyuda | null;
+}
+
+export interface AyudasEconomicasSocio {
+  muestra: boolean;
+  solicitudes: AyudaEconomica[];
+}
+
 export interface ListasGestion {
   valores: ValoresMutual;
   tipos: TipoTramite[];
   ahorros: AhorrosSocio;
+  ayudasEconomicas: AyudasEconomicasSocio;
 }
 
 /**
@@ -237,11 +307,12 @@ export class GestionListasService {
     return of(respuesta as ListasPhp);
   }
 
-  private normalizar([valores, tipos, ahorros]: ListasPhp): ListasGestion {
+  private normalizar([valores, tipos, ahorros, ayudas]: ListasPhp): ListasGestion {
     return {
       valores: this.normalizarValores(valores ?? []),
       tipos: this.normalizarTipos(tipos ?? []),
       ahorros: this.normalizarAhorros(ahorros),
+      ayudasEconomicas: this.normalizarAyudas(ayudas),
     };
   }
 
@@ -411,6 +482,80 @@ export class GestionListasService {
       saldo: Number(cuenta.Am_saldo) || 0,
       fecha: fechaIso ? fechaIso.split('-').reverse().join('/') : SIN_DATO,
       fechaIso,
+    };
+  }
+
+  /**
+   * El PHP manda una fila por cuota, con los datos de la solicitud repetidos
+   * en cada una. Se agrupan por número de solicitud y se arma cada ayuda con
+   * su plan de pagos.
+   */
+  private normalizarAyudas(crudo: AyudasEcPhp | undefined): AyudasEconomicasSocio {
+    const porSolicitud = new Map<string, CuotaAyudaPhp[]>();
+
+    for (const fila of crudo?.AyudasEc ?? []) {
+      const numero = (fila?.NSolicitud ?? "").toString().trim();
+      if (!numero) continue;
+
+      porSolicitud.set(numero, [...(porSolicitud.get(numero) ?? []), fila]);
+    }
+
+    const solicitudes = [...porSolicitud.entries()]
+      .map(([numero, filas]) => this.aAyuda(numero, filas))
+      // Primero lo que el socio está pagando, que es lo que viene a mirar;
+      // después el historial, de lo más nuevo a lo más viejo.
+      .sort((a, b) => {
+        if (a.enCurso !== b.enCurso) return a.enCurso ? -1 : 1;
+        return (b.fechaIso ?? "").localeCompare(a.fechaIso ?? "");
+      });
+
+    return {
+      muestra: this.muestraLaSeccion(crudo?.Muestra),
+      solicitudes,
+    };
+  }
+
+  private aAyuda(numeroSolicitud: string, filas: CuotaAyudaPhp[]): AyudaEconomica {
+    const primera = filas[0];
+    const cuotas = filas.map(fila => this.aCuota(fila)).sort((a, b) => a.numero - b.numero);
+    const pendientes = cuotas.filter(cuota => !cuota.pagada);
+    const plazos = Number(primera.Plazos) || cuotas.length;
+    const proximaCuota = pendientes[0] ?? null;
+    const fechaIso = this.fechaAIso(primera.FSolicitud);
+
+    return {
+      numeroSolicitud,
+      fecha: fechaIso ? fechaIso.split("-").reverse().join("/") : SIN_DATO,
+      fechaIso,
+      capital: Number(primera.Capital) || 0,
+      plazos,
+      valorCuota: Number(primera.ValorCuota) || 0,
+      totalAReintegrar: Number(primera.reintegro) || 0,
+      cuotas,
+      cuotasPendientes: pendientes.length,
+      // Se restan las pendientes en vez de contar las pagadas: el PHP no
+      // siempre manda todas las filas —hay solicitudes saldadas a las que les
+      // falta la primera cuota— y contarlas diría "3 de 4" en algo ya pago.
+      cuotasPagadas: Math.max(0, plazos - pendientes.length),
+      enCurso: pendientes.length > 0,
+      // Lo que falta pagar es el saldo anterior a la primera cuota impaga.
+      saldo: proximaCuota?.saldo ?? 0,
+      proximaCuota,
+    };
+  }
+
+  private aCuota(fila: CuotaAyudaPhp): CuotaAyuda {
+    const estado = (fila.Estado ?? "").trim();
+
+    return {
+      numero: Number(fila.Cuota) || 0,
+      mes: (fila.MesDto ?? "").trim() || SIN_DATO,
+      importe: Number(fila.cobro) || 0,
+      saldo: Number(fila.saldo) || 0,
+      saldoFinal: Number(fila.saldoFinal) || 0,
+      // "Pagado", "Pagada", "PAGO": alcanza con que empiece por "pag".
+      pagada: /^pag/i.test(estado),
+      estado: estado || SIN_DATO,
     };
   }
 

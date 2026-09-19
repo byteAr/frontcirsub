@@ -1,112 +1,180 @@
 import { registerLocaleData } from '@angular/common';
 import localeEsAr from '@angular/common/locales/es-AR';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { of, throwError } from 'rxjs';
 
-import { cuotaFrancesa } from '../../utils/prestamo';
+import { AyudaEconomica, GestionListasService } from '../../services/gestion-listas.service';
 import AyudaEconomicaComponent from './ayuda-economica.component';
 
 // En la app lo registra app.config.ts, que los tests no cargan.
 registerLocaleData(localeEsAr);
+
+function ayuda(campos: Partial<AyudaEconomica>): AyudaEconomica {
+  return {
+    numeroSolicitud: '1',
+    fecha: '01/01/2026',
+    fechaIso: '2026-01-01',
+    capital: 100_000,
+    plazos: 2,
+    valorCuota: 60_000,
+    totalAReintegrar: 120_000,
+    cuotas: [],
+    cuotasPagadas: 0,
+    cuotasPendientes: 0,
+    enCurso: false,
+    saldo: 0,
+    proximaCuota: null,
+    ...campos,
+  };
+}
+
+const EN_CURSO = ayuda({
+  numeroSolicitud: '131937',
+  fecha: '14/05/2026',
+  capital: 100_000,
+  plazos: 3,
+  valorCuota: 30_474.04,
+  totalAReintegrar: 91_422.12,
+  cuotasPagadas: 1,
+  cuotasPendientes: 2,
+  enCurso: true,
+  saldo: 60_948.08,
+  proximaCuota: { numero: 2, mes: 'jul 2026', importe: 30_474.04, saldo: 60_948.08, saldoFinal: 30_474.04, pagada: false, estado: 'Pendiente' },
+  cuotas: [
+    { numero: 1, mes: 'jun 2026', importe: 30_474.04, saldo: 91_422.12, saldoFinal: 60_948.08, pagada: true, estado: 'Pagado' },
+    { numero: 2, mes: 'jul 2026', importe: 30_474.04, saldo: 60_948.08, saldoFinal: 30_474.04, pagada: false, estado: 'Pendiente' },
+    { numero: 3, mes: 'ago 2026', importe: 30_474.04, saldo: 30_474.04, saldoFinal: 0, pagada: false, estado: 'Pendiente' },
+  ],
+});
+
+const SALDADA = ayuda({
+  numeroSolicitud: '105564',
+  fecha: '05/09/2025',
+  plazos: 4,
+  cuotasPagadas: 4,
+  cuotasPendientes: 0,
+  enCurso: false,
+  // El PHP mandó 3 filas de 4 plazos: la vista lo aclara.
+  cuotas: [
+    { numero: 2, mes: 'nov 2025', importe: 60_948.07, saldo: 182_844.21, saldoFinal: 121_896.14, pagada: true, estado: 'Pagado' },
+    { numero: 3, mes: 'dic 2025', importe: 60_948.07, saldo: 121_896.14, saldoFinal: 60_948.07, pagada: true, estado: 'Pagado' },
+    { numero: 4, mes: 'ene 2026', importe: 60_948.07, saldo: 60_948.07, saldoFinal: 0, pagada: true, estado: 'Pagado' },
+  ],
+});
 
 describe('AyudaEconomicaComponent', () => {
   let fixture: ComponentFixture<AyudaEconomicaComponent>;
   let component: AyudaEconomicaComponent;
 
   const raiz = () => fixture.nativeElement as HTMLElement;
-  const campo = () => raiz().querySelector('#monto') as HTMLInputElement;
-  const deslizador = () => raiz().querySelector('input[type="range"]') as HTMLInputElement;
-  const plazos = () => Array.from(raiz().querySelectorAll('[role="radio"]')) as HTMLButtonElement[];
+  const texto = () => raiz().textContent?.replace(/\s+/g, ' ') ?? '';
+  const tarjetas = () => Array.from(raiz().querySelectorAll('article'));
 
-  function escribir(texto: string): void {
-    campo().value = texto;
-    campo().dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-  }
+  function crear(ayudasEconomicas: unknown, falla = false): void {
+    // Se resetea acá y no sólo en afterEach: hay tests que crean el
+    // componente dos veces para comparar dos escenarios.
+    TestBed.resetTestingModule();
 
-  function deslizarA(valor: number): void {
-    deslizador().value = String(valor);
-    deslizador().dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-  }
+    TestBed.configureTestingModule({
+      imports: [AyudaEconomicaComponent],
+      providers: [{
+        provide: GestionListasService,
+        useValue: {
+          getListas: () => falla ? throwError(() => new Error('sin conexión')) : of({ ayudasEconomicas }),
+          recargar: () => falla ? throwError(() => new Error('sin conexión')) : of({ ayudasEconomicas }),
+        },
+      }],
+    });
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [AyudaEconomicaComponent] }).compileComponents();
     fixture = TestBed.createComponent(AyudaEconomicaComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  }
+
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('muestra una tarjeta por solicitud', () => {
+    crear({ muestra: true, solicitudes: [EN_CURSO, SALDADA] });
+
+    expect(tarjetas().length).toBe(2);
+    expect(texto()).toContain('Solicitud N° 131937');
+    expect(texto()).toContain('Solicitada el 14/05/2026');
   });
 
-  it('arranca en $ 500.000 y en el plazo más largo', () => {
-    expect(campo().value).toBe('500.000');
-    expect(component.mesesElegidos()).toBe(12);
+  it('marca el estado de cada una', () => {
+    crear({ muestra: true, solicitudes: [EN_CURSO, SALDADA] });
+
+    expect(tarjetas()[0].textContent).toContain('En curso');
+    expect(tarjetas()[1].textContent).toContain('Pagada');
   });
 
-  it('ofrece los cuatro plazos con su cuota', () => {
-    expect(plazos().map(b => b.textContent?.replace(/\s+/g, ' ').trim().split(' cuotas')[0]))
-      .toEqual(['3', '6', '9', '12']);
+  it('a la que está en curso le muestra el saldo y la próxima cuota', () => {
+    crear({ muestra: true, solicitudes: [EN_CURSO] });
 
-    const a6 = component.simulaciones().find(s => s.meses === 6)!;
-    expect(a6.cuota).toBeCloseTo(cuotaFrancesa(500_000, 0.48, 6), 6);
+    expect(texto()).toContain('Saldo pendiente');
+    expect(texto()).toContain('$ 60.948,08');
+    expect(texto()).toContain('Próxima cuota 2');
+    expect(texto()).toContain('en jul 2026');
   });
 
-  it('al deslizar cambia el monto y se recalculan todas las cuotas', () => {
-    const antes = component.simulaciones().map(s => s.cuota);
+  it('muestra el avance de cuotas', () => {
+    crear({ muestra: true, solicitudes: [EN_CURSO] });
 
-    deslizarA(1_000_000);
-
-    expect(campo().value).toBe('1.000.000');
-    const despues = component.simulaciones().map(s => s.cuota);
-    despues.forEach((cuota, i) => expect(cuota).toBeCloseTo(antes[i] * 2, 6));
+    expect(texto()).toContain('1 de 3 cuotas pagadas');
+    expect(texto()).toContain('faltan 2');
+    expect(component.progreso(EN_CURSO)).toBeCloseTo(33.33, 1);
   });
 
-  it('el campo y el deslizador son la misma cifra', () => {
-    escribir('750000');
+  it('el plan de pagos arranca cerrado y se abre al tocarlo', () => {
+    crear({ muestra: true, solicitudes: [EN_CURSO] });
 
-    expect(campo().value).toBe('750.000');
-    expect(deslizador().value).toBe('750000');
-  });
+    expect(component.estaDesplegada(EN_CURSO)).toBeFalse();
 
-  it('pasado el máximo se planta en el máximo y avisa', () => {
-    escribir('3500000');
-
-    expect(component.monto()).toBe(2_000_000);
-    expect(campo().value).toBe('2.000.000');
-    expect(raiz().textContent).toContain('El máximo es $ 2.000.000.');
-  });
-
-  it('por debajo del mínimo avisa, esconde las cuotas y corrige al salir del campo', () => {
-    escribir('5');
-
-    expect(raiz().textContent).toContain('El mínimo es $ 50.000.');
-    expect(plazos().length).toBe(0);
-
-    campo().dispatchEvent(new Event('blur'));
+    const boton = Array.from(raiz().querySelectorAll('button'))
+      .find(b => b.textContent?.includes('Ver plan de pagos'))!;
+    boton.click();
     fixture.detectChanges();
 
-    expect(campo().value).toBe('50.000');
-    expect(plazos().length).toBe(4);
+    expect(component.estaDesplegada(EN_CURSO)).toBeTrue();
+    expect(texto()).toContain('Cuota 1');
+    expect(texto()).toContain('Cuota 3');
   });
 
-  it('ignora lo que no sean números', () => {
-    escribir('$ 12a3.0b00');
+  it('avisa cuando el sistema de gestión no mandó todas las cuotas', () => {
+    crear({ muestra: true, solicitudes: [SALDADA] });
 
-    expect(component.monto()).toBe(123_000);
-    expect(campo().value).toBe('123.000');
+    expect(texto()).toContain('informa 3 de las 4 cuotas');
   });
 
-  it('elegir un plazo cambia el resumen', () => {
-    plazos().find(b => b.textContent?.includes('3 cuotas'))!.click();
-    fixture.detectChanges();
+  it('suma el saldo de las que están en curso sólo si hay más de una', () => {
+    crear({ muestra: true, solicitudes: [EN_CURSO] });
+    expect(texto()).not.toContain('Saldo pendiente total');
 
-    expect(component.elegida()?.meses).toBe(3);
-    expect(raiz().textContent).toContain('Pagaría 3 cuotas fijas de');
+    const otra = ayuda({ numeroSolicitud: '142128', enCurso: true, saldo: 385_986.42, plazos: 6, cuotasPendientes: 6 });
+    crear({ muestra: true, solicitudes: [EN_CURSO, otra] });
+
+    expect(component.saldoTotal()).toBe(446_934.5);
+    expect(texto()).toContain('Saldo pendiente total');
   });
 
-  it('muestra las tasas en texto', () => {
-    const texto = raiz().textContent ?? '';
+  it('sin solicitudes lo dice, sin tarjetas vacías', () => {
+    crear({ muestra: true, solicitudes: [] });
 
-    expect(texto).toContain('TNA 48%');
-    expect(texto).toContain('TEM 4%');
-    expect(texto).toContain('TEA 60,1%');
+    expect(texto()).toContain('No registra solicitudes de ayuda económica.');
+    expect(tarjetas().length).toBe(0);
+  });
+
+  it('con Muestra en false no muestra nada aunque lleguen solicitudes', () => {
+    crear({ muestra: false, solicitudes: [EN_CURSO] });
+
+    expect(tarjetas().length).toBe(0);
+    expect(texto()).toContain('No registra solicitudes de ayuda económica.');
+  });
+
+  it('si falla la consulta ofrece reintentar', () => {
+    crear({ muestra: true, solicitudes: [] }, true);
+
+    expect(texto()).toContain('No pudimos obtener sus ayudas económicas.');
+    expect(Array.from(raiz().querySelectorAll('button')).some(b => b.textContent?.includes('Reintentar'))).toBeTrue();
   });
 });

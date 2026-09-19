@@ -45,7 +45,7 @@ const CONDICIONES_PROVISORIAS: CondicionesPrestamo = {
  * Ya devuelve un Observable para que ese cambio no altere a quien lo usa.
  */
 @Injectable({ providedIn: 'root' })
-export class AyudaEconomicaService {
+export class SimuladorPrestamoService {
 
   getCondiciones(): Observable<CondicionesPrestamo> {
     return of(CONDICIONES_PROVISORIAS);

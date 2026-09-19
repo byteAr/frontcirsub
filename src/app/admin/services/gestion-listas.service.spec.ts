@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { environment } from '../../../environments/environment';
 import { GESTION_API_BASE } from '../../shared/utils/gestion-api-key';
-import { GestionListasService, ListasGestion, ListasPhp } from './gestion-listas.service';
+import { CuotaAyudaPhp, GestionListasService, ListasGestion, ListasPhp } from './gestion-listas.service';
 
 const URL_PHP = `${GESTION_API_BASE}/api-list_tramite.php`;
 const URL_BACKEND = `${environment.API_URL}/reintegros/listas-gestion`;
@@ -44,7 +44,27 @@ const RESPUESTA: ListasPhp = [
       { Tipo: 'Ahorro Estimulo', Am_saldo: '2573.23', Am_fechamov: '2026-09-17' },
     ],
   },
+  {
+    Muestra: true,
+    AyudasEc: [
+      // Saldada de un solo pago.
+      cuota({ NSolicitud: '95864', FSolicitud: '2025-01-29', Capital: '100000.00', Plazos: '1', reintegro: '112183.33', ValorCuota: '112183.33', Cuota: '1', MesDto: 'feb 2025', saldo: '112183.33', cobro: '112183.33', saldoFinal: '0.00', Estado: 'Pagado' }),
+      // Saldada, pero el PHP no manda la cuota 1: son 4 plazos y vienen 3 filas.
+      cuota({ NSolicitud: '105564', FSolicitud: '2025-09-05', Capital: '200000.00', Plazos: '4', reintegro: '243792.28', ValorCuota: '60948.07', Cuota: '2', MesDto: 'nov 2025', saldo: '182844.21', cobro: '60948.07', saldoFinal: '121896.14', Estado: 'Pagado' }),
+      cuota({ NSolicitud: '105564', FSolicitud: '2025-09-05', Capital: '200000.00', Plazos: '4', reintegro: '243792.28', ValorCuota: '60948.07', Cuota: '3', MesDto: 'dic 2025', saldo: '121896.14', cobro: '60948.07', saldoFinal: '60948.07', Estado: 'Pagado' }),
+      cuota({ NSolicitud: '105564', FSolicitud: '2025-09-05', Capital: '200000.00', Plazos: '4', reintegro: '243792.28', ValorCuota: '60948.07', Cuota: '4', MesDto: 'ene 2026', saldo: '60948.07', cobro: '60948.07', saldoFinal: '0.00', Estado: 'Pagado' }),
+      // En curso: una pagada y dos por pagar. Llegan desordenadas a propósito.
+      cuota({ NSolicitud: '131937', FSolicitud: '2026-05-14', Capital: '100000.00', Plazos: '3', reintegro: '91422.12', ValorCuota: '30474.04', Cuota: '3', MesDto: 'ago 2026', saldo: '30474.04', cobro: '30474.04', saldoFinal: '0.00', Estado: 'Pendiente' }),
+      cuota({ NSolicitud: '131937', FSolicitud: '2026-05-14', Capital: '100000.00', Plazos: '3', reintegro: '91422.12', ValorCuota: '30474.04', Cuota: '1', MesDto: 'jun 2026', saldo: '91422.12', cobro: '30474.04', saldoFinal: '60948.08', Estado: 'Pagado' }),
+      cuota({ NSolicitud: '131937', FSolicitud: '2026-05-14', Capital: '100000.00', Plazos: '3', reintegro: '91422.12', ValorCuota: '30474.04', Cuota: '2', MesDto: 'jul 2026', saldo: '60948.08', cobro: '30474.04', saldoFinal: '30474.04', Estado: 'Pendiente' }),
+    ],
+  },
 ];
+
+/** Una fila de cuota como las que manda el PHP. */
+function cuota(campos: CuotaAyudaPhp): CuotaAyudaPhp {
+  return campos;
+}
 
 describe('GestionListasService', () => {
   let service: GestionListasService;
@@ -240,6 +260,90 @@ describe('GestionListasService', () => {
       const { ahorros } = listasDelPhp([[], []]);
 
       expect(ahorros).toEqual({ muestra: true, cuentas: [] });
+    });
+  });
+
+  describe('ayudas económicas', () => {
+
+    it('arma una solicitud por número, aunque el PHP mande una fila por cuota', () => {
+      const { ayudasEconomicas } = listasDelPhp();
+
+      expect(ayudasEconomicas.muestra).toBeTrue();
+      expect(ayudasEconomicas.solicitudes.map(s => s.numeroSolicitud))
+        .toEqual(['131937', '105564', '95864']);
+    });
+
+    it('pone primero la que está pagando y después el historial, de lo más nuevo a lo más viejo', () => {
+      const { solicitudes } = listasDelPhp().ayudasEconomicas;
+
+      expect(solicitudes.map(s => s.enCurso)).toEqual([true, false, false]);
+      expect(solicitudes.map(s => s.fecha)).toEqual(['14/05/2026', '05/09/2025', '29/01/2025']);
+    });
+
+    it('ordena las cuotas aunque lleguen desordenadas', () => {
+      const enCurso = listasDelPhp().ayudasEconomicas.solicitudes[0];
+
+      expect(enCurso.cuotas.map(c => c.numero)).toEqual([1, 2, 3]);
+      expect(enCurso.cuotas.map(c => c.pagada)).toEqual([true, false, false]);
+    });
+
+    it('el saldo y la próxima cuota salen de la primera cuota impaga', () => {
+      const enCurso = listasDelPhp().ayudasEconomicas.solicitudes[0];
+
+      expect(enCurso.saldo).toBe(60948.08);
+      expect(enCurso.proximaCuota?.numero).toBe(2);
+      expect(enCurso.proximaCuota?.mes).toBe('jul 2026');
+      expect(enCurso.proximaCuota?.importe).toBe(30474.04);
+    });
+
+    it('cuenta las cuotas pagadas restando las pendientes, no contando filas', () => {
+      const { solicitudes } = listasDelPhp().ayudasEconomicas;
+      const porNumero = Object.fromEntries(solicitudes.map(s => [s.numeroSolicitud, s]));
+
+      // Esta viene con 3 filas de 4 plazos: contando filas diría "3 de 4"
+      // cuando en realidad está saldada.
+      expect(porNumero['105564'].cuotas.length).toBe(3);
+      expect(porNumero['105564'].cuotasPagadas).toBe(4);
+      expect(porNumero['105564'].cuotasPendientes).toBe(0);
+      expect(porNumero['105564'].enCurso).toBeFalse();
+      expect(porNumero['105564'].saldo).toBe(0);
+
+      expect(porNumero['131937'].cuotasPagadas).toBe(1);
+      expect(porNumero['131937'].cuotasPendientes).toBe(2);
+    });
+
+    it('guarda los datos del préstamo y los pasa a número', () => {
+      const { solicitudes } = listasDelPhp().ayudasEconomicas;
+      const saldada = solicitudes.find(s => s.numeroSolicitud === '95864')!;
+
+      expect(saldada.capital).toBe(100_000);
+      expect(saldada.plazos).toBe(1);
+      expect(saldada.valorCuota).toBe(112_183.33);
+      expect(saldada.totalAReintegrar).toBe(112_183.33);
+    });
+
+    it('respeta el flag Muestra', () => {
+      const { ayudasEconomicas } = listasRecargadas([[], [], {}, { Muestra: 0, AyudasEc: [] }]);
+
+      expect(ayudasEconomicas.muestra).toBeFalse();
+    });
+
+    it('no rompe si el cuarto elemento no viene: se agregó después', () => {
+      const { ayudasEconomicas } = listasDelPhp([[], []]);
+
+      expect(ayudasEconomicas).toEqual({ muestra: true, solicitudes: [] });
+    });
+
+    it('toma como pagada cualquier variante de "pagado" y conserva el literal desconocido', () => {
+      const { ayudasEconomicas } = listasDelPhp([[], [], {}, { AyudasEc: [
+        cuota({ NSolicitud: '1', FSolicitud: '2026-01-01', Capital: '1000', Plazos: '2', reintegro: '1000', ValorCuota: '500', Cuota: '1', MesDto: 'feb 2026', saldo: '1000', cobro: '500', saldoFinal: '500', Estado: 'PAGA' }),
+        cuota({ NSolicitud: '1', FSolicitud: '2026-01-01', Capital: '1000', Plazos: '2', reintegro: '1000', ValorCuota: '500', Cuota: '2', MesDto: 'mar 2026', saldo: '500', cobro: '500', saldoFinal: '0', Estado: 'En revisión' }),
+      ] }]);
+
+      const cuotas = ayudasEconomicas.solicitudes[0].cuotas;
+      expect(cuotas[0].pagada).toBeTrue();
+      expect(cuotas[1].pagada).toBeFalse();
+      expect(cuotas[1].estado).toBe('En revisión');
     });
   });
 
