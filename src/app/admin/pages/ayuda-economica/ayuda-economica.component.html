@@ -173,14 +173,13 @@
             </ul>
 
             <!--
-              Aclara de dónde sale el mes: el sistema de gestión trabaja con el
-              mes de los haberes y el socio lo ve descontado al mes siguiente.
+              El sistema de gestión no siempre manda todas las cuotas de una
+              solicitud vieja. Se aclara para que el socio no crea que le falta
+              información por un error de la app.
             -->
-            <p class="px-4 md:px-5 py-2.5 text-[0.7rem] text-gray-400 border-t border-gray-100">
-              Cada cuota se descuenta de los haberes del mes anterior al indicado.
-              <span *ngIf="solicitud.cuotas.length < solicitud.plazos" class="block mt-1">
-                El sistema de gestión informa {{ solicitud.cuotas.length }} de las {{ solicitud.plazos }} cuotas de esta solicitud.
-              </span>
+            <p *ngIf="solicitud.cuotas.length < solicitud.plazos"
+              class="px-4 md:px-5 py-2.5 text-[0.7rem] text-gray-400 border-t border-gray-100">
+              El sistema de gestión informa {{ solicitud.cuotas.length }} de las {{ solicitud.plazos }} cuotas de esta solicitud.
             </p>
           </div>
         </div>
