@@ -79,7 +79,7 @@ export default class NotificacionesComponent implements OnInit {
         tipo: 'oficial',
         de: 'Comisión Directiva',
         asunto: 'Bienvenida',
-        mensaje: `Estimado socio, es un honor contar con su pertenencia a nuestra institución. A partir de hoy, ponemos a su disposición una nueva herramienta: la credencial digital. Con ella podremos mantener una comunicación permanente con usted y avanzar hacia una administración más transparente, ágil y cercana. ¡Gracias por acompañarnos en este nuevo paso!`,
+        mensaje: `Estimado asociado, es un honor contar con su pertenencia a nuestra institución. A partir de hoy, ponemos a su disposición una nueva herramienta: la credencial digital. Con ella podremos mantener una comunicación permanente con usted y avanzar hacia una administración más transparente, ágil y cercana. ¡Gracias por acompañarnos en este nuevo paso!`,
         fecha: '06/03/26',
         fechaOrden: this.aOrden('06/03/26')
       }
@@ -89,7 +89,7 @@ export default class NotificacionesComponent implements OnInit {
       tipo: 'servicio',
       de: 'Departamento Afiliaciones',
       asunto: 'Bienvenida',
-      mensaje: `Estimado/a Socio/a ${apellido}, tenemos el gusto de registrarlo en la credencial digital, herramienta por medio de la cual les haremos llegar la información actualizada de nuestra MUTUAL y de esta forma lograr una comunicación permanente con usted, que es lo más importante para la mutual.`,
+      mensaje: `Estimado/a Asociado/a ${apellido}, tenemos el gusto de registrarlo en la credencial digital, herramienta por medio de la cual les haremos llegar la información actualizada de nuestra MUTUAL y de esta forma lograr una comunicación permanente con usted, que es lo más importante para la mutual.`,
       fecha: '06/03/26',
       fechaOrden: this.aOrden('06/03/26')
     };

@@ -68,7 +68,7 @@ export class AdminNotifModalComponent {
         this.isSearching.set(false);
       },
       error: () => {
-        this.searchError.set('No se encontró ningún socio con ese DNI.');
+        this.searchError.set('No se encontró ningún asociado con ese DNI.');
         this.isSearching.set(false);
       },
     });
@@ -130,7 +130,7 @@ export class AdminNotifModalComponent {
         this.isSearchingPerm.set(false);
       },
       error: () => {
-        this.permSearchError.set('No se encontró ningún socio con ese DNI.');
+        this.permSearchError.set('No se encontró ningún asociado con ese DNI.');
         this.isSearchingPerm.set(false);
       },
     });
