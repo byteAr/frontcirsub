@@ -43,109 +43,118 @@
       </p>
     </div>
 
-    <div class="flex flex-col gap-3">
+    <div class="flex flex-col gap-2">
       <article *ngFor="let solicitud of solicitudes()"
         class="bg-white rounded-2xl shadow-sm overflow-hidden">
 
-        <div class="px-4 md:px-5 pt-4">
+        <!--
+          Cerrada se ve sólo con qué identificarla y en qué anda. El detalle
+          se despliega, igual que los meses de Mis descuentos: el socio suele
+          tener varias y no las mira todas.
+        -->
+        <button type="button" (click)="alternarDespliegue(solicitud)"
+          [attr.aria-expanded]="estaDesplegada(solicitud)"
+          class="w-full flex items-center justify-between gap-3 px-4 md:px-5 py-3.5 text-left cursor-pointer">
 
-          <!-- Encabezado: número, fecha y estado -->
-          <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0">
-              <p class="text-sm md:text-base font-semibold text-gray-800">
-                Solicitud N° {{ solicitud.numeroSolicitud }}
-              </p>
-              <p class="text-xs text-gray-400 mt-0.5">Solicitada el {{ solicitud.fecha }}</p>
-            </div>
+          <div class="min-w-0">
+            <p class="text-sm md:text-base font-semibold text-gray-800">
+              Solicitud N° {{ solicitud.numeroSolicitud }}
+            </p>
+            <p class="text-xs text-gray-400 mt-0.5">Solicitada el {{ solicitud.fecha }}</p>
+          </div>
 
+          <div class="flex items-center gap-2 shrink-0">
             <span *ngIf="solicitud.enCurso"
-              class="shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-cyan-700 bg-cyan-50 ring-1 ring-cyan-200 rounded-full px-2.5 py-1">
+              class="inline-flex items-center text-xs font-semibold text-cyan-700 bg-cyan-50 ring-1 ring-cyan-200 rounded-full px-2.5 py-1">
               En curso
             </span>
             <span *ngIf="!solicitud.enCurso"
-              class="shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-50 ring-1 ring-green-200 rounded-full pl-1.5 pr-2.5 py-1">
+              class="inline-flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-50 ring-1 ring-green-200 rounded-full pl-1.5 pr-2.5 py-1">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m9.55 18l-5.7-5.7l1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"/></svg>
               Pagada
             </span>
+
+            <svg class="text-cyan-600 transition-transform duration-200"
+              [ngClass]="estaDesplegada(solicitud) ? 'rotate-180' : ''"
+              xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M12 15.4L6.6 10L8 8.6l4 4l4-4l1.4 1.4z"/>
+            </svg>
           </div>
-
-          <!-- Lo que falta pagar y cuándo se descuenta la próxima cuota -->
-          <div *ngIf="solicitud.enCurso" class="mt-3 rounded-xl bg-cyan-50/70 px-3.5 py-3">
-            <div class="flex items-end justify-between gap-3 flex-wrap">
-              <div>
-                <p class="text-xs text-cyan-800/70">Saldo pendiente</p>
-                <p class="text-xl md:text-2xl font-bold text-cyan-800 tabular-nums">
-                  {{ solicitud.saldo | currency:'ARS':'symbol':'1.2-2':'es-AR' }}
-                </p>
-              </div>
-              <p *ngIf="solicitud.proximaCuota as proxima" class="text-xs text-cyan-800/80 text-right">
-                Próxima cuota {{ proxima.numero }}<br>
-                <span class="font-semibold tabular-nums">{{ proxima.importe | currency:'ARS':'symbol':'1.2-2':'es-AR' }}</span>
-                en {{ proxima.mes }}
-              </p>
-            </div>
-          </div>
-
-          <!-- Avance de cuotas -->
-          <div class="mt-3.5">
-            <div class="flex items-center justify-between text-xs text-gray-500">
-              <span>
-                {{ solicitud.cuotasPagadas }} de {{ solicitud.plazos }}
-                {{ solicitud.plazos === 1 ? 'cuota pagada' : 'cuotas pagadas' }}
-              </span>
-              <span *ngIf="solicitud.enCurso" class="text-gray-400">
-                {{ solicitud.cuotasPendientes === 1 ? 'falta 1' : 'faltan ' + solicitud.cuotasPendientes }}
-              </span>
-            </div>
-            <div class="mt-1.5 h-2 rounded-full bg-gray-200 overflow-hidden">
-              <div class="h-full rounded-full transition-all duration-300"
-                [ngClass]="solicitud.enCurso ? 'bg-cyan-600' : 'bg-green-600'"
-                [style.width.%]="progreso(solicitud)"></div>
-            </div>
-          </div>
-
-          <!-- Datos del préstamo -->
-          <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-2.5">
-            <div>
-              <dt class="text-[0.7rem] text-gray-400 uppercase tracking-wider">Capital</dt>
-              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ solicitud.capital | currency:'ARS':'symbol':'1.2-2':'es-AR' }}</dd>
-            </div>
-            <div>
-              <dt class="text-[0.7rem] text-gray-400 uppercase tracking-wider">Valor de cuota</dt>
-              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ solicitud.valorCuota | currency:'ARS':'symbol':'1.2-2':'es-AR' }}</dd>
-            </div>
-            <div>
-              <dt class="text-[0.7rem] text-gray-400 uppercase tracking-wider">Plazos</dt>
-              <dd class="text-sm font-semibold text-gray-700">{{ solicitud.plazos }} {{ solicitud.plazos === 1 ? 'cuota' : 'cuotas' }}</dd>
-            </div>
-            <div>
-              <dt class="text-[0.7rem] text-gray-400 uppercase tracking-wider">Total a reintegrar</dt>
-              <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ solicitud.totalAReintegrar | currency:'ARS':'symbol':'1.2-2':'es-AR' }}</dd>
-            </div>
-          </dl>
-        </div>
-
-        <!-- Plan de pagos, desplegable -->
-        <button type="button" (click)="alternarDespliegue(solicitud)"
-          [attr.aria-expanded]="estaDesplegada(solicitud)"
-          class="w-full mt-3 flex items-center justify-between gap-2 px-4 md:px-5 py-3 border-t border-gray-100 text-sm text-cyan-700 font-medium cursor-pointer">
-          {{ estaDesplegada(solicitud) ? 'Ocultar plan de pagos' : 'Ver plan de pagos' }}
-          <svg class="transition-transform duration-200 shrink-0"
-            [ngClass]="estaDesplegada(solicitud) ? 'rotate-180' : ''"
-            xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M12 15.4L6.6 10L8 8.6l4 4l4-4l1.4 1.4z"/>
-          </svg>
         </button>
 
+        <!-- Detalle: se revela con transición de alto -->
         <div class="grid transition-all duration-300 ease-out"
           [ngClass]="estaDesplegada(solicitud) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'">
           <div class="overflow-hidden">
+
+            <div class="px-4 md:px-5 pt-4 border-t border-gray-100">
+
+              <!-- Lo que falta pagar y cuándo se descuenta la próxima cuota -->
+              <div *ngIf="solicitud.enCurso" class="rounded-xl bg-cyan-50/70 px-3.5 py-3">
+                <div class="flex items-end justify-between gap-3 flex-wrap">
+                  <div>
+                    <p class="text-xs text-cyan-800/70">Saldo pendiente</p>
+                    <p class="text-xl md:text-2xl font-bold text-cyan-800 tabular-nums">
+                      {{ solicitud.saldo | currency:'ARS':'symbol':'1.2-2':'es-AR' }}
+                    </p>
+                  </div>
+                  <p *ngIf="solicitud.proximaCuota as proxima" class="text-xs text-cyan-800/80 text-right">
+                    Próxima cuota {{ proxima.numero }}<br>
+                    <span class="font-semibold tabular-nums">{{ proxima.importe | currency:'ARS':'symbol':'1.2-2':'es-AR' }}</span>
+                    en {{ proxima.mesCobro }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Avance de cuotas -->
+              <div [ngClass]="solicitud.enCurso ? 'mt-3.5' : ''">
+                <div class="flex items-center justify-between text-xs text-gray-500">
+                  <span>
+                    {{ solicitud.cuotasPagadas }} de {{ solicitud.plazos }}
+                    {{ solicitud.plazos === 1 ? 'cuota pagada' : 'cuotas pagadas' }}
+                  </span>
+                  <span *ngIf="solicitud.enCurso" class="text-gray-400">
+                    {{ solicitud.cuotasPendientes === 1 ? 'falta 1' : 'faltan ' + solicitud.cuotasPendientes }}
+                  </span>
+                </div>
+                <div class="mt-1.5 h-2 rounded-full bg-gray-200 overflow-hidden">
+                  <div class="h-full rounded-full transition-all duration-300"
+                    [ngClass]="solicitud.enCurso ? 'bg-cyan-600' : 'bg-green-600'"
+                    [style.width.%]="progreso(solicitud)"></div>
+                </div>
+              </div>
+
+              <!-- Datos del préstamo -->
+              <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-2.5">
+                <div>
+                  <dt class="text-[0.7rem] text-gray-400 uppercase tracking-wider">Capital</dt>
+                  <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ solicitud.capital | currency:'ARS':'symbol':'1.2-2':'es-AR' }}</dd>
+                </div>
+                <div>
+                  <dt class="text-[0.7rem] text-gray-400 uppercase tracking-wider">Valor de cuota</dt>
+                  <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ solicitud.valorCuota | currency:'ARS':'symbol':'1.2-2':'es-AR' }}</dd>
+                </div>
+                <div>
+                  <dt class="text-[0.7rem] text-gray-400 uppercase tracking-wider">Plazos</dt>
+                  <dd class="text-sm font-semibold text-gray-700">{{ solicitud.plazos }} {{ solicitud.plazos === 1 ? 'cuota' : 'cuotas' }}</dd>
+                </div>
+                <div>
+                  <dt class="text-[0.7rem] text-gray-400 uppercase tracking-wider">Total a reintegrar</dt>
+                  <dd class="text-sm font-semibold text-gray-700 tabular-nums">{{ solicitud.totalAReintegrar | currency:'ARS':'symbol':'1.2-2':'es-AR' }}</dd>
+                </div>
+              </dl>
+            </div>
+
+            <!-- Plan de pagos -->
+            <p class="px-4 md:px-5 mt-4 mb-1 text-[0.7rem] text-gray-400 uppercase tracking-wider">
+              Plan de pagos
+            </p>
             <ul class="divide-y divide-gray-100 border-t border-gray-100">
               <li *ngFor="let cuota of solicitud.cuotas"
                 class="flex items-center justify-between gap-3 px-4 md:px-5 py-2.5">
                 <div class="min-w-0">
                   <p class="text-sm text-gray-700">Cuota {{ cuota.numero }}</p>
-                  <p class="text-[0.7rem] text-gray-400">{{ cuota.mes }}</p>
+                  <p class="text-[0.7rem] text-gray-400">se cobra en {{ cuota.mesCobro }}</p>
                 </div>
                 <div class="flex items-center gap-3 shrink-0">
                   <span class="text-sm font-semibold text-gray-700 tabular-nums">
@@ -164,13 +173,14 @@
             </ul>
 
             <!--
-              El sistema de gestión no siempre manda todas las cuotas de una
-              solicitud vieja. Se aclara para que el socio no crea que le falta
-              información por un error de la app.
+              Aclara de dónde sale el mes: el sistema de gestión trabaja con el
+              mes de los haberes y el socio lo ve descontado al mes siguiente.
             -->
-            <p *ngIf="solicitud.cuotas.length < solicitud.plazos"
-              class="px-4 md:px-5 py-2.5 text-[0.7rem] text-gray-400 border-t border-gray-100">
-              El sistema de gestión informa {{ solicitud.cuotas.length }} de las {{ solicitud.plazos }} cuotas de esta solicitud.
+            <p class="px-4 md:px-5 py-2.5 text-[0.7rem] text-gray-400 border-t border-gray-100">
+              Cada cuota se descuenta de los haberes del mes anterior al indicado.
+              <span *ngIf="solicitud.cuotas.length < solicitud.plazos" class="block mt-1">
+                El sistema de gestión informa {{ solicitud.cuotas.length }} de las {{ solicitud.plazos }} cuotas de esta solicitud.
+              </span>
             </p>
           </div>
         </div>

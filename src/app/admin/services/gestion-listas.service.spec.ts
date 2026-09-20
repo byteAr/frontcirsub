@@ -292,8 +292,11 @@ describe('GestionListasService', () => {
 
       expect(enCurso.saldo).toBe(60948.08);
       expect(enCurso.proximaCuota?.numero).toBe(2);
-      expect(enCurso.proximaCuota?.mes).toBe('jul 2026');
       expect(enCurso.proximaCuota?.importe).toBe(30474.04);
+      // El PHP manda el mes de los haberes; el socio lo ve descontado al mes
+      // siguiente, que es el que se muestra.
+      expect(enCurso.proximaCuota?.mesHaberes).toBe('jul 2026');
+      expect(enCurso.proximaCuota?.mesCobro).toBe('ago 2026');
     });
 
     it('cuenta las cuotas pagadas restando las pendientes, no contando filas', () => {
@@ -332,6 +335,22 @@ describe('GestionListasService', () => {
       const { ayudasEconomicas } = listasDelPhp([[], []]);
 
       expect(ayudasEconomicas).toEqual({ muestra: true, solicitudes: [] });
+    });
+
+    it('pasa diciembre a enero del año siguiente', () => {
+      const { ayudasEconomicas } = listasDelPhp([[], [], {}, { AyudasEc: [
+        cuota({ NSolicitud: '1', FSolicitud: '2026-11-01', Capital: '1000', Plazos: '1', reintegro: '1000', ValorCuota: '1000', Cuota: '1', MesDto: 'dic 2026', saldo: '1000', cobro: '1000', saldoFinal: '0', Estado: 'Pendiente' }),
+      ] }]);
+
+      expect(ayudasEconomicas.solicitudes[0].cuotas[0].mesCobro).toBe('ene 2027');
+    });
+
+    it('deja el mes como vino si no se puede interpretar, sin inventar uno', () => {
+      const { ayudasEconomicas } = listasDelPhp([[], [], {}, { AyudasEc: [
+        cuota({ NSolicitud: '1', FSolicitud: '2026-11-01', Capital: '1000', Plazos: '1', reintegro: '1000', ValorCuota: '1000', Cuota: '1', MesDto: 'a confirmar', saldo: '1000', cobro: '1000', saldoFinal: '0', Estado: 'Pendiente' }),
+      ] }]);
+
+      expect(ayudasEconomicas.solicitudes[0].cuotas[0].mesCobro).toBe('a confirmar');
     });
 
     it('toma como pagada cualquier variante de "pagado" y conserva el literal desconocido', () => {

@@ -39,11 +39,11 @@ const EN_CURSO = ayuda({
   cuotasPendientes: 2,
   enCurso: true,
   saldo: 60_948.08,
-  proximaCuota: { numero: 2, mes: 'jul 2026', importe: 30_474.04, saldo: 60_948.08, saldoFinal: 30_474.04, pagada: false, estado: 'Pendiente' },
+  proximaCuota: { numero: 2, mesHaberes: 'jul 2026', mesCobro: 'ago 2026', importe: 30_474.04, saldo: 60_948.08, saldoFinal: 30_474.04, pagada: false, estado: 'Pendiente' },
   cuotas: [
-    { numero: 1, mes: 'jun 2026', importe: 30_474.04, saldo: 91_422.12, saldoFinal: 60_948.08, pagada: true, estado: 'Pagado' },
-    { numero: 2, mes: 'jul 2026', importe: 30_474.04, saldo: 60_948.08, saldoFinal: 30_474.04, pagada: false, estado: 'Pendiente' },
-    { numero: 3, mes: 'ago 2026', importe: 30_474.04, saldo: 30_474.04, saldoFinal: 0, pagada: false, estado: 'Pendiente' },
+    { numero: 1, mesHaberes: 'jun 2026', mesCobro: 'jul 2026', importe: 30_474.04, saldo: 91_422.12, saldoFinal: 60_948.08, pagada: true, estado: 'Pagado' },
+    { numero: 2, mesHaberes: 'jul 2026', mesCobro: 'ago 2026', importe: 30_474.04, saldo: 60_948.08, saldoFinal: 30_474.04, pagada: false, estado: 'Pendiente' },
+    { numero: 3, mesHaberes: 'ago 2026', mesCobro: 'sep 2026', importe: 30_474.04, saldo: 30_474.04, saldoFinal: 0, pagada: false, estado: 'Pendiente' },
   ],
 });
 
@@ -56,9 +56,9 @@ const SALDADA = ayuda({
   enCurso: false,
   // El PHP mandó 3 filas de 4 plazos: la vista lo aclara.
   cuotas: [
-    { numero: 2, mes: 'nov 2025', importe: 60_948.07, saldo: 182_844.21, saldoFinal: 121_896.14, pagada: true, estado: 'Pagado' },
-    { numero: 3, mes: 'dic 2025', importe: 60_948.07, saldo: 121_896.14, saldoFinal: 60_948.07, pagada: true, estado: 'Pagado' },
-    { numero: 4, mes: 'ene 2026', importe: 60_948.07, saldo: 60_948.07, saldoFinal: 0, pagada: true, estado: 'Pagado' },
+    { numero: 2, mesHaberes: 'nov 2025', mesCobro: 'dic 2025', importe: 60_948.07, saldo: 182_844.21, saldoFinal: 121_896.14, pagada: true, estado: 'Pagado' },
+    { numero: 3, mesHaberes: 'dic 2025', mesCobro: 'ene 2026', importe: 60_948.07, saldo: 121_896.14, saldoFinal: 60_948.07, pagada: true, estado: 'Pagado' },
+    { numero: 4, mesHaberes: 'ene 2026', mesCobro: 'feb 2026', importe: 60_948.07, saldo: 60_948.07, saldoFinal: 0, pagada: true, estado: 'Pagado' },
   ],
 });
 
@@ -114,7 +114,8 @@ describe('AyudaEconomicaComponent', () => {
     expect(texto()).toContain('Saldo pendiente');
     expect(texto()).toContain('$ 60.948,08');
     expect(texto()).toContain('Próxima cuota 2');
-    expect(texto()).toContain('en jul 2026');
+    // Los haberes son de julio, pero se cobran en agosto: se muestra el cobro.
+    expect(texto()).toContain('Próxima cuota 2$ 30.474,04 en ago 2026');
   });
 
   it('muestra el avance de cuotas', () => {
@@ -125,19 +126,36 @@ describe('AyudaEconomicaComponent', () => {
     expect(component.progreso(EN_CURSO)).toBeCloseTo(33.33, 1);
   });
 
-  it('el plan de pagos arranca cerrado y se abre al tocarlo', () => {
+  it('arranca cerrada: en el encabezado sólo va lo mínimo para identificarla', () => {
     crear({ muestra: true, solicitudes: [EN_CURSO] });
 
     expect(component.estaDesplegada(EN_CURSO)).toBeFalse();
 
-    const boton = Array.from(raiz().querySelectorAll('button'))
-      .find(b => b.textContent?.includes('Ver plan de pagos'))!;
-    boton.click();
+    const encabezado = tarjetas()[0].querySelector('button')!;
+    expect(encabezado.getAttribute('aria-expanded')).toBe('false');
+    expect(encabezado.textContent).toContain('Solicitud N° 131937');
+    expect(encabezado.textContent).toContain('En curso');
+    // El detalle no forma parte del encabezado: se revela al desplegar.
+    expect(encabezado.textContent).not.toContain('Saldo pendiente');
+    expect(encabezado.textContent).not.toContain('Cuota 1');
+
+    // El contenedor del detalle está colapsado hasta que se toca.
+    const detalle = tarjetas()[0].querySelector('button + div')!;
+    expect(detalle.className).toContain('grid-rows-[0fr]');
+  });
+
+  it('al tocar el encabezado se despliega el detalle con el plan de pagos', () => {
+    crear({ muestra: true, solicitudes: [EN_CURSO] });
+
+    tarjetas()[0].querySelector('button')!.click();
     fixture.detectChanges();
 
     expect(component.estaDesplegada(EN_CURSO)).toBeTrue();
+    expect(tarjetas()[0].querySelector('button + div')!.className).toContain('grid-rows-[1fr]');
+    expect(texto()).toContain('Plan de pagos');
     expect(texto()).toContain('Cuota 1');
     expect(texto()).toContain('Cuota 3');
+    expect(texto()).toContain('se cobra en jul 2026');
   });
 
   it('avisa cuando el sistema de gestión no mandó todas las cuotas', () => {

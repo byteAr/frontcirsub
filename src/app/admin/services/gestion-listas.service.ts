@@ -146,8 +146,13 @@ export interface AhorrosSocio {
 
 export interface CuotaAyuda {
   numero: number;
-  /** "sep 2026", tal cual lo manda el PHP. */
-  mes: string;
+  /** Mes de los haberes sobre los que se descuenta, tal cual lo manda el PHP. */
+  mesHaberes: string;
+  /**
+   * Mes en que el socio lo ve descontado, que es el siguiente al de haberes:
+   * el sueldo de septiembre se cobra en octubre. Es el que se muestra.
+   */
+  mesCobro: string;
   importe: number;
   /** Lo que se debía antes de pagar esta cuota. */
   saldo: number;
@@ -206,6 +211,12 @@ const BENEFICIO_POR_TRAMITE: Record<string, ClaveBeneficio | undefined> = {
   RM: 'far',
   TE: 'eva',
 };
+
+/** Abreviaturas de los meses, en orden, para escribirlos. */
+const MESES_ABREVIADOS_EN_ORDEN = [
+  'ene', 'feb', 'mar', 'abr', 'may', 'jun',
+  'jul', 'ago', 'sep', 'oct', 'nov', 'dic',
+];
 
 /** Abreviaturas con las que el PHP manda el mes en FechaUpd. */
 const MESES_ABREVIADOS: Record<string, number> = {
@@ -546,10 +557,12 @@ export class GestionListasService {
 
   private aCuota(fila: CuotaAyudaPhp): CuotaAyuda {
     const estado = (fila.Estado ?? "").trim();
+    const mesHaberes = (fila.MesDto ?? "").trim() || SIN_DATO;
 
     return {
       numero: Number(fila.Cuota) || 0,
-      mes: (fila.MesDto ?? "").trim() || SIN_DATO,
+      mesHaberes,
+      mesCobro: this.mesSiguiente(mesHaberes),
       importe: Number(fila.cobro) || 0,
       saldo: Number(fila.saldo) || 0,
       saldoFinal: Number(fila.saldoFinal) || 0,
@@ -557,6 +570,27 @@ export class GestionListasService {
       pagada: /^pag/i.test(estado),
       estado: estado || SIN_DATO,
     };
+  }
+
+  /**
+   * "sep 2026" -> "oct 2026".
+   *
+   * El PHP manda el mes de los haberes sobre los que se descuenta la cuota, y
+   * los sueldos se cobran al mes siguiente del trabajado: lo que sale del
+   * recibo de septiembre, el socio lo ve en octubre. Si el texto no se puede
+   * interpretar se devuelve igual, sin inventar un mes.
+   */
+  private mesSiguiente(crudo: string): string {
+    const match = /^([a-zá-ú]{3})\.?\s*(\d{4})$/i.exec(crudo.trim());
+    if (!match) return crudo;
+
+    const mes = MESES_ABREVIADOS[match[1].toLowerCase()];
+    if (!mes) return crudo;
+
+    const anio = mes === 12 ? Number(match[2]) + 1 : Number(match[2]);
+    const siguiente = mes === 12 ? 1 : mes + 1;
+
+    return `${MESES_ABREVIADOS_EN_ORDEN[siguiente - 1]} ${anio}`;
   }
 
   /** "2026-09-17" -> el mismo texto si es válido, null si no. */
