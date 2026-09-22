@@ -3,6 +3,7 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 
 import { AuthService } from '../../../auth/services/auth.service';
+import { comoAsociado } from '../../../shared/utils/terminologia';
 
 @Component({
   selector: 'app-personal-date-credential',
@@ -29,4 +30,11 @@ export default class PersonalDateCredentialComponent {
   });
 
   hasImage = computed(() => !!this.autService.imagenPerfilUrl());
+
+  /**
+   * El cargo llega de la base por sp_Perfil_completo_detallado y hoy dice
+   * "SOCIO". La mutual usa "asociado", así que se traduce al mostrarlo; si la
+   * base ya lo manda bien, queda igual.
+   */
+  cargo = computed(() => comoAsociado(this.user()?.Personal?.[0]?.Tipo_Cargo_Detalle));
 }

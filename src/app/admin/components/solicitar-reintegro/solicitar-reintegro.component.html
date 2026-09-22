@@ -5,15 +5,15 @@
 -->
 <button (click)="abrirFormulario()"
   class="text-white bg-cyan-600 px-3 sm:px-4 py-2 rounded-2xl text-xs sm:text-sm inline-flex items-center justify-center gap-1.5 cursor-pointer shadow-md whitespace-nowrap"
-  aria-label="Solicitar reintegro">
+  aria-label="Iniciar trámite">
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="#ffffff" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm-1 7V3.5L18.5 9zM12 19l-3-3h2v-3h2v3h2z"/></svg>
-  Solicitar reintegro
+  Iniciar trámite
 </button>
 
 <!-- Formulario de carga -->
 <dialog #modalForm class="modal" (close)="onFormularioCerrado()">
   <div class="modal-box w-[90%] md:w-[45%] lg:w-[35%] max-w-2xl">
-    <h3 class="font-bold text-base text-cyan-600">Solicitar reintegro</h3>
+    <h3 class="font-bold text-base text-cyan-600">Iniciar trámite</h3>
     <p class="text-xs text-gray-500 mt-1">
       Elija el tipo de trámite y adjunte la documentación (PDF, Word, PNG o JPG) o saque una foto. Hasta 10 archivos de 10 MB cada uno.
     </p>
