@@ -53,6 +53,20 @@ export class AuthService {
 
   token = computed(()=> this._token());
 
+  /**
+   * La encuesta se ofrece una sola vez. El perfil recién la trae como
+   * respondida en el próximo check-status; esto la marca en el momento, así
+   * el ítem del sidebar desaparece apenas el asociado califica.
+   */
+  marcarEncuestaRespondida(): void {
+    this._User.update(usuario => {
+      const persona = usuario?.Persona?.[0];
+      if (!usuario || !persona) return usuario;
+
+      return { ...usuario, Persona: [{ ...persona, Encuesta: true }, ...usuario.Persona.slice(1)] };
+    });
+  }
+
   url = environment.API_URL;
 
   http = inject(HttpClient);

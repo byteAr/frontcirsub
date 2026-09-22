@@ -51,7 +51,15 @@ export class CredencialService {
     );
   }
 
-  updateEncuesta(id: number, servicio: number, atencion: number): Observable<any> {
-    return this.http.post(`${this.url}/credencial/encuesta`, { id, servicio, atencion })
+  /**
+   * Sin id: el backend lo toma del token, así nadie califica a nombre de
+   * otro. Mandarlo además da 400, porque el backend rechaza campos de más.
+   */
+  updateEncuesta(servicio: number, atencion: number): Observable<any> {
+    const token = localStorage.getItem('token');
+
+    return this.http.post(`${this.url}/credencial/encuesta`, { servicio, atencion }, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
   }
 }

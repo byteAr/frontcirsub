@@ -81,4 +81,22 @@ describe('AuthService caching', () => {
 
     expect(secondRef).toBe(firstRef);
   });
+
+  it('marcarEncuestaRespondida() marca el perfil en el momento, sin esperar al próximo check-status', () => {
+    service.login('111', 'pass').subscribe();
+    const sinResponder = { ...mockUser, userData: { Persona: [{ ...mockUser.userData.Persona[0], Encuesta: false }] } };
+    httpMock.expectOne(`${environment.API_URL}/auth/login`).flush(sinResponder);
+    expect(service.user()?.Persona[0].Encuesta).toBeFalse();
+
+    service.marcarEncuestaRespondida();
+
+    expect(service.user()?.Persona[0].Encuesta).toBeTrue();
+    // El resto del perfil queda igual.
+    expect(service.user()?.Persona[0].Documento).toBe('111');
+  });
+
+  it('marcarEncuestaRespondida() no rompe si todavía no hay perfil', () => {
+    expect(() => service.marcarEncuestaRespondida()).not.toThrow();
+    expect(service.user()).toBeNull();
+  });
 });

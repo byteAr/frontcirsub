@@ -56,4 +56,19 @@ describe('CredencialService', () => {
     httpMock.expectOne(`${environment.API_URL}/credencial?id=7`)
       .flush({ cbu: '2222222222222222222222' });
   });
+
+  it('updateEncuesta manda las dos calificaciones con el token y sin id', () => {
+    localStorage.setItem('token', 'tok-123');
+
+    service.updateEncuesta(5, 3).subscribe();
+
+    const req = httpMock.expectOne(`${environment.API_URL}/credencial/encuesta`);
+    expect(req.request.method).toBe('POST');
+    // Sin id: el backend lo toma del token y rechaza campos de más con 400.
+    expect(req.request.body).toEqual({ servicio: 5, atencion: 3 });
+    expect(req.request.headers.get('Authorization')).toBe('Bearer tok-123');
+    req.flush({ ok: true });
+
+    localStorage.removeItem('token');
+  });
 });
