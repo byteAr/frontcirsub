@@ -61,14 +61,24 @@
                 </div>
               </div>
               <!--
-                flex-1: se queda con el espacio que sobra. La cara está
-                centrada verticalmente, así que sin esto un nombre corto deja
-                aire arriba y el wave se despega del borde de la tarjeta.
+                flex-1: se queda con el espacio que sobra entre el wave y los
+                íconos de abajo, así el wave no se despega del borde de arriba
+                con un nombre corto. Adentro, foto, datos y QR van centrados
+                verticalmente: el blanco que sobra se reparte igual arriba y
+                abajo, en vez de acumularse todo debajo de los datos.
+                Columna y no fila, para que el componente que renderiza el
+                outlet —que queda como hermano de <router-outlet>— siga
+                ocupando todo el ancho.
               -->
-              <div class="w-full flex-1 min-h-0">
+              <div class="w-full flex-1 min-h-0 flex flex-col justify-center">
                 <router-outlet name="front"></router-outlet>
               </div>
-                <div class="w-full pr-3 pl-5 pb-3 mt-5">
+                <!--
+                  Sin margen de arriba: la separación con los datos la da el
+                  centrado. Con margen, abajo quedaba siempre más blanco que
+                  arriba.
+                -->
+                <div class="w-full pr-3 pl-5 pb-3">
                   <div class="flex justify-between">
                   <!--
                     Info y flecha comparten el mismo lugar y se turnan: uno se
