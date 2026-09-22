@@ -24,7 +24,7 @@
 
   <div *ngIf="cargando()" class="flex items-center justify-center gap-2 py-12 text-gray-400 text-sm">
     <span class="loading loading-spinner loading-sm"></span>
-    Cargando sus reintegros...
+    Cargando sus trámites...
   </div>
 
   <div *ngIf="error()" class="bg-white rounded-2xl shadow-sm py-12 px-5 text-center">
@@ -37,7 +37,7 @@
 
   <div *ngIf="!cargando() && !error() && ordenes().length === 0"
     class="bg-white rounded-2xl shadow-sm py-12 px-5 text-center">
-    <p class="text-sm text-gray-500">Todavía no registra reintegros.</p>
+    <p class="text-sm text-gray-500">Todavía no registra trámites.</p>
   </div>
 
   <ng-container *ngIf="!cargando() && !error() && ordenes().length > 0">

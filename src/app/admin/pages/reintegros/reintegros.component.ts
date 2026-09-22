@@ -54,7 +54,7 @@ export default class ReintegrosComponent implements OnInit {
         this.cargando.set(false);
       },
       error: () => {
-        this.error.set('No pudimos obtener sus reintegros. Intente nuevamente en unos minutos.');
+        this.error.set('No pudimos obtener sus trámites. Intente nuevamente en unos minutos.');
         this.cargando.set(false);
       }
     });
