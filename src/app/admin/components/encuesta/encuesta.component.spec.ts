@@ -53,7 +53,7 @@ describe('EncuestaComponent', () => {
   it('muestra las dos preguntas a quien todavía no calificó', () => {
     crear(false);
 
-    expect(texto()).toContain('¿Cómo calificaría la Credencial Digital?');
+    expect(texto()).toContain('¿Cómo calificarías la App del círculo?');
     expect(texto()).toContain('¿Cómo calificaría la atención del operador?');
   });
 
@@ -121,6 +121,6 @@ describe('EncuestaComponent', () => {
     crear(true);
 
     expect(texto()).toContain('¡Gracias por calificarnos!');
-    expect(texto()).not.toContain('¿Cómo calificaría la Credencial Digital?');
+    expect(texto()).not.toContain('¿Cómo calificarías la App del círculo?');
   });
 });
