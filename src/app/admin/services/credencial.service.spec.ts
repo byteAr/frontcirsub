@@ -32,32 +32,62 @@ describe('CredencialService', () => {
     service.getCbu('7').subscribe();
     service.getCbu('7').subscribe();
 
-    const reqs = httpMock.match(`${environment.API_URL}/credencial?id=7`);
+    const reqs = httpMock.match(`${environment.API_URL}/credencial`);
     expect(reqs.length).toBe(1);
     reqs[0].flush({ cbu: '1234567890123456789012' });
   });
 
   it('does not cache a failed getCbu request', () => {
     service.getCbu('9').subscribe({ error: () => {} });
-    httpMock.expectOne(`${environment.API_URL}/credencial?id=9`)
+    httpMock.expectOne(`${environment.API_URL}/credencial`)
       .flush('error', { status: 500, statusText: 'Server Error' });
 
     service.getCbu('9').subscribe({ error: () => {} });
-    httpMock.expectOne(`${environment.API_URL}/credencial?id=9`)
+    httpMock.expectOne(`${environment.API_URL}/credencial`)
       .flush('error', { status: 500, statusText: 'Server Error' });
   });
 
   it('invalidates the cached getCbu(id) after updateCbu succeeds', () => {
     service.getCbu('7').subscribe();
-    httpMock.expectOne(`${environment.API_URL}/credencial?id=7`)
+    httpMock.expectOne(`${environment.API_URL}/credencial`)
       .flush({ cbu: '1111111111111111111111' });
 
     service.updateCbu(7, '2222222222222222222222').subscribe();
     httpMock.expectOne(`${environment.API_URL}/credencial`).flush({ ok: true });
 
     service.getCbu('7').subscribe();
-    httpMock.expectOne(`${environment.API_URL}/credencial?id=7`)
+    httpMock.expectOne(`${environment.API_URL}/credencial`)
       .flush({ cbu: '2222222222222222222222' });
+  });
+
+  it('getCbu pide el CBU con el token y sin id en la URL', () => {
+    localStorage.setItem('token', 'tok-123');
+
+    service.getCbu('7').subscribe();
+
+    const req = httpMock.expectOne(`${environment.API_URL}/credencial`);
+    expect(req.request.method).toBe('GET');
+    // El backend toma el asociado del token: un ?id= ya no sirve de nada.
+    expect(req.request.params.keys()).toEqual([]);
+    expect(req.request.headers.get('Authorization')).toBe('Bearer tok-123');
+    req.flush({ cbu: '1234567890123456789012' });
+
+    localStorage.removeItem('token');
+  });
+
+  it('updateCbu manda sólo el CBU, con el token: el id sale del token', () => {
+    localStorage.setItem('token', 'tok-123');
+
+    service.updateCbu(7, '2850590940090418135201').subscribe();
+
+    const req = httpMock.expectOne(`${environment.API_URL}/credencial`);
+    expect(req.request.method).toBe('PATCH');
+    // Con id en el cuerpo el backend contesta 400 (rechaza campos de más).
+    expect(req.request.body).toEqual({ cbu: '2850590940090418135201' });
+    expect(req.request.headers.get('Authorization')).toBe('Bearer tok-123');
+    req.flush({ ok: true });
+
+    localStorage.removeItem('token');
   });
 
   it('updateEncuesta manda las dos calificaciones con el token y sin id', () => {

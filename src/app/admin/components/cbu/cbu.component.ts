@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormBuilder, FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
 import { AuthService } from '../../../auth/services/auth.service';
@@ -71,20 +72,30 @@ export default class CBUComponent implements OnInit {
     if (!id) return;
     const cbuValue = this.cbuIngresado;
 
-    this.credencialService.updateCbu(id, cbuValue).subscribe(resp => {
-      console.log('Respuesta updateCbu (api-cbu.php):', resp);
+    // El éxito se muestra recién cuando el backend confirma: contesta 200
+    // aunque no haya podido guardar, así que hay que mirar "ok". Si falla, el
+    // formulario queda como estaba para que pueda reintentar.
+    this.credencialService.updateCbu(id, cbuValue).subscribe({
+      next: resp => {
+        if (!resp?.ok) {
+          this.avisarError('No pudimos actualizar su CBU. Intente nuevamente en unos minutos.');
+          return;
+        }
+        this.messageService.add({ severity: 'success', summary: 'CBU actualizado con éxito', life: 4000 });
+        this.form.get('cbu')?.disable();
+        this.visible = true;
+        this.submitted = false;
+      },
+      error: (err: HttpErrorResponse) => {
+        this.avisarError(err?.status === 401
+          ? 'Su sesión expiró. Vuelva a ingresar para cambiar su CBU.'
+          : 'No pudimos actualizar su CBU. Intente nuevamente en unos minutos.');
+      },
     });
-    // this.credencialService.updateCbuPhp(id, cbuValue).subscribe();
+  }
 
-    this.messageService.add({
-      severity: 'success',
-      summary: 'CBU actualizado con éxito',
-      life: 4000
-    });
-
-    this.form.get('cbu')?.disable();
-    this.visible = true;
-    this.submitted = false;
+  private avisarError(detail: string) {
+    this.messageService.add({ severity: 'error', summary: 'CBU sin cambios', detail, life: 6000 });
   }
 
   cancelarGuardar() {
