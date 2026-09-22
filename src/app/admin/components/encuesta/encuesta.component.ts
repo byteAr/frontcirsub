@@ -31,13 +31,12 @@ export default class EncuestaComponent {
   private enviadaAhora = signal<boolean>(false);
 
   /**
-   * Ya respondida: recién ahora, o en otra sesión. Lo segundo pasa si alguien
-   * entra directo por la URL después de haber calificado; ahí se le muestra
-   * el agradecimiento en vez de dejarlo calificar de nuevo.
+   * Ya respondida: recién ahora, o antes. Lo segundo pasa si alguien entra
+   * directo por la URL después de haber calificado; ahí se le muestra el
+   * agradecimiento en vez de dejarlo calificar de nuevo. Qué cuenta como
+   * "antes" depende del modo demo: lo decide AuthService.
    */
-  respondida = computed(() =>
-    this.enviadaAhora() || this.authService.user()?.Persona?.[0]?.Encuesta === true
-  );
+  respondida = computed(() => this.enviadaAhora() || this.authService.encuestaYaRespondida());
 
   setRating(value: number): void {
     this.rating = value;

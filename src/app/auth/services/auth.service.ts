@@ -4,6 +4,7 @@ import { catchError, finalize, map, Observable, of, shareReplay, tap } from 'rxj
 import { environment } from '../../../environments/environment';
 import { User, UserData } from '../interfaces/user.interface';
 import { PushNotificationService } from '../../shared/services/push-notification.service';
+import { ENCUESTA_MODO_DEMO } from '../../shared/modo-demo';
 
 import { rxResource } from '@angular/core/rxjs-interop'
 
@@ -53,12 +54,36 @@ export class AuthService {
 
   token = computed(()=> this._token());
 
+  private encuestaModoDemo = inject(ENCUESTA_MODO_DEMO);
+
+  /** Si ya calificó durante este ingreso. Se reinicia al salir o recargar. */
+  private _encuestaEnEstaSesion = signal<boolean>(false);
+
+  /**
+   * Si hay que ofrecerle la encuesta. Normalmente, sólo mientras el perfil
+   * diga que no respondió. En modo demo, en cada ingreso hasta que califique.
+   */
+  encuestaPendiente = computed(() =>
+    this.encuestaModoDemo
+      ? !this._encuestaEnEstaSesion()
+      : this.user()?.Persona?.[0]?.Encuesta === false
+  );
+
+  /** Si ya la respondió: la encuesta muestra el agradecimiento en vez del formulario. */
+  encuestaYaRespondida = computed(() =>
+    this.encuestaModoDemo
+      ? this._encuestaEnEstaSesion()
+      : this.user()?.Persona?.[0]?.Encuesta === true
+  );
+
   /**
    * La encuesta se ofrece una sola vez. El perfil recién la trae como
    * respondida en el próximo check-status; esto la marca en el momento, así
    * el ítem del sidebar desaparece apenas el asociado califica.
    */
   marcarEncuestaRespondida(): void {
+    this._encuestaEnEstaSesion.set(true);
+
     this._User.update(usuario => {
       const persona = usuario?.Persona?.[0];
       if (!usuario || !persona) return usuario;
@@ -187,6 +212,7 @@ export class AuthService {
   }
 
   logout() {
+    this._encuestaEnEstaSesion.set(false);
     this._User.set(null)
     this._token.set(null)
     this._authStatus.set('not-authenticated')

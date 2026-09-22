@@ -13,14 +13,17 @@ describe('EncuestaComponent', () => {
   let credencial: jasmine.SpyObj<CredencialService>;
   let marcarEncuestaRespondida: jasmine.Spy;
   const usuario = signal<UserData | null>(null);
+  const yaRespondida = signal<boolean>(false);
 
   const texto = () => (fixture.nativeElement as HTMLElement).textContent ?? '';
   const botonCalificar = () =>
     Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('button'))
       .find(b => /Calificar|Enviando/.test(b.textContent ?? '')) as HTMLButtonElement;
 
+  /** El modo (demo o normal) lo resuelve AuthService: acá sólo importa su respuesta. */
   function crear(encuestaRespondida: boolean): void {
     usuario.set({ Persona: [{ Id: 4, Encuesta: encuestaRespondida }] } as UserData);
+    yaRespondida.set(encuestaRespondida);
     fixture = TestBed.createComponent(EncuestaComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -42,7 +45,7 @@ describe('EncuestaComponent', () => {
       imports: [EncuestaComponent],
       providers: [
         { provide: CredencialService, useValue: credencial },
-        { provide: AuthService, useValue: { user: usuario.asReadonly(), marcarEncuestaRespondida } },
+        { provide: AuthService, useValue: { user: usuario.asReadonly(), encuestaYaRespondida: yaRespondida.asReadonly(), marcarEncuestaRespondida } },
       ],
     }).compileComponents();
   });
@@ -114,7 +117,7 @@ describe('EncuestaComponent', () => {
     expect(botonCalificar().disabled).toBeFalse();
   });
 
-  it('a quien ya calificó en otra sesión no lo deja calificar de nuevo', () => {
+  it('a quien ya calificó no lo deja calificar de nuevo', () => {
     crear(true);
 
     expect(texto()).toContain('¡Gracias por calificarnos!');

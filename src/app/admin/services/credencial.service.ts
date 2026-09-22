@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { catchError, Observable, shareReplay, tap, throwError } from 'rxjs';
+import { catchError, delay, Observable, of, shareReplay, tap, throwError } from 'rxjs';
+import { ENCUESTA_MODO_DEMO } from '../../shared/modo-demo';
 
 interface Cbu {
   cbu: string
@@ -13,6 +14,8 @@ interface Cbu {
 export class CredencialService {
 
   http = inject(HttpClient);
+
+  private encuestaModoDemo = inject(ENCUESTA_MODO_DEMO);
 
   url = environment.API_URL;
 
@@ -56,6 +59,10 @@ export class CredencialService {
    * otro. Mandarlo además da 400, porque el backend rechaza campos de más.
    */
   updateEncuesta(servicio: number, atencion: number): Observable<any> {
+    // Modo demo: se simula el envío, con una espera corta para que se vea el
+    // "Enviando...". No se guarda nada: ver shared/modo-demo.ts.
+    if (this.encuestaModoDemo) return of({ ok: true, demo: true }).pipe(delay(700));
+
     const token = localStorage.getItem('token');
 
     return this.http.post(`${this.url}/credencial/encuesta`, { servicio, atencion }, {

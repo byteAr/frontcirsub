@@ -57,10 +57,11 @@ export class SidebarNavComponent {
   /** "Credencial Virtual" sólo aparece cuando no se está viendo la credencial. */
   mostrarCredencial = computed(() => !this.urlActual().includes('/dashboard/credencial'));
 
-  /** La encuesta se ofrece sólo mientras el socio no la haya respondido. */
-  mostrarEncuesta = computed(
-    () => this.authService.user()?.Persona?.[0]?.Encuesta === false
-  );
+  /**
+   * La encuesta se ofrece mientras esté pendiente. La regla vive en
+   * AuthService porque cambia con el modo demo (ver shared/modo-demo.ts).
+   */
+  mostrarEncuesta = computed(() => this.authService.encuestaPendiente());
 
   /** Al navegar se cierra, si no tapa la vista que el socio acaba de elegir. */
   cerrar(): void {

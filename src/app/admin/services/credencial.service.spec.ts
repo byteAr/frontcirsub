@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideServiceWorker } from '@angular/service-worker';
@@ -6,6 +6,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 
 import { CredencialService } from './credencial.service';
 import { environment } from '../../../environments/environment';
+import { ENCUESTA_MODO_DEMO } from '../../shared/modo-demo';
 
 describe('CredencialService', () => {
   let service: CredencialService;
@@ -13,7 +14,9 @@ describe('CredencialService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideServiceWorker('ngsw-worker.js', { enabled: false }), provideRouter([])],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideServiceWorker('ngsw-worker.js', { enabled: false }), provideRouter([]),
+        // Modo normal: estas pruebas miran el pedido real al backend.
+        { provide: ENCUESTA_MODO_DEMO, useValue: false }],
     });
     service = TestBed.inject(CredencialService);
     httpMock = TestBed.inject(HttpTestingController);
@@ -71,4 +74,31 @@ describe('CredencialService', () => {
 
     localStorage.removeItem('token');
   });
+});
+
+describe('CredencialService en modo demo', () => {
+  let service: CredencialService;
+  let httpMock: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting(), { provide: ENCUESTA_MODO_DEMO, useValue: true }],
+    });
+    service = TestBed.inject(CredencialService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => httpMock.verify());
+
+  it('simula el envío de la encuesta: no llama al backend y confirma después de una espera', fakeAsync(() => {
+    let respuesta: unknown;
+    service.updateEncuesta(5, 5).subscribe(r => (respuesta = r));
+
+    // Sin espera no confirma: así se llega a ver el "Enviando...".
+    expect(respuesta).toBeUndefined();
+    tick(700);
+
+    expect(respuesta).toEqual({ ok: true, demo: true });
+    httpMock.expectNone(`${environment.API_URL}/credencial/encuesta`);
+  }));
 });
