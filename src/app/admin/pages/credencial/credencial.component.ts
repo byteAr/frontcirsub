@@ -5,17 +5,28 @@ import {
   ElementRef,
   HostListener,
   OnInit,
+  computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter, map, startWith } from 'rxjs';
 import domtoimage from 'dom-to-image';
 import QRCode from 'qrcode';
 import { AuthService } from '../../../auth/services/auth.service';
 import { InstallButtonComponent } from '../../components/install-button/install-button.component';
+import GrupoFamiliarComponent from '../../components/grupo-familiar/grupo-familiar.component';
 import { AdminNotifService } from '../../../shared/services/admin-notif.service';
 import { NotifViewModalComponent } from '../../../shared/components/notif-view-modal/notif-view-modal.component';
 import { AdminNotifModalComponent } from '../../components/admin-notif-modal/admin-notif-modal.component';
+
+/**
+ * El QR sobrevive al ciclo de vida del componente: se calcula una sola vez
+ * aunque el socio entre y salga de la credencial muchas veces.
+ */
+let qrCacheado: string | null = null;
 
 @Component({
   selector: 'app-credencial',
@@ -28,6 +39,7 @@ import { AdminNotifModalComponent } from '../../components/admin-notif-modal/adm
     InstallButtonComponent,
     NotifViewModalComponent,
     AdminNotifModalComponent,
+    GrupoFamiliarComponent,
   ],
   templateUrl: './credencial.component.html',
   styleUrl: './credencial.component.css',
@@ -35,6 +47,33 @@ import { AdminNotifModalComponent } from '../../components/admin-notif-modal/adm
 export default class CredencialComponen implements OnInit {
   autService = inject(AuthService);
   adminNotifService = inject(AdminNotifService);
+  private router = inject(Router);
+
+  /**
+   * La flecha de "inicio" sólo tiene sentido cuando el frente está mostrando
+   * la información de contacto: desde la vista de datos personales no hay a
+   * dónde volver. Se calcula de la URL y no de un flag para que sobreviva a
+   * una recarga con la ruta de info abierta.
+   */
+  private urlActual = toSignal(
+    this.router.events.pipe(
+      filter((evento): evento is NavigationEnd => evento instanceof NavigationEnd),
+      map(evento => evento.urlAfterRedirects),
+      startWith(this.router.url)
+    ),
+    { initialValue: this.router.url }
+  );
+
+  mostrarInicio = computed(() => this.urlActual().includes('front:info'));
+
+  /**
+   * La tarjeta se muestra recién cuando no queda nada por cargar: datos del
+   * socio y foto de perfil resueltos. Mientras tanto se ve el esqueleto, para
+   * que la credencial nunca aparezca a medio armar.
+   */
+  credencialLista = computed(
+    () => !!this.user()?.Persona?.[0]?.Id && this.autService.imagenPerfilResuelta()
+  );
 
   user = this.autService.user;
   encuesta = this.autService._encuesta;
@@ -73,6 +112,16 @@ export default class CredencialComponen implements OnInit {
     if (Math.abs(deltaX) > this.swipeThreshold) {
       this.flipCard(deltaX > 0 ? 'right' : 'left');
     }
+  }
+
+  constructor() {
+    // Dispara la descarga de la foto en cuanto se conoce el socio. Va acá y no
+    // en el componente hijo porque ese no se monta hasta que la foto está
+    // lista, y quedaría esperándose a sí mismo.
+    effect(() => {
+      const userId = this.autService.user()?.Persona?.[0]?.Id;
+      if (userId) this.autService.cargarImagenPerfil(userId);
+    });
   }
 
   ngOnInit(): void {
@@ -133,8 +182,17 @@ export default class CredencialComponen implements OnInit {
   }
 
   generateQrCode() {
+    // El QR apunta siempre a la misma URL, así que se genera una vez por
+    // sesión. Sin esto se regeneraba en cada visita a la credencial y la fila
+    // inferior de la tarjeta, que depende de qrUrl, parpadeaba al volver.
+    if (qrCacheado) {
+      this.qrUrl = qrCacheado;
+      return;
+    }
+
     QRCode.toDataURL('https://iugna.edu.ar', { errorCorrectionLevel: 'H' }, (err, url) => {
       if (err) { console.error('Error al generar el QR:', err); return; }
+      qrCacheado = url;
       this.qrUrl = url;
     });
   }

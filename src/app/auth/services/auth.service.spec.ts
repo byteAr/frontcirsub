@@ -1,9 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { provideServiceWorker } from '@angular/service-worker';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { SwPush } from '@angular/service-worker';
 import { AuthService } from './auth.service';
 import { environment } from '../../../environments/environment';
+import { ENCUESTA_MODO_DEMO } from '../../shared/modo-demo';
 
 describe('AuthService caching', () => {
   let service: AuthService;
@@ -78,5 +81,87 @@ describe('AuthService caching', () => {
     const secondRef = service.user();
 
     expect(secondRef).toBe(firstRef);
+  });
+
+  it('marcarEncuestaRespondida() marca el perfil en el momento, sin esperar al próximo check-status', () => {
+    service.login('111', 'pass').subscribe();
+    const sinResponder = { ...mockUser, userData: { Persona: [{ ...mockUser.userData.Persona[0], Encuesta: false }] } };
+    httpMock.expectOne(`${environment.API_URL}/auth/login`).flush(sinResponder);
+    expect(service.user()?.Persona[0].Encuesta).toBeFalse();
+
+    service.marcarEncuestaRespondida();
+
+    expect(service.user()?.Persona[0].Encuesta).toBeTrue();
+    // El resto del perfil queda igual.
+    expect(service.user()?.Persona[0].Documento).toBe('111');
+  });
+
+  it('marcarEncuestaRespondida() no rompe si todavía no hay perfil', () => {
+    expect(() => service.marcarEncuestaRespondida()).not.toThrow();
+    expect(service.user()).toBeNull();
+  });
+});
+
+describe('AuthService: cuándo se ofrece la encuesta', () => {
+  const perfil = (encuesta: boolean) => ({
+    ok: true,
+    token: 'abc123',
+    userData: { Persona: [{ Id: 1, Documento: '111', Nombre: 'Ana', Apellido: 'Perez', Encuesta: encuesta }] },
+  });
+
+  function crear(modoDemo: boolean, encuestaEnElPerfil: boolean) {
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: SwPush, useValue: { isEnabled: false } },
+        { provide: ENCUESTA_MODO_DEMO, useValue: modoDemo },
+      ],
+    });
+    const service = TestBed.inject(AuthService);
+    const httpMock = TestBed.inject(HttpTestingController);
+    service.login('111', 'pass').subscribe();
+    httpMock.expectOne(`${environment.API_URL}/auth/login`).flush(perfil(encuestaEnElPerfil));
+    return service;
+  }
+
+  afterEach(() => localStorage.clear());
+
+  describe('modo normal', () => {
+    it('la ofrece si el perfil dice que no respondió', () => {
+      const service = crear(false, false);
+      expect(service.encuestaPendiente()).toBeTrue();
+      expect(service.encuestaYaRespondida()).toBeFalse();
+    });
+
+    it('no la ofrece si ya respondió en otra sesión', () => {
+      const service = crear(false, true);
+      expect(service.encuestaPendiente()).toBeFalse();
+      expect(service.encuestaYaRespondida()).toBeTrue();
+    });
+
+    it('deja de ofrecerla apenas califica', () => {
+      const service = crear(false, false);
+      service.marcarEncuestaRespondida();
+      expect(service.encuestaPendiente()).toBeFalse();
+    });
+  });
+
+  describe('modo demo', () => {
+    it('la ofrece en cada ingreso aunque ya haya respondido antes', () => {
+      const service = crear(true, true);
+      expect(service.encuestaPendiente()).toBeTrue();
+      expect(service.encuestaYaRespondida()).toBeFalse();
+    });
+
+    it('al calificar desaparece hasta el próximo ingreso', () => {
+      const service = crear(true, true);
+      service.marcarEncuestaRespondida();
+      expect(service.encuestaPendiente()).toBeFalse();
+      expect(service.encuestaYaRespondida()).toBeTrue();
+
+      service.logout();
+      expect(service.encuestaPendiente()).toBeTrue();
+    });
   });
 });

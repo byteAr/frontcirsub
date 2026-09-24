@@ -1,0 +1,53 @@
+<div class="w-full max-w-3xl mx-auto px-1 md:px-4">
+
+  <div class="flex items-baseline justify-between mb-3">
+    <p class="text-base md:text-lg text-cyan-600 font-semibold">Mis ahorros</p>
+    <p class="text-xs text-gray-400" *ngIf="!cargando() && !error() && actualizado()">
+      Al {{ actualizado() }}
+    </p>
+  </div>
+
+  <div *ngIf="cargando()" class="flex items-center justify-center gap-2 py-12 text-gray-400 text-sm">
+    <span class="loading loading-spinner loading-sm"></span>
+    Cargando sus ahorros...
+  </div>
+
+  <div *ngIf="error()" class="bg-white rounded-2xl shadow-sm py-12 px-5 text-center">
+    <p class="text-sm text-red-500">{{ error() }}</p>
+    <button (click)="cargar()"
+      class="mt-4 text-white bg-cyan-600 px-4 py-1.5 rounded-2xl text-sm cursor-pointer">
+      Reintentar
+    </button>
+  </div>
+
+  <div *ngIf="!cargando() && !error() && !hayCuentas()"
+    class="bg-white rounded-2xl shadow-sm py-12 px-5 text-center">
+    <p class="text-sm text-gray-500">No registra cuentas de ahorro.</p>
+  </div>
+
+  <ng-container *ngIf="!cargando() && !error() && hayCuentas()">
+
+    <!-- Una tarjeta por cuenta: son pocas y el saldo es lo que se viene a ver -->
+    <div class="flex flex-col gap-2">
+      <article *ngFor="let cuenta of cuentas()"
+        class="bg-white rounded-2xl shadow-sm px-4 md:px-5 py-3.5 flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <p class="text-sm md:text-base font-semibold text-cyan-600">{{ cuenta.tipo }}</p>
+          <p class="text-[0.7rem] text-gray-400 mt-0.5">Último movimiento: {{ cuenta.fecha }}</p>
+        </div>
+        <p class="text-base md:text-lg font-bold text-gray-700 tabular-nums whitespace-nowrap">
+          {{ cuenta.saldo | currency:'ARS':'symbol':'1.2-2':'es-AR' }}
+        </p>
+      </article>
+    </div>
+
+    <!-- Total: cierra la lista igual que en Mis descuentos -->
+    <div *ngIf="cuentas().length > 1"
+      class="mt-2 bg-green-50/60 border border-green-100 rounded-2xl px-4 md:px-5 py-3.5 flex items-center justify-between gap-3">
+      <p class="text-xs md:text-sm font-semibold text-green-700 uppercase tracking-wider">Total</p>
+      <p class="text-base md:text-lg font-bold text-green-600 tabular-nums whitespace-nowrap">
+        {{ total() | currency:'ARS':'symbol':'1.2-2':'es-AR' }}
+      </p>
+    </div>
+  </ng-container>
+</div>

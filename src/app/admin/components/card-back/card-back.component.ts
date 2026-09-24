@@ -1,9 +1,10 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-card-back',
-  imports: [RouterOutlet],
+  imports: [CommonModule, RouterOutlet],
   templateUrl: './card-back.component.html',
   styleUrl: './card-back.component.css'
 })

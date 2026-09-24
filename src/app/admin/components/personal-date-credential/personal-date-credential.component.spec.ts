@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { of } from 'rxjs';
 import { SwPush } from '@angular/service-worker';
@@ -7,6 +8,12 @@ import { SwPush } from '@angular/service-worker';
 import PersonalDateCredentialComponent from './personal-date-credential.component';
 import { AuthService } from '../../../auth/services/auth.service';
 
+/**
+ * La descarga de la foto se mudó a AuthService: la credencial necesita saber
+ * si ya está lista antes de montar este componente, así que no puede pedirla
+ * él. Acá se prueba esa división: el servicio descarga una sola vez y el
+ * componente sólo dibuja lo que el servicio ya resolvió.
+ */
 describe('PersonalDateCredentialComponent', () => {
   let fixture: ComponentFixture<PersonalDateCredentialComponent>;
   let component: PersonalDateCredentialComponent;
@@ -28,6 +35,7 @@ describe('PersonalDateCredentialComponent', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideRouter([]),
         { provide: SwPush, useValue: { isEnabled: false } },
       ],
     }).compileComponents();
@@ -37,35 +45,46 @@ describe('PersonalDateCredentialComponent', () => {
     (authService as any).user = () => userData;
 
     httpMock = TestBed.inject(HttpTestingController);
-
-    fixture = TestBed.createComponent(PersonalDateCredentialComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   afterEach(() => httpMock.verify());
 
   it('should create', () => {
-    // The constructor effect fires the profile-image request during the
-    // beforeEach detectChanges(); flush it so afterEach's httpMock.verify()
-    // doesn't see it as an outstanding request.
-    const req = httpMock.expectOne(authService.getProfileImageUrl(42));
-    req.flush(new Blob(['fake-image']));
+    fixture = TestBed.createComponent(PersonalDateCredentialComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
 
+    // Montarlo no dispara ninguna descarga: de eso se encarga la credencial.
+    httpMock.expectNone(authService.getProfileImageUrl(42));
     expect(component).toBeTruthy();
   });
 
-  it('fetches the profile image once and reuses it for a second mounted instance', () => {
-    const req = httpMock.expectOne(authService.getProfileImageUrl(42));
-    req.flush(new Blob(['fake-image']));
+  it('muestra la foto que dejó resuelta el servicio', () => {
+    authService.cargarImagenPerfil(42);
+    httpMock.expectOne(authService.getProfileImageUrl(42)).flush(new Blob(['fake-image']));
+
+    fixture = TestBed.createComponent(PersonalDateCredentialComponent);
+    component = fixture.componentInstance;
     fixture.detectChanges();
 
     expect(component.hasImage()).toBeTrue();
+    expect(authService.imagenPerfilResuelta()).toBeTrue();
+  });
 
-    const fixture2 = TestBed.createComponent(PersonalDateCredentialComponent);
-    fixture2.detectChanges();
+  it('descarga la foto una sola vez aunque se pida de nuevo', () => {
+    authService.cargarImagenPerfil(42);
+    httpMock.expectOne(authService.getProfileImageUrl(42)).flush(new Blob(['fake-image']));
 
+    authService.cargarImagenPerfil(42);
     httpMock.expectNone(authService.getProfileImageUrl(42));
-    expect(fixture2.componentInstance.hasImage()).toBeTrue();
+  });
+
+  it('da la foto por resuelta aunque la descarga falle, para no dejar la credencial esperando', () => {
+    authService.cargarImagenPerfil(42);
+    httpMock.expectOne(authService.getProfileImageUrl(42))
+      .error(new ProgressEvent('error'), { status: 404, statusText: 'Not Found' });
+
+    expect(authService.imagenPerfilResuelta()).toBeTrue();
+    expect(authService.imagenPerfilUrl()).toBeNull();
   });
 });

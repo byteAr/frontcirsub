@@ -36,7 +36,7 @@ export default class NotificationsComponent implements OnInit {
     const bienvenida: Message = {
       de: 'Departamento Afiliaciones',
       asunto: 'Bienvenida',
-      mensaje: `Estimado/a Socio/a ${apellido}, tenemos el gusto de registrarlo en la credencial digital, herramienta por medio de la cual les haremos llegar la información actualizada de nuestra MUTUAL y de esta forma lograr una comunicación permanente con usted, que es lo más importante para la mutual.`,
+      mensaje: `Estimado/a Asociado/a ${apellido}, tenemos el gusto de registrarlo en la credencial digital, herramienta por medio de la cual les haremos llegar la información actualizada de nuestra MUTUAL y de esta forma lograr una comunicación permanente con usted, que es lo más importante para la mutual.`,
       fecha: '06/03/26',
     };
 

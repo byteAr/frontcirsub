@@ -6,7 +6,9 @@
     "start": "ng serve --host 0.0.0.0 --disable-host-check",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "iconos": "node scripts/generar-iconos.mjs",
+    "logo": "node scripts/preparar-logo.mjs"
   },
   "private": true,
   "dependencies": {

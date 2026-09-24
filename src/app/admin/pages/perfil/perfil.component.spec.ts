@@ -1,4 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { provideServiceWorker } from '@angular/service-worker';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { PerfilComponent } from './perfil.component';
 
@@ -8,7 +12,8 @@ describe('PerfilComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PerfilComponent]
+      imports: [PerfilComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideServiceWorker('ngsw-worker.js', { enabled: false }), provideRouter([])]
     })
     .compileComponents();
 
