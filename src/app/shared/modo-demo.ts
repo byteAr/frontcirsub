@@ -1,7 +1,8 @@
 import { InjectionToken } from '@angular/core';
 
 /**
- * MODO DEMO DE LA ENCUESTA — PROVISORIO, para la presentación de la app.
+ * MODO DEMO DE LA ENCUESTA — APAGADO desde el 24/09/2026, pasada la
+ * presentación. Se deja el interruptor por si hace falta otra demostración.
  *
  * Prendido (true):
  *   - La encuesta aparece en el sidebar cada vez que se ingresa, aunque el
@@ -22,5 +23,5 @@ import { InjectionToken } from '@angular/core';
  */
 export const ENCUESTA_MODO_DEMO = new InjectionToken<boolean>('ENCUESTA_MODO_DEMO', {
   providedIn: 'root',
-  factory: () => true,
+  factory: () => false,
 });
