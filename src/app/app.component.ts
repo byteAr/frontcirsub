@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterModule, RouterOutlet } from '@angular/router';
 
 import { ButtonModule } from 'primeng/button';
 import { InputOtpModule } from 'primeng/inputotp';
 
 import { estadoDeRuta, routeAnimations } from './shared/animations/route-animations';
+import { ActualizacionAppService } from './shared/services/actualizacion-app.service';
 
 @Component({
   selector: 'app-root',
@@ -19,6 +20,12 @@ import { estadoDeRuta, routeAnimations } from './shared/animations/route-animati
 export class AppComponent {
   title = 'cirsubfrontend';
   value = 0;
+
+  constructor() {
+    // Mantiene al día la versión instalada de la PWA. Ver el servicio: sin
+    // esto, quien tiene la app instalada se queda con la versión vieja.
+    inject(ActualizacionAppService).iniciar();
+  }
 
   prepareRoute(outlet: RouterOutlet): string {
     return estadoDeRuta(outlet);
