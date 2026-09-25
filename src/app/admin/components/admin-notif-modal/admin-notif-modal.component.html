@@ -48,7 +48,60 @@
     @if (activeTab() === 'send') {
       <div class="p-5 flex flex-col gap-4">
 
+        <!-- A quién le llega -->
+        @if (role() === 'superadmin') {
+          <div class="flex gap-2">
+            <button
+              (click)="elegirDestino('uno')"
+              class="flex-1 py-2 text-xs font-semibold rounded-lg border transition-colors cursor-pointer"
+              [class.bg-cyan-600]="destino() === 'uno'"
+              [class.text-white]="destino() === 'uno'"
+              [class.border-cyan-600]="destino() === 'uno'"
+              [class.text-gray-500]="destino() !== 'uno'"
+              [class.border-gray-300]="destino() !== 'uno'"
+            >
+              Un asociado
+            </button>
+            <button
+              (click)="elegirDestino('todos')"
+              class="flex-1 py-2 text-xs font-semibold rounded-lg border transition-colors cursor-pointer"
+              [class.bg-cyan-600]="destino() === 'todos'"
+              [class.text-white]="destino() === 'todos'"
+              [class.border-cyan-600]="destino() === 'todos'"
+              [class.text-gray-500]="destino() !== 'todos'"
+              [class.border-gray-300]="destino() !== 'todos'"
+            >
+              Todos los asociados
+            </button>
+          </div>
+        }
+
+        @if (destino() === 'todos') {
+          <!-- A cuántos les llega, antes de mandar nada -->
+          <div class="bg-amber-50 border border-amber-200 rounded-lg px-3 py-3">
+            @if (cargandoAudiencia()) {
+              <p class="text-xs text-amber-800">Consultando el padrón…</p>
+            } @else if (errorAudiencia()) {
+              <p class="text-xs text-red-600">{{ errorAudiencia() }}</p>
+              <button (click)="cargarAudiencia()" class="text-xs text-cyan-700 font-semibold underline cursor-pointer mt-1">
+                Reintentar
+              </button>
+            } @else {
+              @if (audiencia(); as datos) {
+                <p class="text-xs text-amber-900 font-semibold">
+                  Le va a llegar a {{ datos.enGestion }} asociados registrados.
+                </p>
+                <p class="text-[0.7rem] text-amber-800 mt-1">
+                  {{ datos.conApp }} tienen las notificaciones prendidas y lo reciben en el
+                  momento. Al resto les queda el mensaje guardado y lo ven al entrar.
+                </p>
+              }
+            }
+          </div>
+        }
+
         <!-- Buscar por DNI -->
+        @if (destino() === 'uno') {
         <div>
           <label class="block text-xs font-semibold text-gray-600 mb-1">DNI del destinatario</label>
           <div class="flex gap-2">
@@ -85,6 +138,7 @@
             </p>
           </div>
         }
+        }
 
         <!-- Formulario de mensaje -->
         <div>
@@ -110,17 +164,65 @@
         </div>
 
         <!-- Botón enviar -->
-        <button
-          (click)="enviarNotificacion()"
-          [disabled]="isSending() || !searchResult() || !titulo().trim() || !cuerpo().trim()"
-          class="w-full py-2 bg-gradient-to-r from-[#00b8da] to-[#00c951] hover:opacity-90 disabled:opacity-40 text-white font-semibold text-sm rounded-xl transition-opacity cursor-pointer"
-        >
-          @if (isSending()) {
-            <span class="loading loading-spinner loading-sm"></span>
+        @if (destino() === 'uno') {
+          <button
+            (click)="enviarNotificacion()"
+            [disabled]="isSending() || !searchResult() || !titulo().trim() || !cuerpo().trim()"
+            class="w-full py-2 bg-gradient-to-r from-[#00b8da] to-[#00c951] hover:opacity-90 disabled:opacity-40 text-white font-semibold text-sm rounded-xl transition-opacity cursor-pointer"
+          >
+            @if (isSending()) {
+              <span class="loading loading-spinner loading-sm"></span>
+            } @else {
+              Enviar notificación
+            }
+          </button>
+        } @else {
+          @if (confirmandoTodos()) {
+            <p class="text-xs text-red-700 font-semibold text-center">
+              Esto le llega a {{ audiencia()?.enGestion ?? 0 }} asociados y no se puede deshacer.
+            </p>
+            <div class="flex gap-2">
+              <button
+                (click)="cancelarEnvioATodos()"
+                class="flex-1 py-2 border border-gray-300 text-gray-600 font-semibold text-sm rounded-xl cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                (click)="enviarATodos()"
+                [disabled]="isSending()"
+                class="flex-1 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white font-semibold text-sm rounded-xl cursor-pointer"
+              >
+                @if (isSending()) {
+                  <span class="loading loading-spinner loading-sm"></span>
+                } @else {
+                  Sí, enviar a todos
+                }
+              </button>
+            </div>
           } @else {
-            Enviar notificación
+            <button
+              (click)="enviarATodos()"
+              [disabled]="isSending() || !titulo().trim() || !cuerpo().trim()"
+              class="w-full py-2 bg-gradient-to-r from-[#00b8da] to-[#00c951] hover:opacity-90 disabled:opacity-40 text-white font-semibold text-sm rounded-xl transition-opacity cursor-pointer"
+            >
+              Enviar a todos los asociados
+            </button>
           }
-        </button>
+
+          @if (resultadoMasivo(); as resultado) {
+            <div class="bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+              <p class="text-xs text-green-900 font-semibold">Envío terminado</p>
+              <p class="text-[0.7rem] text-green-800 mt-1">
+                {{ resultado.notificados }} notificados en el momento ·
+                {{ resultado.sinSuscripcion }} lo verán al entrar
+                @if (resultado.fallidos > 0) {
+                  · {{ resultado.fallidos }} fallaron
+                }
+              </p>
+            </div>
+          }
+        }
       </div>
     }
 

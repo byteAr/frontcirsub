@@ -17,6 +17,22 @@ export interface PermissionUser {
   apellido: string;
 }
 
+/** Cuántos asociados alcanzaría un envío masivo. */
+export interface Audiencia {
+  /** Los que se registraron, según el padrón del sistema de gestión. */
+  enGestion: number;
+  /** De esos, los que además tienen las notificaciones prendidas. */
+  conApp: number;
+}
+
+export interface ResultadoEnvioMasivo {
+  ok: boolean;
+  destinatarios: number;
+  notificados: number;
+  sinSuscripcion: number;
+  fallidos: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AdminNotifService {
   private http = inject(HttpClient);
@@ -54,6 +70,23 @@ export class AdminNotifService {
   }): Observable<{ ok: boolean; pushed: boolean }> {
     return this.http.post<{ ok: boolean; pushed: boolean }>(
       `${this.apiUrl}/admin-notifications/send`,
+      dto,
+      { headers: this.getHeaders() },
+    );
+  }
+
+  /** Cuánta gente recibiría un envío a todos, para mostrarlo antes de mandar. */
+  contarAudiencia(): Observable<Audiencia> {
+    return this.http.get<Audiencia>(
+      `${this.apiUrl}/admin-notifications/audiencia`,
+      { headers: this.getHeaders() },
+    );
+  }
+
+  /** Envía a todo el padrón de la app. Sólo lo permite el backend a super admins. */
+  sendToAll(dto: { titulo: string; cuerpo: string }): Observable<ResultadoEnvioMasivo> {
+    return this.http.post<ResultadoEnvioMasivo>(
+      `${this.apiUrl}/admin-notifications/send-all`,
       dto,
       { headers: this.getHeaders() },
     );

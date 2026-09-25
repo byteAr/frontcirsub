@@ -3,7 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { AdminNotifService, PermissionUser } from '../../../shared/services/admin-notif.service';
+import {
+  AdminNotifService,
+  Audiencia,
+  PermissionUser,
+  ResultadoEnvioMasivo,
+} from '../../../shared/services/admin-notif.service';
 
 @Component({
   selector: 'app-admin-notif-modal',
@@ -31,6 +36,15 @@ export class AdminNotifModalComponent {
   cuerpo = signal('');
   isSending = signal(false);
 
+  // Sección: enviar a todos (sólo superadmin; el backend además lo verifica)
+  destino = signal<'uno' | 'todos'>('uno');
+  audiencia = signal<Audiencia | null>(null);
+  cargandoAudiencia = signal(false);
+  errorAudiencia = signal('');
+  /** Segundo paso: el botón pide confirmación antes de mandar a cientos. */
+  confirmandoTodos = signal(false);
+  resultadoMasivo = signal<ResultadoEnvioMasivo | null>(null);
+
   // Sección: gestionar accesos (solo superadmin)
   permDni = signal('');
   permSearchResult = signal<{ id: number; nombre: string; apellido: string } | null>(null);
@@ -53,6 +67,81 @@ export class AdminNotifModalComponent {
     if (tab === 'permissions') {
       this.cargarPermisos();
     }
+  }
+
+  /**
+   * El envío a todos alcanza a cientos de asociados reales, así que al elegir
+   * ese destino se consulta cuántos son y el botón pide confirmación aparte.
+   */
+  elegirDestino(destino: 'uno' | 'todos') {
+    this.destino.set(destino);
+    this.confirmandoTodos.set(false);
+    this.resultadoMasivo.set(null);
+
+    if (destino === 'todos' && !this.audiencia() && !this.cargandoAudiencia()) {
+      this.cargarAudiencia();
+    }
+  }
+
+  cargarAudiencia() {
+    this.cargandoAudiencia.set(true);
+    this.errorAudiencia.set('');
+
+    this.adminNotifService.contarAudiencia().subscribe({
+      next: (audiencia) => {
+        this.audiencia.set(audiencia);
+        this.cargandoAudiencia.set(false);
+      },
+      error: () => {
+        this.errorAudiencia.set('No se pudo consultar el padrón del sistema de gestión.');
+        this.cargandoAudiencia.set(false);
+      },
+    });
+  }
+
+  /** Primer toque: pide confirmación. Segundo toque: manda. */
+  enviarATodos() {
+    if (!this.titulo().trim() || !this.cuerpo().trim()) return;
+
+    if (!this.confirmandoTodos()) {
+      this.confirmandoTodos.set(true);
+      return;
+    }
+
+    this.isSending.set(true);
+    this.adminNotifService
+      .sendToAll({ titulo: this.titulo().trim(), cuerpo: this.cuerpo().trim() })
+      .subscribe({
+        next: (resultado) => {
+          this.isSending.set(false);
+          this.confirmandoTodos.set(false);
+          this.resultadoMasivo.set(resultado);
+          this.titulo.set('');
+          this.cuerpo.set('');
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Enviado a todos',
+            detail: `${resultado.notificados} de ${resultado.destinatarios} asociados recibieron el aviso.`,
+            life: 8000,
+          });
+        },
+        error: (err) => {
+          this.isSending.set(false);
+          this.confirmandoTodos.set(false);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail:
+              err?.status === 403
+                ? 'Solo los super admins pueden enviar a todos.'
+                : 'No se pudo enviar a todos. No se mandó nada.',
+          });
+        },
+      });
+  }
+
+  cancelarEnvioATodos() {
+    this.confirmandoTodos.set(false);
   }
 
   buscarPorDni() {
