@@ -28,6 +28,13 @@ export interface PuntoTendencia extends Metricas {
   fecha: string;
 }
 
+/** Quién está usando la app en este momento: actividad en los últimos 5 minutos. */
+export interface ActivosAhora {
+  total: number;
+  pwa: number;
+  web: number;
+}
+
 export interface PersonaConAcceso {
   dni: string;
   nombre: string;
@@ -71,6 +78,10 @@ export class EstadisticasService {
   /** Al cerrar sesión: el próximo que entre puede tener otro permiso. */
   olvidarPermiso(): void {
     this.permiso$ = undefined;
+  }
+
+  ahora(): Observable<ActivosAhora> {
+    return this.http.get<ActivosAhora>(`${this.url}/ahora`, { headers: this.headers() });
   }
 
   dia(fecha: string, plataforma?: Plataforma): Observable<ResumenDia> {

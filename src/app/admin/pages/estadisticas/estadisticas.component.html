@@ -50,6 +50,44 @@
   } @else {
   @if (dia(); as d) {
 
+    <!-- En vivo: sólo el día de hoy -->
+    @if (enVivo()) {
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-2xl px-5 py-4 text-white shadow-md
+                  bg-gradient-to-r from-slate-900 via-slate-900 to-[#0b3b44]">
+        <span class="flex items-center gap-2 text-[0.7rem] font-bold uppercase tracking-widest text-emerald-300">
+          <span class="relative flex h-2.5 w-2.5">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
+          </span>
+          En vivo
+        </span>
+
+        <p class="flex items-baseline gap-2">
+          <span class="text-3xl font-bold tabular-nums">{{ activos()?.total ?? 0 }}</span>
+          <span class="text-sm text-slate-300">
+            {{ (activos()?.total ?? 0) === 1 ? 'persona usando la app ahora' : 'personas usando la app ahora' }}
+          </span>
+        </p>
+
+        <p class="flex items-center gap-4 text-xs text-slate-300">
+          <span class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-[#00C579]"></span>
+            <strong class="text-white tabular-nums">{{ activos()?.pwa ?? 0 }}</strong> en la app
+          </span>
+          <span class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-[#00BBCF]"></span>
+            <strong class="text-white tabular-nums">{{ activos()?.web ?? 0 }}</strong> en el navegador
+          </span>
+        </p>
+
+        <p class="text-[0.7rem] text-slate-400 sm:ml-auto">Actualizado {{ haceTexto() }}</p>
+      </div>
+    } @else {
+      <div class="rounded-2xl bg-slate-100 text-slate-500 text-xs px-5 py-3">
+        Estás viendo un día cerrado. Volvé a hoy para ver la actividad en vivo.
+      </div>
+    }
+
     <!-- Números del día -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="rounded-2xl p-5 text-white bg-gradient-to-br from-[#00BBCF] to-[#00C579] shadow-md">

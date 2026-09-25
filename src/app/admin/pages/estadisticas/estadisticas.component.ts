@@ -1,7 +1,8 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import {
   AfterViewInit,
   Component,
+  DestroyRef,
   ElementRef,
   OnDestroy,
   computed,
@@ -9,11 +10,13 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
-import { forkJoin } from 'rxjs';
+import { forkJoin, fromEvent, interval, of } from 'rxjs';
 
 import {
+  ActivosAhora,
   EstadisticasService,
   PersonaConAcceso,
   Plataforma,
@@ -30,6 +33,15 @@ const TINTA = '#0f172a';
 const GRIS = '#94a3b8';
 
 type Filtro = Plataforma | 'todas';
+
+/**
+ * Cada cuánto se refresca el día de hoy. Diez segundos alcanza para que se
+ * sienta en vivo y no le pesa a nadie: sólo lo hacen quienes tienen la vista
+ * abierta, y se pausa cuando la pestaña queda en segundo plano.
+ */
+const REFRESCO_MS = 10_000;
+/** La tendencia de 30 días casi no se mueve: se refresca una vez por minuto. */
+const VUELTAS_POR_TENDENCIA = 6;
 
 /** Hoy en Argentina, como AAAA-MM-DD, sin depender del reloj del teléfono. */
 function hoyArgentina(): string {
@@ -49,12 +61,17 @@ function hoyArgentina(): string {
 })
 export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
   private readonly servicio = inject(EstadisticasService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly document = inject(DOCUMENT);
 
   private readonly lienzoHoras = viewChild<ElementRef<HTMLCanvasElement>>('graficoHoras');
   private readonly lienzoReparto = viewChild<ElementRef<HTMLCanvasElement>>('graficoReparto');
   private readonly lienzoTendencia = viewChild<ElementRef<HTMLCanvasElement>>('graficoTendencia');
 
-  private graficos: Chart[] = [];
+  private graficoHoras?: Chart;
+  private graficoReparto?: Chart;
+  private graficoTendencia?: Chart;
+  private vuelta = 0;
 
   readonly hoy = hoyArgentina();
   fecha = signal(this.hoy);
@@ -66,6 +83,20 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
   tendencia = signal<PuntoTendencia[]>([]);
 
   esDueno = signal(false);
+
+  /** Sólo el día de hoy se mueve; los anteriores ya están cerrados. */
+  enVivo = computed(() => this.fecha() === this.hoy);
+  activos = signal<ActivosAhora | null>(null);
+  /** Cuándo llegó el último dato, para el "hace N segundos". */
+  actualizado = signal<number | null>(null);
+  private reloj = signal(Date.now());
+
+  haceTexto = computed(() => {
+    const cuando = this.actualizado();
+    if (!cuando) return '';
+    const segundos = Math.max(0, Math.round((this.reloj() - cuando) / 1000));
+    return segundos < 5 ? 'recién' : `hace ${segundos} s`;
+  });
 
   readonly filtros: { valor: Filtro; etiqueta: string }[] = [
     { valor: 'todas', etiqueta: 'Todas' },
@@ -104,10 +135,38 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
       if (esDueno) this.cargarAccesos();
     });
     this.cargar();
+    this.iniciarEnVivo();
   }
 
   ngOnDestroy(): void {
-    this.graficos.forEach((g) => g.destroy());
+    this.destruirGraficos();
+  }
+
+  /**
+   * Mientras la vista está abierta y mirando el día de hoy, se refresca sola.
+   * Si la pestaña queda en segundo plano, se pausa; al volver, se pone al día
+   * en el acto en lugar de esperar al próximo turno.
+   */
+  private iniciarEnVivo(): void {
+    interval(1000)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.reloj.set(Date.now()));
+
+    interval(REFRESCO_MS)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        if (this.enVivo() && !this.cargando() && this.document.visibilityState !== 'hidden') {
+          this.refrescar();
+        }
+      });
+
+    fromEvent(this.document, 'visibilitychange')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        if (this.document.visibilityState === 'visible' && this.enVivo() && !this.cargando()) {
+          this.refrescar();
+        }
+      });
   }
 
   cambiarFecha(fecha: string): void {
@@ -135,10 +194,13 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
     forkJoin({
       dia: this.servicio.dia(this.fecha(), plataforma),
       tendencia: this.servicio.tendencia(this.fecha(), 30, plataforma),
+      ahora: this.enVivo() ? this.servicio.ahora() : of(null),
     }).subscribe({
-      next: ({ dia, tendencia }) => {
+      next: ({ dia, tendencia, ahora }) => {
         this.dia.set(dia);
         this.tendencia.set(tendencia);
+        this.activos.set(ahora);
+        this.actualizado.set(Date.now());
         this.cargando.set(false);
         // Los lienzos recién existen cuando el @if deja de mostrar la carga.
         setTimeout(() => this.dibujar());
@@ -150,11 +212,41 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  /**
+   * El refresco en vivo: sin esqueleto de carga ni redibujar, para que no
+   * parpadee. Los gráficos se actualizan en el lugar y los valores se deslizan
+   * hasta el número nuevo. Si una vuelta falla, se queda con lo último que
+   * tenía y lo reintenta en la siguiente.
+   */
+  refrescar(): void {
+    const plataforma = this.filtro() === 'todas' ? undefined : (this.filtro() as Plataforma);
+    const conTendencia = ++this.vuelta % VUELTAS_POR_TENDENCIA === 0;
+
+    forkJoin({
+      dia: this.servicio.dia(this.fecha(), plataforma),
+      ahora: this.servicio.ahora(),
+      tendencia: conTendencia ? this.servicio.tendencia(this.fecha(), 30, plataforma) : of(null),
+    }).subscribe({
+      next: ({ dia, ahora, tendencia }) => {
+        this.dia.set(dia);
+        this.activos.set(ahora);
+        if (tendencia) this.tendencia.set(tendencia);
+        this.actualizado.set(Date.now());
+        this.actualizarGraficos();
+      },
+      error: () => undefined,
+    });
+  }
+
   // ------------------------------------------------------------ gráficos
 
+  private destruirGraficos(): void {
+    [this.graficoHoras, this.graficoReparto, this.graficoTendencia].forEach((g) => g?.destroy());
+    this.graficoHoras = this.graficoReparto = this.graficoTendencia = undefined;
+  }
+
   private dibujar(): void {
-    this.graficos.forEach((g) => g.destroy());
-    this.graficos = [];
+    this.destruirGraficos();
 
     const dia = this.dia();
     if (!dia) return;
@@ -163,9 +255,40 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
     const reparto = this.lienzoReparto()?.nativeElement;
     const tendencia = this.lienzoTendencia()?.nativeElement;
 
-    if (horas) this.graficos.push(new Chart(horas, this.configHoras(dia, horas)));
-    if (reparto) this.graficos.push(new Chart(reparto, this.configReparto(dia)));
-    if (tendencia) this.graficos.push(new Chart(tendencia, this.configTendencia(tendencia)));
+    if (horas) this.graficoHoras = new Chart(horas, this.configHoras(dia, horas));
+    if (reparto) this.graficoReparto = new Chart(reparto, this.configReparto(dia));
+    if (tendencia) this.graficoTendencia = new Chart(tendencia, this.configTendencia(tendencia));
+  }
+
+  /** Reemplaza los datos de cada gráfico y le deja a Chart.js la transición. */
+  private actualizarGraficos(): void {
+    const dia = this.dia();
+    const horas = this.lienzoHoras()?.nativeElement;
+    const tendencia = this.lienzoTendencia()?.nativeElement;
+    if (!dia || !horas || !tendencia || !this.graficoHoras || !this.graficoReparto || !this.graficoTendencia) {
+      this.dibujar();
+      return;
+    }
+
+    const nuevasHoras = this.configHoras(dia, horas).data;
+    this.graficoHoras.data.datasets.forEach((serie, i) => {
+      serie.data = nuevasHoras.datasets[i].data;
+      serie.backgroundColor = nuevasHoras.datasets[i].backgroundColor;
+    });
+    this.graficoHoras.update();
+
+    const nuevoReparto = this.configReparto(dia).data.datasets[0];
+    this.graficoReparto.data.datasets[0].data = nuevoReparto.data;
+    this.graficoReparto.data.datasets[0].backgroundColor = nuevoReparto.backgroundColor;
+    this.graficoReparto.update();
+
+    const nuevaTendencia = this.configTendencia(tendencia).data;
+    this.graficoTendencia.data.labels = nuevaTendencia.labels;
+    this.graficoTendencia.data.datasets[0].data = nuevaTendencia.datasets[0].data;
+    Object.assign(this.graficoTendencia.data.datasets[0], {
+      pointRadius: (nuevaTendencia.datasets[0] as { pointRadius?: unknown }).pointRadius,
+    });
+    this.graficoTendencia.update();
   }
 
   private degradado(lienzo: HTMLCanvasElement, arriba: string, abajo: string): CanvasGradient {

@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, discardPeriodicTasks, fakeAsync, tick } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 
 import { EstadisticasService, ResumenDia } from '../../services/estadisticas.service';
@@ -34,8 +34,9 @@ describe('EstadisticasComponent', () => {
 
   beforeEach(async () => {
     servicio = jasmine.createSpyObj<EstadisticasService>('EstadisticasService', [
-      'permiso', 'dia', 'tendencia', 'listarAccesos', 'buscarAsociado', 'darAcceso', 'quitarAcceso',
+      'permiso', 'dia', 'tendencia', 'ahora', 'listarAccesos', 'buscarAsociado', 'darAcceso', 'quitarAcceso',
     ]);
+    servicio.ahora.and.returnValue(of({ total: 24, pwa: 17, web: 7 }));
     servicio.dia.and.returnValue(of(resumen()));
     servicio.tendencia.and.returnValue(of([]));
     servicio.listarAccesos.and.returnValue(of([]));
@@ -54,6 +55,7 @@ describe('EstadisticasComponent', () => {
     expect(texto()).toContain('850');
     expect(texto()).toContain('11 a 12 h');
     expect(texto()).toContain('141 personas en esa hora');
+    discardPeriodicTasks();
   }));
 
   it('calcula qué parte entró por la app', () => {
@@ -69,6 +71,7 @@ describe('EstadisticasComponent', () => {
     fixture.detectChanges();
 
     expect(texto()).toContain('Sin actividad');
+    discardPeriodicTasks();
   }));
 
   it('el filtro de plataforma vuelve a pedir los datos sólo de esa plataforma', () => {
@@ -94,6 +97,7 @@ describe('EstadisticasComponent', () => {
     fixture.detectChanges();
     expect(texto()).not.toContain('Quién puede ver las estadísticas');
     expect(servicio.listarAccesos).not.toHaveBeenCalled();
+    discardPeriodicTasks();
   }));
 
   it('al dueño le muestra quién tiene acceso', fakeAsync(() => {
@@ -104,6 +108,7 @@ describe('EstadisticasComponent', () => {
 
     expect(texto()).toContain('Quién puede ver las estadísticas');
     expect(texto()).toContain('ARANGUE, Marcelo');
+    discardPeriodicTasks();
   }));
 
   it('antes de dar acceso muestra a quién, y recién ahí lo da', fakeAsync(() => {
@@ -120,6 +125,7 @@ describe('EstadisticasComponent', () => {
 
     componente.confirmarAcceso();
     expect(servicio.darAcceso).toHaveBeenCalledOnceWith('11111111');
+    discardPeriodicTasks();
   }));
 
   it('si falla la carga, avisa y deja reintentar', fakeAsync(() => {
@@ -129,5 +135,60 @@ describe('EstadisticasComponent', () => {
     fixture.detectChanges();
 
     expect(texto()).toContain('No se pudieron cargar las estadísticas');
+    discardPeriodicTasks();
   }));
+
+  describe('en vivo', () => {
+    it('hoy muestra cuánta gente está usando la app en este momento', fakeAsync(() => {
+      crear();
+      tick();
+      fixture.detectChanges();
+
+      expect(texto()).toContain('24');
+      expect(texto()).toContain('personas usando la app ahora');
+      expect(texto()).toContain('17');
+      discardPeriodicTasks();
+    }));
+
+    it('se refresca solo cada 10 segundos, sin volver a mostrar la carga', fakeAsync(() => {
+      crear();
+      tick();
+      servicio.dia.calls.reset();
+      servicio.ahora.and.returnValue(of({ total: 31, pwa: 20, web: 11 }));
+
+      tick(10_000);
+      fixture.detectChanges();
+
+      expect(servicio.dia).toHaveBeenCalledTimes(1);
+      expect(componente.cargando()).toBeFalse();
+      expect(componente.activos()).toEqual({ total: 31, pwa: 20, web: 11 });
+      discardPeriodicTasks();
+    }));
+
+    it('un día que ya pasó no se refresca: está cerrado', fakeAsync(() => {
+      crear();
+      tick();
+      componente.moverDia(-1);
+      tick();
+      servicio.dia.calls.reset();
+
+      tick(30_000);
+
+      expect(componente.enVivo()).toBeFalse();
+      expect(servicio.dia).not.toHaveBeenCalled();
+      discardPeriodicTasks();
+    }));
+
+    it('si una vuelta falla, se queda con los últimos datos', fakeAsync(() => {
+      crear();
+      tick();
+      servicio.ahora.and.returnValue(throwError(() => new Error('sin red')));
+
+      tick(10_000);
+
+      expect(componente.activos()).toEqual({ total: 24, pwa: 17, web: 7 });
+      expect(componente.error()).toBe('');
+      discardPeriodicTasks();
+    }));
+  });
 });
