@@ -8,15 +8,37 @@
     </div>
 
     <div class="flex flex-col sm:flex-row gap-3">
-      <!-- Día -->
-      <div class="flex items-center bg-white border border-slate-200 rounded-xl shadow-sm">
-        <button (click)="moverDia(-1)" aria-label="Día anterior"
-          class="px-3 py-2 text-slate-500 hover:text-cyan-700 cursor-pointer">‹</button>
-        <input type="date" [ngModel]="fecha()" (ngModelChange)="cambiarFecha($event)" [max]="hoy"
-          class="px-1 py-2 text-sm font-semibold text-slate-700 bg-transparent focus:outline-none" />
-        <button (click)="moverDia(1)" [disabled]="fecha() >= hoy" aria-label="Día siguiente"
-          class="px-3 py-2 text-slate-500 hover:text-cyan-700 disabled:opacity-30 cursor-pointer">›</button>
+      <!-- Día o esta semana -->
+      <div class="flex bg-slate-100 rounded-xl p-1">
+        <button (click)="cambiarModo('dia')"
+          class="px-4 py-1.5 text-sm font-semibold rounded-lg transition-all cursor-pointer"
+          [class.bg-white]="modo() === 'dia'" [class.shadow-sm]="modo() === 'dia'"
+          [class.text-cyan-700]="modo() === 'dia'" [class.text-slate-500]="modo() !== 'dia'">
+          Día
+        </button>
+        <button (click)="cambiarModo('semana')"
+          class="px-4 py-1.5 text-sm font-semibold rounded-lg transition-all cursor-pointer"
+          [class.bg-white]="modo() === 'semana'" [class.shadow-sm]="modo() === 'semana'"
+          [class.text-cyan-700]="modo() === 'semana'" [class.text-slate-500]="modo() !== 'semana'">
+          Esta semana
+        </button>
       </div>
+
+      <!-- Qué día (sólo en modo día) -->
+      @if (modo() === 'dia') {
+        <div class="flex items-center bg-white border border-slate-200 rounded-xl shadow-sm">
+          <button (click)="moverDia(-1)" aria-label="Día anterior"
+            class="px-3 py-2 text-slate-500 hover:text-cyan-700 cursor-pointer">‹</button>
+          <input type="date" [ngModel]="fecha()" (ngModelChange)="cambiarFecha($event)" [max]="hoy"
+            class="px-1 py-2 text-sm font-semibold text-slate-700 bg-transparent focus:outline-none" />
+          <button (click)="moverDia(1)" [disabled]="fecha() >= hoy" aria-label="Día siguiente"
+            class="px-3 py-2 text-slate-500 hover:text-cyan-700 disabled:opacity-30 cursor-pointer">›</button>
+        </div>
+      } @else {
+        <div class="flex items-center px-4 py-2 bg-white border border-slate-200 rounded-xl shadow-sm">
+          <p class="text-sm font-semibold text-slate-700">{{ rangoTexto() }}</p>
+        </div>
+      }
 
       <!-- Plataforma -->
       <div class="flex bg-slate-100 rounded-xl p-1">
@@ -36,10 +58,10 @@
 
   @if (cargando()) {
     <!-- Esqueleto mientras carga -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      @for (i of [1, 2, 3, 4]; track i) {
-        <div class="h-28 rounded-2xl bg-slate-100 animate-pulse"></div>
-      }
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+      <div class="h-40 rounded-2xl bg-slate-100 animate-pulse"></div>
+      <div class="h-40 rounded-2xl bg-slate-100 animate-pulse lg:col-span-2"></div>
+      <div class="h-40 rounded-2xl bg-slate-100 animate-pulse"></div>
     </div>
     <div class="h-80 rounded-2xl bg-slate-100 animate-pulse"></div>
   } @else if (error()) {
@@ -48,9 +70,9 @@
       <button (click)="cargar()" class="mt-3 text-sm font-semibold text-cyan-700 underline cursor-pointer">Reintentar</button>
     </div>
   } @else {
-  @if (dia(); as d) {
+  @if (resumen(); as r) {
 
-    <!-- En vivo: sólo el día de hoy -->
+    <!-- En vivo: sólo si lo que se mira incluye hoy -->
     @if (enVivo()) {
       <div class="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-2xl px-5 py-4 text-white shadow-md
                   bg-gradient-to-r from-slate-900 via-slate-900 to-[#0b3b44]">
@@ -88,41 +110,68 @@
       </div>
     }
 
-    <!-- Números del día -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="rounded-2xl p-5 text-white bg-gradient-to-br from-[#00BBCF] to-[#00C579] shadow-md">
-        <p class="text-xs font-semibold uppercase tracking-wider opacity-90">Personas</p>
-        <p class="text-4xl font-bold mt-2">{{ d.totales.personas }}</p>
-        <p class="text-xs opacity-90 mt-1">asociados distintos</p>
+    <!-- Las tres tarjetas -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+
+      <!-- Cuántos entraron -->
+      <div class="rounded-2xl p-5 text-white bg-gradient-to-br from-[#00BBCF] to-[#00C579] shadow-md flex flex-col justify-between">
+        <p class="text-xs font-semibold uppercase tracking-wider opacity-90">{{ cuando() }}</p>
+        <div class="mt-3">
+          <p class="text-5xl font-bold tabular-nums">{{ r.personas }}</p>
+          <p class="text-sm opacity-95 mt-1">
+            {{ r.personas === 1 ? 'asociado inició sesión' : 'asociados iniciaron sesión' }}
+          </p>
+        </div>
       </div>
-      <div class="rounded-2xl p-5 bg-white border border-slate-200 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Sesiones</p>
-        <p class="text-4xl font-bold text-slate-900 mt-2">{{ d.totales.sesiones }}</p>
-        <p class="text-xs text-slate-500 mt-1">{{ pantallasPorSesion() }} pantallas por sesión</p>
+
+      <!-- Qué vistas abrieron -->
+      <div class="lg:col-span-2 rounded-2xl p-5 bg-white border border-slate-200 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Qué vistas abrieron</p>
+        <p class="text-[0.7rem] text-slate-400 mt-0.5">Porcentaje de esos asociados que entró a cada una.</p>
+
+        @if (vistas().length) {
+          <ul class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+            @for (v of vistas(); track v.vista) {
+              <li>
+                <div class="flex items-baseline justify-between gap-2">
+                  <span class="text-sm text-slate-700 truncate">{{ v.nombre }}</span>
+                  <span class="text-sm font-bold text-slate-900 tabular-nums">{{ v.porcentaje }}%</span>
+                </div>
+                <div class="mt-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+                  <div class="h-full rounded-full bg-gradient-to-r from-[#00BBCF] to-[#00C579] transition-all duration-700"
+                    [style.width.%]="v.porcentaje"></div>
+                </div>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="mt-6 text-sm text-slate-400">Todavía no se abrió ninguna vista en este período.</p>
+        }
       </div>
-      <div class="rounded-2xl p-5 bg-white border border-slate-200 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Visitas</p>
-        <p class="text-4xl font-bold text-slate-900 mt-2">{{ d.totales.visitas }}</p>
-        <p class="text-xs text-slate-500 mt-1">pantallas abiertas</p>
-      </div>
-      <div class="rounded-2xl p-5 bg-slate-900 text-white shadow-md">
+
+      <!-- Hora pico -->
+      <div class="rounded-2xl p-5 bg-slate-900 text-white shadow-md flex flex-col justify-between">
         <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Hora pico</p>
-        <p class="text-2xl font-bold mt-3 leading-tight">{{ horaPicoTexto() }}</p>
-        <p class="text-xs text-slate-400 mt-1">
-          @if (d.horaPico !== null) { {{ personasEnPico() }} {{ personasEnPico() === 1 ? 'persona' : 'personas' }} en esa hora } @else { no hubo ingresos }
-        </p>
+        <div class="mt-3">
+          <p class="text-3xl font-bold leading-tight">{{ horaPicoTexto() }}</p>
+          <p class="text-xs text-slate-400 mt-1">
+            @if (r.horaPico !== null) {
+              {{ personasEnPico() }} {{ personasEnPico() === 1 ? 'persona' : 'personas' }} en esa hora
+            } @else {
+              no hubo ingresos
+            }
+          </p>
+        </div>
       </div>
     </div>
 
     <!-- Actividad por hora -->
     <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
-      <div class="flex items-baseline justify-between mb-4">
-        <div>
-          <h2 class="text-base font-bold text-slate-900">Actividad por hora</h2>
-          <p class="text-xs text-slate-500">Personas distintas en cada hora. La barra oscura es la hora pico.</p>
-        </div>
-      </div>
-      <div class="relative h-72">
+      <h2 class="text-base font-bold text-slate-900">Actividad por hora</h2>
+      <p class="text-xs text-slate-500">
+        Personas distintas en cada hora{{ modo() === 'semana' ? ', sumando de lunes a hoy' : '' }}. La barra oscura es la hora pico.
+      </p>
+      <div class="relative h-72 mt-4">
         <canvas #graficoHoras></canvas>
       </div>
     </div>
@@ -131,7 +180,7 @@
       <!-- App vs navegador -->
       <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
         <h2 class="text-base font-bold text-slate-900">Desde dónde entran</h2>
-        <p class="text-xs text-slate-500">Personas del día, sin importar el filtro.</p>
+        <p class="text-xs text-slate-500">Asociados del período, sin importar el filtro.</p>
 
         <div class="relative h-52 mt-4">
           <canvas #graficoReparto></canvas>
@@ -147,16 +196,14 @@
               <span class="w-2.5 h-2.5 rounded-full bg-[#00C579]"></span>
               <p class="text-xs font-semibold text-emerald-800">App instalada</p>
             </div>
-            <p class="text-xl font-bold text-slate-900 mt-1">{{ d.porPlataforma.pwa.personas }}</p>
-            <p class="text-[0.7rem] text-slate-500">{{ d.porPlataforma.pwa.sesiones }} sesiones</p>
+            <p class="text-xl font-bold text-slate-900 mt-1">{{ r.porPlataforma.pwa }}</p>
           </div>
           <div class="rounded-xl bg-cyan-50 p-3">
             <div class="flex items-center gap-2">
               <span class="w-2.5 h-2.5 rounded-full bg-[#00BBCF]"></span>
               <p class="text-xs font-semibold text-cyan-800">Navegador</p>
             </div>
-            <p class="text-xl font-bold text-slate-900 mt-1">{{ d.porPlataforma.web.personas }}</p>
-            <p class="text-[0.7rem] text-slate-500">{{ d.porPlataforma.web.sesiones }} sesiones</p>
+            <p class="text-xl font-bold text-slate-900 mt-1">{{ r.porPlataforma.web }}</p>
           </div>
         </div>
       </div>
@@ -164,7 +211,7 @@
       <!-- Últimos 30 días -->
       <div class="lg:col-span-2 rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
         <h2 class="text-base font-bold text-slate-900">Últimos 30 días</h2>
-        <p class="text-xs text-slate-500">Personas por día. El punto verde es el día elegido.</p>
+        <p class="text-xs text-slate-500">Asociados por día. Los puntos verdes son los días que estás mirando.</p>
         <div class="relative h-64 mt-4">
           <canvas #graficoTendencia></canvas>
         </div>
@@ -172,8 +219,7 @@
     </div>
 
     <p class="text-[0.7rem] text-slate-400 text-center">
-      Una persona que entra varias veces en el día cuenta una sola vez. Una sesión termina a los 30 minutos sin actividad.
-      Horarios de Argentina. Se cuenta desde el inicio de sesión.
+      Un asociado que entra varias veces cuenta una sola vez, en el día y en la semana. Horarios de Argentina.
     </p>
   }
   }

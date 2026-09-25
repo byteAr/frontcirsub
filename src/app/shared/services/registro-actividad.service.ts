@@ -13,6 +13,17 @@ import { EstadisticasService, Plataforma } from '../../admin/services/estadistic
 const LATIDO_MS = 30_000;
 
 /**
+ * La vista que abrió el asociado: el primer tramo después de /dashboard.
+ * La credencial trae además sus paneles con nombre, del estilo
+ * "/dashboard/credencial/(front:info//back:grupo)", que no interesan.
+ */
+export function vistaDe(url: string): string | undefined {
+  const resto = url.split('/dashboard/')[1];
+  if (!resto) return undefined;
+  return resto.split(/[/(?#;]/)[0] || undefined;
+}
+
+/**
  * Le cuenta al backend cómo usa la app cada asociado, para las estadísticas:
  *
  * - **Visita**: cada pantalla que abre, y desde dónde (app instalada o
@@ -39,7 +50,9 @@ export class RegistroActividadService {
       .subscribe((evento) => {
         this.urlActual = evento.urlAfterRedirects;
         if (this.enLaApp()) {
-          this.estadisticas.registrarActividad(this.plataforma()).subscribe({ error: () => undefined });
+          this.estadisticas
+            .registrarActividad(this.plataforma(), vistaDe(this.urlActual))
+            .subscribe({ error: () => undefined });
         }
       });
 

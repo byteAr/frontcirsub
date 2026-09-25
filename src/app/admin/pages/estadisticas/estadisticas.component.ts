@@ -21,7 +21,7 @@ import {
   PersonaConAcceso,
   Plataforma,
   PuntoTendencia,
-  ResumenDia,
+  ResumenPeriodo,
 } from '../../services/estadisticas.service';
 
 Chart.register(...registerables);
@@ -33,11 +33,12 @@ const TINTA = '#0f172a';
 const GRIS = '#94a3b8';
 
 type Filtro = Plataforma | 'todas';
+type Modo = 'dia' | 'semana';
 
 /**
- * Cada cuánto se refresca el día de hoy. Diez segundos alcanza para que se
- * sienta en vivo y no le pesa a nadie: sólo lo hacen quienes tienen la vista
- * abierta, y se pausa cuando la pestaña queda en segundo plano.
+ * Cada cuánto se refresca mientras se mira algo que incluye hoy. Diez
+ * segundos alcanza para que se sienta en vivo y no le pesa a nadie: sólo lo
+ * hacen quienes tienen la vista abierta, y se pausa en segundo plano.
  */
 const REFRESCO_MS = 10_000;
 /** La tendencia de 30 días casi no se mueve: se refresca una vez por minuto. */
@@ -49,6 +50,19 @@ const VUELTAS_POR_TENDENCIA = 6;
  */
 const ESPERA_AL_VOLVER_MS = 1_000;
 
+/** Los nombres tal cual los ve el asociado en el menú. */
+const NOMBRES_DE_VISTAS: Record<string, string> = {
+  credencial: 'Credencial Virtual',
+  beneficios: 'Beneficios',
+  reintegros: 'Mis trámites',
+  descuentos: 'Mis descuentos',
+  ahorros: 'Mis ahorros',
+  'ayuda-economica': 'Ayuda económica',
+  cbu: 'Actualización de CBU',
+  encuesta: 'Encuesta',
+  notificaciones: 'Notificaciones',
+};
+
 /** Hoy en Argentina, como AAAA-MM-DD, sin depender del reloj del teléfono. */
 function hoyArgentina(): string {
   return new Intl.DateTimeFormat('en-CA', {
@@ -57,6 +71,20 @@ function hoyArgentina(): string {
     month: '2-digit',
     day: '2-digit',
   }).format(new Date());
+}
+
+/** El lunes de la semana de una fecha. Si ya es lunes, la misma fecha. */
+export function lunesDe(fecha: string): string {
+  const d = new Date(`${fecha}T12:00:00Z`);
+  const desdeElLunes = (d.getUTCDay() + 6) % 7; // lunes = 0, domingo = 6
+  d.setUTCDate(d.getUTCDate() - desdeElLunes);
+  return d.toISOString().slice(0, 10);
+}
+
+/** "2026-09-21" → "21/09". */
+function corta(fecha: string): string {
+  const [, mes, dia] = fecha.split('-');
+  return `${dia}/${mes}`;
 }
 
 @Component({
@@ -80,18 +108,32 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
   private vuelta = 0;
 
   readonly hoy = hoyArgentina();
+  modo = signal<Modo>('dia');
   fecha = signal(this.hoy);
   filtro = signal<Filtro>('todas');
 
   cargando = signal(true);
   error = signal('');
-  dia = signal<ResumenDia | null>(null);
+  resumen = signal<ResumenPeriodo | null>(null);
   tendencia = signal<PuntoTendencia[]>([]);
 
   esDueno = signal(false);
 
-  /** Sólo el día de hoy se mueve; los anteriores ya están cerrados. */
-  enVivo = computed(() => this.fecha() === this.hoy);
+  readonly filtros: { valor: Filtro; etiqueta: string }[] = [
+    { valor: 'todas', etiqueta: 'Todas' },
+    { valor: 'pwa', etiqueta: 'App' },
+    { valor: 'web', etiqueta: 'Navegador' },
+  ];
+
+  /** Lo que se está mirando: un día, o de lunes a hoy. */
+  rango = computed(() =>
+    this.modo() === 'semana'
+      ? { desde: lunesDe(this.hoy), hasta: this.hoy }
+      : { desde: this.fecha(), hasta: this.fecha() },
+  );
+
+  /** Sólo se mueve lo que incluye hoy; los días que ya pasaron están cerrados. */
+  enVivo = computed(() => this.rango().hasta === this.hoy);
   activos = signal<ActivosAhora | null>(null);
   /** Cuándo llegó el último dato, para el "hace N segundos". */
   actualizado = signal<number | null>(null);
@@ -104,36 +146,43 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
     return segundos < 5 ? 'recién' : `hace ${segundos} s`;
   });
 
-  readonly filtros: { valor: Filtro; etiqueta: string }[] = [
-    { valor: 'todas', etiqueta: 'Todas' },
-    { valor: 'pwa', etiqueta: 'App' },
-    { valor: 'web', etiqueta: 'Navegador' },
-  ];
-
-  /** Qué parte del total entró por la app instalada. */
-  porcentajeApp = computed(() => {
-    const d = this.dia();
-    if (!d) return 0;
-    const total = d.porPlataforma.pwa.personas + d.porPlataforma.web.personas;
-    return total ? Math.round((d.porPlataforma.pwa.personas / total) * 100) : 0;
+  /** El rótulo de la tarjeta de personas: "Hoy", "El 24/09" o "Esta semana". */
+  cuando = computed(() => {
+    if (this.modo() === 'semana') return 'Esta semana';
+    return this.fecha() === this.hoy ? 'Hoy' : `El ${corta(this.fecha())}`;
   });
 
-  /** La hora pico en palabras: "11 a 12 h". */
+  /** "Del lunes 21/09 a hoy", para aclarar qué cubre la semana. */
+  rangoTexto = computed(() => {
+    const { desde, hasta } = this.rango();
+    return desde === hasta ? '' : `Del lunes ${corta(desde)} a hoy`;
+  });
+
   horaPicoTexto = computed(() => {
-    const pico = this.dia()?.horaPico;
+    const pico = this.resumen()?.horaPico;
     return pico === null || pico === undefined ? 'Sin actividad' : `${pico} a ${pico + 1} h`;
   });
 
   personasEnPico = computed(() => {
-    const d = this.dia();
-    return d && d.horaPico !== null ? d.porHora[d.horaPico].personas : 0;
+    const r = this.resumen();
+    return r && r.horaPico !== null ? r.porHora[r.horaPico].personas : 0;
   });
 
-  /** Promedio de pantallas por sesión: cuánto se usa cada vez que se entra. */
-  pantallasPorSesion = computed(() => {
-    const t = this.dia()?.totales;
-    return t && t.sesiones ? (t.visitas / t.sesiones).toFixed(1) : '0';
+  /** Qué parte del total entró por la app instalada. */
+  porcentajeApp = computed(() => {
+    const r = this.resumen();
+    if (!r) return 0;
+    const total = r.porPlataforma.pwa + r.porPlataforma.web;
+    return total ? Math.round((r.porPlataforma.pwa / total) * 100) : 0;
   });
+
+  /** Las vistas con su nombre de menú, de la más visitada a la menos. */
+  vistas = computed(() =>
+    (this.resumen()?.vistas ?? []).map((v) => ({
+      ...v,
+      nombre: NOMBRES_DE_VISTAS[v.vista] ?? v.vista,
+    })),
+  );
 
   ngAfterViewInit(): void {
     this.servicio.permiso().subscribe(({ esDueno }) => {
@@ -148,10 +197,93 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
     this.destruirGraficos();
   }
 
+  // ------------------------------------------------------------ filtros
+
+  cambiarModo(modo: Modo): void {
+    if (modo === this.modo()) return;
+    this.modo.set(modo);
+    this.cargar();
+  }
+
+  cambiarFecha(fecha: string): void {
+    if (!fecha || fecha > this.hoy) return;
+    this.fecha.set(fecha);
+    this.cargar();
+  }
+
+  moverDia(delta: number): void {
+    const d = new Date(`${this.fecha()}T12:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + delta);
+    this.cambiarFecha(d.toISOString().slice(0, 10));
+  }
+
+  cambiarFiltro(filtro: Filtro): void {
+    this.filtro.set(filtro);
+    this.cargar();
+  }
+
+  private plataforma(): Plataforma | undefined {
+    return this.filtro() === 'todas' ? undefined : (this.filtro() as Plataforma);
+  }
+
+  // ------------------------------------------------------------ datos
+
+  cargar(): void {
+    this.cargando.set(true);
+    this.error.set('');
+    const { desde, hasta } = this.rango();
+
+    forkJoin({
+      resumen: this.servicio.periodo(desde, hasta, this.plataforma()),
+      tendencia: this.servicio.tendencia(hasta, 30, this.plataforma()),
+      ahora: this.enVivo() ? this.servicio.ahora() : of(null),
+    }).subscribe({
+      next: ({ resumen, tendencia, ahora }) => {
+        this.resumen.set(resumen);
+        this.tendencia.set(tendencia);
+        this.activos.set(ahora);
+        this.actualizado.set(Date.now());
+        this.cargando.set(false);
+        // Los lienzos recién existen cuando el @if deja de mostrar la carga.
+        setTimeout(() => this.dibujar());
+      },
+      error: () => {
+        this.error.set('No se pudieron cargar las estadísticas. Probá de nuevo en un rato.');
+        this.cargando.set(false);
+      },
+    });
+  }
+
   /**
-   * Mientras la vista está abierta y mirando el día de hoy, se refresca sola.
-   * Si la pestaña queda en segundo plano, se pausa; al volver, se pone al día
-   * en el acto en lugar de esperar al próximo turno.
+   * El refresco en vivo: sin esqueleto de carga ni redibujar, para que no
+   * parpadee. Los gráficos se actualizan en el lugar y los valores se deslizan
+   * hasta el número nuevo. Si una vuelta falla, se queda con lo último que
+   * tenía y lo reintenta en la siguiente.
+   */
+  refrescar(): void {
+    const { desde, hasta } = this.rango();
+    const conTendencia = ++this.vuelta % VUELTAS_POR_TENDENCIA === 0;
+
+    forkJoin({
+      resumen: this.servicio.periodo(desde, hasta, this.plataforma()),
+      ahora: this.servicio.ahora(),
+      tendencia: conTendencia ? this.servicio.tendencia(hasta, 30, this.plataforma()) : of(null),
+    }).subscribe({
+      next: ({ resumen, ahora, tendencia }) => {
+        this.resumen.set(resumen);
+        this.activos.set(ahora);
+        if (tendencia) this.tendencia.set(tendencia);
+        this.actualizado.set(Date.now());
+        this.actualizarGraficos();
+      },
+      error: () => undefined,
+    });
+  }
+
+  /**
+   * Mientras la vista está abierta y mirando algo que incluye hoy, se refresca
+   * sola. Si la pestaña queda en segundo plano, se pausa; al volver, se pone
+   * al día en lugar de esperar al próximo turno.
    */
   private iniciarEnVivo(): void {
     interval(1000)
@@ -175,75 +307,6 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
       });
   }
 
-  cambiarFecha(fecha: string): void {
-    if (!fecha || fecha > this.hoy) return;
-    this.fecha.set(fecha);
-    this.cargar();
-  }
-
-  moverDia(delta: number): void {
-    const d = new Date(`${this.fecha()}T12:00:00Z`);
-    d.setUTCDate(d.getUTCDate() + delta);
-    this.cambiarFecha(d.toISOString().slice(0, 10));
-  }
-
-  cambiarFiltro(filtro: Filtro): void {
-    this.filtro.set(filtro);
-    this.cargar();
-  }
-
-  cargar(): void {
-    this.cargando.set(true);
-    this.error.set('');
-    const plataforma = this.filtro() === 'todas' ? undefined : (this.filtro() as Plataforma);
-
-    forkJoin({
-      dia: this.servicio.dia(this.fecha(), plataforma),
-      tendencia: this.servicio.tendencia(this.fecha(), 30, plataforma),
-      ahora: this.enVivo() ? this.servicio.ahora() : of(null),
-    }).subscribe({
-      next: ({ dia, tendencia, ahora }) => {
-        this.dia.set(dia);
-        this.tendencia.set(tendencia);
-        this.activos.set(ahora);
-        this.actualizado.set(Date.now());
-        this.cargando.set(false);
-        // Los lienzos recién existen cuando el @if deja de mostrar la carga.
-        setTimeout(() => this.dibujar());
-      },
-      error: () => {
-        this.error.set('No se pudieron cargar las estadísticas. Probá de nuevo en un rato.');
-        this.cargando.set(false);
-      },
-    });
-  }
-
-  /**
-   * El refresco en vivo: sin esqueleto de carga ni redibujar, para que no
-   * parpadee. Los gráficos se actualizan en el lugar y los valores se deslizan
-   * hasta el número nuevo. Si una vuelta falla, se queda con lo último que
-   * tenía y lo reintenta en la siguiente.
-   */
-  refrescar(): void {
-    const plataforma = this.filtro() === 'todas' ? undefined : (this.filtro() as Plataforma);
-    const conTendencia = ++this.vuelta % VUELTAS_POR_TENDENCIA === 0;
-
-    forkJoin({
-      dia: this.servicio.dia(this.fecha(), plataforma),
-      ahora: this.servicio.ahora(),
-      tendencia: conTendencia ? this.servicio.tendencia(this.fecha(), 30, plataforma) : of(null),
-    }).subscribe({
-      next: ({ dia, ahora, tendencia }) => {
-        this.dia.set(dia);
-        this.activos.set(ahora);
-        if (tendencia) this.tendencia.set(tendencia);
-        this.actualizado.set(Date.now());
-        this.actualizarGraficos();
-      },
-      error: () => undefined,
-    });
-  }
-
   // ------------------------------------------------------------ gráficos
 
   private destruirGraficos(): void {
@@ -254,36 +317,34 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
   private dibujar(): void {
     this.destruirGraficos();
 
-    const dia = this.dia();
-    if (!dia) return;
+    const resumen = this.resumen();
+    if (!resumen) return;
 
     const horas = this.lienzoHoras()?.nativeElement;
     const reparto = this.lienzoReparto()?.nativeElement;
     const tendencia = this.lienzoTendencia()?.nativeElement;
 
-    if (horas) this.graficoHoras = new Chart(horas, this.configHoras(dia, horas));
-    if (reparto) this.graficoReparto = new Chart(reparto, this.configReparto(dia));
+    if (horas) this.graficoHoras = new Chart(horas, this.configHoras(resumen, horas));
+    if (reparto) this.graficoReparto = new Chart(reparto, this.configReparto(resumen));
     if (tendencia) this.graficoTendencia = new Chart(tendencia, this.configTendencia(tendencia));
   }
 
   /** Reemplaza los datos de cada gráfico y le deja a Chart.js la transición. */
   private actualizarGraficos(): void {
-    const dia = this.dia();
+    const resumen = this.resumen();
     const horas = this.lienzoHoras()?.nativeElement;
     const tendencia = this.lienzoTendencia()?.nativeElement;
-    if (!dia || !horas || !tendencia || !this.graficoHoras || !this.graficoReparto || !this.graficoTendencia) {
+    if (!resumen || !horas || !tendencia || !this.graficoHoras || !this.graficoReparto || !this.graficoTendencia) {
       this.dibujar();
       return;
     }
 
-    const nuevasHoras = this.configHoras(dia, horas).data;
-    this.graficoHoras.data.datasets.forEach((serie, i) => {
-      serie.data = nuevasHoras.datasets[i].data;
-      serie.backgroundColor = nuevasHoras.datasets[i].backgroundColor;
-    });
+    const nuevasHoras = this.configHoras(resumen, horas).data.datasets[0];
+    this.graficoHoras.data.datasets[0].data = nuevasHoras.data;
+    this.graficoHoras.data.datasets[0].backgroundColor = nuevasHoras.backgroundColor;
     this.graficoHoras.update();
 
-    const nuevoReparto = this.configReparto(dia).data.datasets[0];
+    const nuevoReparto = this.configReparto(resumen).data.datasets[0];
     this.graficoReparto.data.datasets[0].data = nuevoReparto.data;
     this.graficoReparto.data.datasets[0].backgroundColor = nuevoReparto.backgroundColor;
     this.graficoReparto.update();
@@ -305,36 +366,22 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
     return g;
   }
 
-  private configHoras(dia: ResumenDia, lienzo: HTMLCanvasElement): ChartConfiguration<'bar' | 'line'> {
+  private configHoras(resumen: ResumenPeriodo, lienzo: HTMLCanvasElement): ChartConfiguration<'bar'> {
     const normal = this.degradado(lienzo, 'rgba(0,187,207,0.9)', 'rgba(0,197,121,0.55)');
     const pico = this.degradado(lienzo, '#0891b2', '#059669');
 
     return {
       type: 'bar',
       data: {
-        labels: dia.porHora.map((h) => `${h.hora}h`),
+        labels: resumen.porHora.map((h) => `${h.hora}h`),
         datasets: [
           {
-            type: 'bar',
             label: 'Personas',
-            data: dia.porHora.map((h) => h.personas),
-            backgroundColor: dia.porHora.map((h) => (h.hora === dia.horaPico ? pico : normal)),
+            data: resumen.porHora.map((h) => h.personas),
+            backgroundColor: resumen.porHora.map((h) => (h.hora === resumen.horaPico ? pico : normal)),
             borderRadius: 8,
             borderSkipped: false,
             maxBarThickness: 26,
-            order: 2,
-          },
-          {
-            type: 'line',
-            label: 'Sesiones',
-            data: dia.porHora.map((h) => h.sesiones),
-            borderColor: TINTA,
-            backgroundColor: TINTA,
-            borderWidth: 2,
-            tension: 0.4,
-            pointRadius: 0,
-            pointHoverRadius: 5,
-            order: 1,
           },
         ],
       },
@@ -342,14 +389,7 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
         responsive: true,
         maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: {
-            position: 'top',
-            align: 'end',
-            labels: { usePointStyle: true, boxWidth: 8, color: '#475569', font: { size: 12 } },
-          },
-          tooltip: this.tooltip(),
-        },
+        plugins: { legend: { display: false }, tooltip: this.tooltip() },
         scales: {
           x: { grid: { display: false }, ticks: { color: GRIS, font: { size: 11 }, maxRotation: 0, autoSkip: true } },
           y: {
@@ -360,12 +400,12 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
           },
         },
       },
-    } as ChartConfiguration<'bar' | 'line'>;
+    };
   }
 
-  private configReparto(dia: ResumenDia): ChartConfiguration<'doughnut'> {
-    const { pwa, web } = dia.porPlataforma;
-    const vacio = pwa.personas + web.personas === 0;
+  private configReparto(resumen: ResumenPeriodo): ChartConfiguration<'doughnut'> {
+    const { pwa, web } = resumen.porPlataforma;
+    const vacio = pwa + web === 0;
 
     return {
       type: 'doughnut',
@@ -373,7 +413,7 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
         labels: ['App instalada', 'Navegador'],
         datasets: [
           {
-            data: vacio ? [1] : [pwa.personas, web.personas],
+            data: vacio ? [1] : [pwa, web],
             backgroundColor: vacio ? ['#e2e8f0'] : [VERDE, CELESTE],
             borderWidth: 0,
             hoverOffset: 6,
@@ -395,15 +435,12 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
   private configTendencia(lienzo: HTMLCanvasElement): ChartConfiguration<'line'> {
     const puntos = this.tendencia();
     const relleno = this.degradado(lienzo, 'rgba(0,187,207,0.35)', 'rgba(0,187,207,0)');
-    const elegido = this.fecha();
+    const { desde, hasta } = this.rango();
 
     return {
       type: 'line',
       data: {
-        labels: puntos.map((p) => {
-          const [, mes, dia] = p.fecha.split('-');
-          return `${dia}/${mes}`;
-        }),
+        labels: puntos.map((p) => corta(p.fecha)),
         datasets: [
           {
             label: 'Personas',
@@ -413,7 +450,8 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
             fill: true,
             tension: 0.4,
             borderWidth: 2.5,
-            pointRadius: puntos.map((p) => (p.fecha === elegido ? 5 : 0)),
+            // Se marcan los días que se están mirando: uno, o de lunes a hoy.
+            pointRadius: puntos.map((p) => (p.fecha >= desde && p.fecha <= hasta ? 5 : 0)),
             pointBackgroundColor: VERDE,
             pointBorderColor: '#fff',
             pointBorderWidth: 2,

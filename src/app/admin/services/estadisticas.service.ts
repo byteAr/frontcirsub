@@ -29,6 +29,27 @@ export interface PuntoTendencia extends Metricas {
   fecha: string;
 }
 
+/** Qué parte de los asociados del período pasó por una vista. */
+export interface UsoDeVista {
+  /** La ruta dentro de /dashboard: "beneficios", "reintegros"… */
+  vista: string;
+  personas: number;
+  /** De 0 a 100, sobre el total de personas del período. */
+  porcentaje: number;
+}
+
+/** Un día, o de lunes a hoy, contado en personas. */
+export interface ResumenPeriodo {
+  desde: string;
+  hasta: string;
+  plataforma: Plataforma | 'todas';
+  personas: number;
+  porPlataforma: Record<Plataforma, number>;
+  porHora: { hora: number; personas: number }[];
+  horaPico: number | null;
+  vistas: UsoDeVista[];
+}
+
 /** Quién tiene la app abierta ahora: la sostiene un latido cada 30 s y sale al cerrarla. */
 export interface ActivosAhora {
   total: number;
@@ -59,8 +80,9 @@ export class EstadisticasService {
     return { Authorization: `Bearer ${localStorage.getItem('token')}` };
   }
 
-  registrarActividad(plataforma: Plataforma): Observable<void> {
-    return this.http.post<void>(`${this.url}/actividad`, { plataforma }, { headers: this.headers() });
+  registrarActividad(plataforma: Plataforma, vista?: string): Observable<void> {
+    const cuerpo = vista ? { plataforma, vista } : { plataforma };
+    return this.http.post<void>(`${this.url}/actividad`, cuerpo, { headers: this.headers() });
   }
 
   latido(plataforma: Plataforma): Observable<void> {
@@ -107,6 +129,12 @@ export class EstadisticasService {
 
   ahora(): Observable<ActivosAhora> {
     return this.http.get<ActivosAhora>(`${this.url}/ahora`, { headers: this.headers() });
+  }
+
+  periodo(desde: string, hasta: string, plataforma?: Plataforma): Observable<ResumenPeriodo> {
+    const params: Record<string, string> = { desde, hasta };
+    if (plataforma) params['plataforma'] = plataforma;
+    return this.http.get<ResumenPeriodo>(`${this.url}/periodo`, { headers: this.headers(), params });
   }
 
   dia(fecha: string, plataforma?: Plataforma): Observable<ResumenDia> {

@@ -4,7 +4,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { of, Subject } from 'rxjs';
 
 import { EstadisticasService } from '../../admin/services/estadisticas.service';
-import { RegistroActividadService } from './registro-actividad.service';
+import { RegistroActividadService, vistaDe } from './registro-actividad.service';
 
 /**
  * Qué se cuenta y qué no. Si esto se rompe, los números del dashboard dejan
@@ -62,6 +62,15 @@ describe('RegistroActividadService', () => {
       navegar('/dashboard/beneficios');
 
       expect(estadisticas.registrarActividad).toHaveBeenCalledTimes(2);
+      discardPeriodicTasks();
+    }));
+
+    it('manda qué vista abrió', fakeAsync(() => {
+      crear().iniciar();
+
+      navegar('/dashboard/beneficios');
+
+      expect(estadisticas.registrarActividad).toHaveBeenCalledWith('web', 'beneficios');
       discardPeriodicTasks();
     }));
 
@@ -170,6 +179,21 @@ describe('RegistroActividadService', () => {
 
     it('en iPhone reconoce la app instalada por navigator.standalone', () => {
       expect(crear({ standalone: false, iosStandalone: true }).plataforma()).toBe('pwa');
+    });
+  });
+
+  describe('vistaDe', () => {
+    it('toma el primer tramo después de /dashboard', () => {
+      expect(vistaDe('/dashboard/descuentos')).toBe('descuentos');
+      expect(vistaDe('/dashboard/ayuda-economica?x=1')).toBe('ayuda-economica');
+    });
+
+    it('ignora los paneles con nombre de la credencial', () => {
+      expect(vistaDe('/dashboard/credencial/(front:info//back:grupo)')).toBe('credencial');
+    });
+
+    it('fuera del dashboard no hay vista', () => {
+      expect(vistaDe('/auth/login')).toBeUndefined();
     });
   });
 });
