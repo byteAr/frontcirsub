@@ -48,6 +48,19 @@
       Mis descuentos
     </a>
 
+    <a *ngIf="mostrarEstadisticas()"
+      routerLink="/dashboard/estadisticas" routerLinkActive="bg-cyan-50 text-cyan-700 font-semibold"
+      (click)="cerrar()"
+      class="flex items-center gap-3 px-4 py-3 text-sm text-gray-600 hover:bg-cyan-50 cursor-pointer">
+      <!-- Barras en subida: se lee como "cómo viene el uso" -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+        <rect x="4" y="13" width="3.5" height="7" rx="1" fill="#0891b2"/>
+        <rect x="10.25" y="8" width="3.5" height="12" rx="1" fill="#0891b2"/>
+        <rect x="16.5" y="4" width="3.5" height="16" rx="1" fill="#0891b2"/>
+      </svg>
+      Estadísticas
+    </a>
+
     <a *ngIf="mostrarAhorros()"
       routerLink="/dashboard/ahorros" routerLinkActive="bg-cyan-50 text-cyan-700 font-semibold"
       (click)="cerrar()"

@@ -1,4 +1,16 @@
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router, Routes } from '@angular/router';
+import { map } from 'rxjs';
+
+import { EstadisticasService } from './services/estadisticas.service';
+
+/** Las estadísticas sólo para quien tiene acceso; al resto lo manda a la credencial. */
+const soloConAccesoAEstadisticas = () => {
+  const router = inject(Router);
+  return inject(EstadisticasService)
+    .permiso()
+    .pipe(map(({ puedeVer }) => puedeVer || router.parseUrl('/dashboard/credencial')));
+};
 
 export default [
   {
@@ -76,6 +88,11 @@ export default [
       {
         path: 'ahorros',
         loadComponent: () => import('./pages/ahorros/ahorros.component')
+      },
+      {
+        path: 'estadisticas',
+        canActivate: [soloConAccesoAEstadisticas],
+        loadComponent: () => import('./pages/estadisticas/estadisticas.component')
       },
       {
         path: 'ayuda-economica',

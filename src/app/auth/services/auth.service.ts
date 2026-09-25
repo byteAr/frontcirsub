@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
+import { EstadisticasService } from '../../admin/services/estadisticas.service';
 import { catchError, finalize, map, Observable, of, shareReplay, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { User, UserData } from '../interfaces/user.interface';
@@ -95,6 +96,8 @@ export class AuthService {
   url = environment.API_URL;
 
   http = inject(HttpClient);
+
+  private estadisticas = inject(EstadisticasService);
   private pushService = inject(PushNotificationService);
 
   checkStatusResources = rxResource({
@@ -212,6 +215,8 @@ export class AuthService {
   }
 
   logout() {
+    // El que entre después puede tener otro permiso para ver estadísticas.
+    this.estadisticas.olvidarPermiso();
     this._encuestaEnEstaSesion.set(false);
     this._User.set(null)
     this._token.set(null)
