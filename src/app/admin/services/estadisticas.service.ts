@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, catchError, of, shareReplay } from 'rxjs';
@@ -28,7 +29,7 @@ export interface PuntoTendencia extends Metricas {
   fecha: string;
 }
 
-/** Quién está usando la app en este momento: actividad en los últimos 5 minutos. */
+/** Quién tiene la app abierta ahora: la sostiene un latido cada 30 s y sale al cerrarla. */
 export interface ActivosAhora {
   total: number;
   pwa: number;
@@ -49,6 +50,7 @@ export interface Permiso {
 @Injectable({ providedIn: 'root' })
 export class EstadisticasService {
   private readonly http = inject(HttpClient);
+  private readonly document = inject(DOCUMENT);
   private readonly url = `${environment.API_URL}/estadisticas`;
 
   private permiso$?: Observable<Permiso>;
@@ -59,6 +61,29 @@ export class EstadisticasService {
 
   registrarActividad(plataforma: Plataforma): Observable<void> {
     return this.http.post<void>(`${this.url}/actividad`, { plataforma }, { headers: this.headers() });
+  }
+
+  latido(plataforma: Plataforma): Observable<void> {
+    return this.http.post<void>(`${this.url}/latido`, { plataforma }, { headers: this.headers() });
+  }
+
+  /**
+   * La salida se manda con sendBeacon: es lo único que el navegador garantiza
+   * que sale mientras la página se está cerrando. No deja poner cabeceras, así
+   * que el token va en el cuerpo, como formulario, que además no dispara la
+   * consulta previa de CORS. Si no está disponible, fetch con keepalive.
+   */
+  avisarSalida(plataforma: Plataforma): void {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    const url = `${this.url}/salida`;
+    const cuerpo = new URLSearchParams({ token, plataforma });
+
+    const enviado = this.document.defaultView?.navigator?.sendBeacon?.(url, cuerpo);
+    if (!enviado) {
+      fetch(url, { method: 'POST', body: cuerpo, keepalive: true }).catch(() => undefined);
+    }
   }
 
   /**

@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { EstadisticasService } from '../../admin/services/estadisticas.service';
+import { RegistroActividadService } from '../../shared/services/registro-actividad.service';
 import { catchError, finalize, map, Observable, of, shareReplay, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { User, UserData } from '../interfaces/user.interface';
@@ -98,6 +99,7 @@ export class AuthService {
   http = inject(HttpClient);
 
   private estadisticas = inject(EstadisticasService);
+  private registroActividad = inject(RegistroActividadService);
   private pushService = inject(PushNotificationService);
 
   checkStatusResources = rxResource({
@@ -215,6 +217,8 @@ export class AuthService {
   }
 
   logout() {
+    // Antes de borrar el token: la salida lo necesita para identificarlo.
+    this.registroActividad.salir();
     // El que entre después puede tener otro permiso para ver estadísticas.
     this.estadisticas.olvidarPermiso();
     this._encuestaEnEstaSesion.set(false);
