@@ -42,6 +42,12 @@ type Filtro = Plataforma | 'todas';
 const REFRESCO_MS = 10_000;
 /** La tendencia de 30 días casi no se mueve: se refresca una vez por minuto. */
 const VUELTAS_POR_TENDENCIA = 6;
+/**
+ * Al volver a la pestaña, la app avisa "llegué" y el dashboard se refresca a
+ * la vez. Si el refresco llega primero, quien mira no se ve a sí mismo hasta
+ * la vuelta siguiente. Esperar un segundo le da tiempo al aviso.
+ */
+const ESPERA_AL_VOLVER_MS = 1_000;
 
 /** Hoy en Argentina, como AAAA-MM-DD, sin depender del reloj del teléfono. */
 function hoyArgentina(): string {
@@ -164,7 +170,7 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         if (this.document.visibilityState === 'visible' && this.enVivo() && !this.cargando()) {
-          this.refrescar();
+          setTimeout(() => this.refrescar(), ESPERA_AL_VOLVER_MS);
         }
       });
   }

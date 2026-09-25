@@ -109,7 +109,7 @@
         <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Hora pico</p>
         <p class="text-2xl font-bold mt-3 leading-tight">{{ horaPicoTexto() }}</p>
         <p class="text-xs text-slate-400 mt-1">
-          @if (d.horaPico !== null) { {{ personasEnPico() }} personas en esa hora } @else { no hubo ingresos }
+          @if (d.horaPico !== null) { {{ personasEnPico() }} {{ personasEnPico() === 1 ? 'persona' : 'personas' }} en esa hora } @else { no hubo ingresos }
         </p>
       </div>
     </div>
