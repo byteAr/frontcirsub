@@ -118,6 +118,17 @@ export interface ValoresMutual {
   periodo: string;
 }
 
+/** Palabras que el PHP manda sin tilde en los nombres de los trámites. */
+const CON_TILDE: Record<string, string> = {
+  tramite: 'trámite',
+  evacuacion: 'evacuación',
+  prestamo: 'préstamo',
+  medicacion: 'medicación',
+  credito: 'crédito',
+  defuncion: 'defunción',
+  adhesion: 'adhesión',
+};
+
 export interface TipoTramite {
   /** RM, RN, TE... Es el prefijo con el que se guarda el archivo en disco. */
   clave: string;
@@ -446,9 +457,15 @@ export class GestionListasService {
       });
   }
 
-  /** "REINTEGRO DE FARMACIA" -> "Reintegro de farmacia". */
+  /**
+   * "TRAMITE DE EVACUACION" -> "Trámite de evacuación". El PHP manda los
+   * nombres sin tildes; se les devuelven a las palabras conocidas porque el
+   * nombre se le muestra al socio tal cual ("El tipo de trámite seleccionado
+   * es..."). Una palabra que no está en la lista queda como vino.
+   */
   private aTextoLegible(crudo: string | undefined): string {
-    const texto = (crudo ?? '').trim().toLowerCase();
+    const texto = (crudo ?? '').trim().toLowerCase()
+      .replace(/[a-zñ]+/g, palabra => CON_TILDE[palabra] ?? palabra);
     if (!texto) return 'Trámite';
 
     return texto.charAt(0).toUpperCase() + texto.slice(1);

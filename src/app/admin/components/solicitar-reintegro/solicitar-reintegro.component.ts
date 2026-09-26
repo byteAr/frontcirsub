@@ -41,6 +41,14 @@ export class SolicitarReintegroComponent implements OnDestroy {
    */
   tipos = signal<TipoTramite[]>([]);
   tipoSeleccionado = signal<string>('');
+  /**
+   * Verdadero mientras el selector está a la vista. Una vez elegido el tipo,
+   * el selector se reemplaza por una leyenda con el nombre, y recién ahí se
+   * pueden adjuntar archivos: así todo lo que carga es para ese trámite.
+   */
+  eligiendoTipo = signal<boolean>(true);
+  descripcionSeleccionada = computed(() =>
+    this.tipos().find(t => t.clave === this.tipoSeleccionado())?.descripcion ?? '');
   cargandoTipos = signal<boolean>(false);
   errorTipos = signal<boolean>(false);
 
@@ -81,6 +89,13 @@ export class SolicitarReintegroComponent implements OnDestroy {
   /** Evita que el cierre automático tras un error borre los archivos elegidos. */
   private conservarArchivosAlCerrar = false;
 
+  /**
+   * El tipo que tenía antes de tocar "Cambiar tipo de trámite". Si vuelve a
+   * elegir el mismo, los archivos adjuntados se quedan; si elige otro, se
+   * quitan, porque eran para el trámite anterior.
+   */
+  private tipoAntesDeCambiar = '';
+
   ngOnDestroy(): void {
     this.subidaEnCurso?.unsubscribe();
   }
@@ -91,9 +106,9 @@ export class SolicitarReintegroComponent implements OnDestroy {
   }
 
   /**
-   * Trae los tipos de trámite, todos. Arranca seleccionado el primero que el
-   * socio puede pedir, para que el formulario nunca abra con un trámite que
-   * le va a saltar el aviso de "no adherido" sin haber tocado nada.
+   * Trae los tipos de trámite, todos. No se preselecciona ninguno: el socio
+   * tiene que elegir a conciencia, porque de eso depende a qué trámite van
+   * los archivos.
    */
   cargarTipos() {
     if (this.tipos().length) return; // ya cargados en una apertura anterior
@@ -106,11 +121,6 @@ export class SolicitarReintegroComponent implements OnDestroy {
         this.tipos.set(tipos);
         this.cargandoTipos.set(false);
         this.errorTipos.set(tipos.length === 0);
-
-        const permitidos = tipos.filter(tipo => this.puedePedir(tipo));
-        if (!permitidos.some(tipo => tipo.clave === this.tipoSeleccionado())) {
-          this.tipoSeleccionado.set(permitidos[0]?.clave ?? '');
-        }
       },
       error: () => {
         this.cargandoTipos.set(false);
@@ -158,7 +168,18 @@ export class SolicitarReintegroComponent implements OnDestroy {
       return;
     }
 
+    if (selector.value !== this.tipoAntesDeCambiar) this.limpiarArchivos();
+
     this.tipoSeleccionado.set(selector.value);
+    this.tipoAntesDeCambiar = '';
+    this.eligiendoTipo.set(false);
+  }
+
+  /** Vuelve a mostrar el selector, sin ningún tipo marcado. */
+  cambiarTipo() {
+    this.tipoAntesDeCambiar = this.tipoSeleccionado();
+    this.tipoSeleccionado.set('');
+    this.eligiendoTipo.set(true);
   }
 
   /**
@@ -206,7 +227,7 @@ export class SolicitarReintegroComponent implements OnDestroy {
   }
 
   enviar() {
-    if (this.enviando() || !this.archivos().length || !this.tipoSeleccionado()) return;
+    if (this.enviando() || !this.archivos().length || !this.tipoSeleccionado() || this.eligiendoTipo()) return;
 
     // Red de contención: el selector ya no deja elegir un trámite sin
     // adhesión, pero si por algún camino quedara uno, se avisa en vez de
@@ -226,11 +247,12 @@ export class SolicitarReintegroComponent implements OnDestroy {
           this.enviando.set(false);
           this.subidaEnCurso = undefined;
           const cantidad = resp?.archivos?.length ?? this.archivos().length;
+          const tramite = this.descripcionSeleccionada();
           this.mostrarResultado(
             'exito',
             cantidad === 1
-              ? 'Su documento se cargó correctamente. En breve procesaremos su solicitud de reintegro.'
-              : `Se cargaron ${cantidad} documentos correctamente. En breve procesaremos su solicitud de reintegro.`
+              ? `Recibimos su documento para el trámite ${tramite}. En breve lo procesaremos.`
+              : `Recibimos ${cantidad} documentos para el trámite ${tramite}. En breve los procesaremos.`
           );
         },
         error: error => {
@@ -246,6 +268,12 @@ export class SolicitarReintegroComponent implements OnDestroy {
     if (this.resultado() === 'error') {
       this.modalForm.nativeElement.showModal(); // vuelve al formulario para reintentar
     }
+  }
+
+  /** Después de un envío exitoso: el formulario de nuevo, en blanco. */
+  iniciarOtroTramite() {
+    this.modalResultado.nativeElement.close();
+    this.abrirFormulario();
   }
 
   /** Traduce el error a algo que el socio pueda entender y accionar. */
@@ -342,7 +370,15 @@ export class SolicitarReintegroComponent implements OnDestroy {
     this.modalResultado.nativeElement.showModal();
   }
 
+  /** Deja el formulario como recién abierto: sin tipo y sin archivos. */
   private limpiar() {
+    this.limpiarArchivos();
+    this.tipoSeleccionado.set('');
+    this.tipoAntesDeCambiar = '';
+    this.eligiendoTipo.set(true);
+  }
+
+  private limpiarArchivos() {
     this.archivos.set([]);
     this.errorValidacion.set(null);
   }

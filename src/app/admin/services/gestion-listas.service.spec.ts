@@ -199,8 +199,8 @@ describe('GestionListasService', () => {
         { clave: 'RM', descripcion: 'Reintegro de farmacia', beneficio: 'far' },
         { clave: 'RN', descripcion: 'Subsidio por nacimiento' },
         { clave: 'RE', descripcion: 'Reintegro de escolaridad' },
-        { clave: 'TE', descripcion: 'Tramite de evacuacion', beneficio: 'eva' },
-        { clave: 'TP', descripcion: 'Tramite de prestamo' },
+        { clave: 'TE', descripcion: 'Trámite de evacuación', beneficio: 'eva' },
+        { clave: 'TP', descripcion: 'Trámite de préstamo' },
         { clave: 'RC', descripcion: 'Subsidio por casamiento' },
       ]);
     });
@@ -208,7 +208,7 @@ describe('GestionListasService', () => {
     it('acepta una clave nueva sin tocar el código', () => {
       const { tipos } = listasDelPhp([[], [{ id: '9', clave: 'XX', descrp: 'TRAMITE NUEVO' }]]);
 
-      expect(tipos).toEqual([{ clave: 'XX', descripcion: 'Tramite nuevo' }]);
+      expect(tipos).toEqual([{ clave: 'XX', descripcion: 'Trámite nuevo' }]);
     });
   });
 
