@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { EstadisticasService } from '../../services/estadisticas.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
 
@@ -28,9 +29,13 @@ export class SidebarNavComponent {
    * confirma: es menos molesto que mostrarlos y sacarlos a los dos segundos.
    */
   mostrarAhorros = signal<boolean>(false);
+  /** Sólo para quien tiene acceso a las estadísticas. Arranca oculto. */
+  mostrarEstadisticas = signal<boolean>(false);
   mostrarAyudaEconomica = signal<boolean>(false);
 
   constructor() {
+    inject(EstadisticasService).permiso().subscribe(({ puedeVer }) => this.mostrarEstadisticas.set(puedeVer));
+
     this.gestionListasService.getListas().subscribe({
       next: ({ ahorros, ayudasEconomicas }) => {
         this.mostrarAhorros.set(ahorros.muestra);

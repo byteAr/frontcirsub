@@ -6,6 +6,7 @@ import { InputOtpModule } from 'primeng/inputotp';
 
 import { estadoDeRuta, routeAnimations } from './shared/animations/route-animations';
 import { ActualizacionAppService } from './shared/services/actualizacion-app.service';
+import { RegistroActividadService } from './shared/services/registro-actividad.service';
 
 @Component({
   selector: 'app-root',
@@ -25,6 +26,8 @@ export class AppComponent {
     // Mantiene al día la versión instalada de la PWA. Ver el servicio: sin
     // esto, quien tiene la app instalada se queda con la versión vieja.
     inject(ActualizacionAppService).iniciar();
+    // Cuenta las pantallas que abre cada asociado, para las estadísticas.
+    inject(RegistroActividadService).iniciar();
   }
 
   prepareRoute(outlet: RouterOutlet): string {
