@@ -15,6 +15,7 @@ import { FormsModule } from '@angular/forms';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
 import { forkJoin, fromEvent, interval, of } from 'rxjs';
 
+import { GestionListasService } from '../../services/gestion-listas.service';
 import {
   ActivosAhora,
   EstadisticasService,
@@ -97,6 +98,7 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
   private readonly servicio = inject(EstadisticasService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly document = inject(DOCUMENT);
+  private readonly gestionListas = inject(GestionListasService);
 
   private readonly lienzoHoras = viewChild<ElementRef<HTMLCanvasElement>>('graficoHoras');
   private readonly lienzoReparto = viewChild<ElementRef<HTMLCanvasElement>>('graficoReparto');
@@ -118,6 +120,21 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
   tendencia = signal<PuntoTendencia[]>([]);
 
   esDueno = signal(false);
+
+  /**
+   * Credenciales creadas en total, según el sistema de gestión. No depende del
+   * día ni de la plataforma que se esté mirando. null: no llegó el dato.
+   */
+  credenciales = signal<number | null>(null);
+  cargandoCredenciales = signal(true);
+
+  /** Qué parte de los que tienen credencial entró en el período. */
+  porcentajeConCredencial = computed(() => {
+    const total = this.credenciales();
+    const personas = this.resumen()?.personas ?? 0;
+    if (!total) return null;
+    return Math.min(100, Math.round((personas / total) * 100));
+  });
 
   readonly filtros: { valor: Filtro; etiqueta: string }[] = [
     { valor: 'todas', etiqueta: 'Todas' },
@@ -150,6 +167,12 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
   cuando = computed(() => {
     if (this.modo() === 'semana') return 'Esta semana';
     return this.fecha() === this.hoy ? 'Hoy' : `El ${corta(this.fecha())}`;
+  });
+
+  /** Lo mismo que cuando(), para ir en medio de una frase. */
+  enElPeriodo = computed(() => {
+    if (this.modo() === 'semana') return 'esta semana';
+    return this.fecha() === this.hoy ? 'hoy' : 'ese día';
   });
 
   /** "Del lunes 21/09 a hoy", para aclarar qué cubre la semana. */
@@ -191,6 +214,24 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
     });
     this.cargar();
     this.iniciarEnVivo();
+    this.cargarCredenciales();
+  }
+
+  /**
+   * Sale de la misma llamada que el resto de la app usa para los valores y los
+   * trámites, así que casi siempre ya está en caché. Si falla, la tarjeta lo
+   * dice y el resto del tablero sigue.
+   */
+  private cargarCredenciales(): void {
+    this.gestionListas.getListas()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ credenciales }) => {
+          this.credenciales.set(credenciales);
+          this.cargandoCredenciales.set(false);
+        },
+        error: () => this.cargandoCredenciales.set(false),
+      });
   }
 
   ngOnDestroy(): void {

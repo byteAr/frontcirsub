@@ -1,8 +1,14 @@
+import { registerLocaleData } from '@angular/common';
+import localeEsAr from '@angular/common/locales/es-AR';
 import { ComponentFixture, TestBed, discardPeriodicTasks, fakeAsync, tick } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
+
+import { GestionListasService, ListasGestion } from '../../services/gestion-listas.service';
 
 import { EstadisticasService, ResumenPeriodo } from '../../services/estadisticas.service';
 import EstadisticasComponent, { lunesDe } from './estadisticas.component';
+
+registerLocaleData(localeEsAr);
 
 function resumen(parcial: Partial<ResumenPeriodo> = {}): ResumenPeriodo {
   return {
@@ -25,6 +31,7 @@ describe('EstadisticasComponent', () => {
   let fixture: ComponentFixture<EstadisticasComponent>;
   let componente: EstadisticasComponent;
   let servicio: jasmine.SpyObj<EstadisticasService>;
+  let listas: Observable<Partial<ListasGestion>>;
 
   const texto = () => (fixture.nativeElement as HTMLElement).textContent ?? '';
 
@@ -50,10 +57,14 @@ describe('EstadisticasComponent', () => {
     servicio.tendencia.and.returnValue(of([]));
     servicio.ahora.and.returnValue(of({ total: 24, pwa: 17, web: 7 }));
     servicio.listarAccesos.and.returnValue(of([]));
+    listas = of({ credenciales: 2389 });
 
     await TestBed.configureTestingModule({
       imports: [EstadisticasComponent],
-      providers: [{ provide: EstadisticasService, useValue: servicio }],
+      providers: [
+        { provide: EstadisticasService, useValue: servicio },
+        { provide: GestionListasService, useValue: { getListas: () => listas } },
+      ],
     }).compileComponents();
   });
 
@@ -90,6 +101,39 @@ describe('EstadisticasComponent', () => {
 
       expect(texto()).not.toContain('Sesiones');
       expect(texto()).not.toContain('pantallas por sesión');
+      discardPeriodicTasks();
+    }));
+
+    it('muestra cuántas credenciales hay creadas, con punto de miles', fakeAsync(() => {
+      listo();
+
+      expect(texto()).toContain('Credenciales creadas');
+      expect(texto()).toContain('2.389');
+      discardPeriodicTasks();
+    }));
+
+    it('dice qué parte de los que tienen credencial entró en el período', fakeAsync(() => {
+      listo(); // 850 de 2389
+
+      expect(texto()).toContain('36% de ellos entró hoy');
+      discardPeriodicTasks();
+    }));
+
+    it('si el sistema de gestión no manda el dato, lo dice y el resto sigue', fakeAsync(() => {
+      listas = of({ credenciales: null });
+      listo();
+
+      expect(texto()).toContain('El sistema de gestión no mandó el dato');
+      expect(texto()).toContain('850');
+      discardPeriodicTasks();
+    }));
+
+    it('si la llamada falla, tampoco rompe el tablero', fakeAsync(() => {
+      listas = throwError(() => new Error('caído'));
+      listo();
+
+      expect(texto()).toContain('El sistema de gestión no mandó el dato');
+      expect(texto()).toContain('asociados iniciaron sesión');
       discardPeriodicTasks();
     }));
 

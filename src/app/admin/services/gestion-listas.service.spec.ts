@@ -366,6 +366,38 @@ describe('GestionListasService', () => {
     });
   });
 
+  describe('credenciales creadas', () => {
+    it('lee la cantidad del quinto elemento', () => {
+      const { credenciales } = listasDelPhp([[], [], { Muestra: false }, { Muestra: true }, [{ cantCred: '2389' }]]);
+
+      expect(credenciales).toBe(2389);
+    });
+
+    it('la encuentra aunque el PHP la corra de lugar', () => {
+      const { credenciales } = listasDelPhp([[], [], [{ cantCred: '2389' }]]);
+
+      expect(credenciales).toBe(2389);
+    });
+
+    it('tolera que venga con punto de miles', () => {
+      const { credenciales } = listasDelPhp([[], [], {}, {}, [{ cantCred: '2.389' }]]);
+
+      expect(credenciales).toBe(2389);
+    });
+
+    it('si no viene, queda en null y lo demás sigue andando', () => {
+      const listas = listasDelPhp([[], [{ id: '1', clave: 'RM', descrp: 'REINTEGRO DE FARMACIA' }]]);
+
+      expect(listas.credenciales).toBeNull();
+      expect(listas.tipos.length).toBe(1);
+    });
+
+    it('si viene vacío o no es un número, queda en null', () => {
+      expect(listasRecargadas([[], [], {}, {}, [{ cantCred: '' }]]).credenciales).toBeNull();
+      expect(listasRecargadas([[], [], {}, {}, [{ cantCred: 'n/d' }]]).credenciales).toBeNull();
+    });
+  });
+
   describe('de dónde salen los datos', () => {
 
     it('cae al backend cuando el navegador bloquea la llamada directa por CORS', () => {
