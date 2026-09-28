@@ -128,14 +128,6 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
   credenciales = signal<number | null>(null);
   cargandoCredenciales = signal(true);
 
-  /** Qué parte de los que tienen credencial entró en el período. */
-  porcentajeConCredencial = computed(() => {
-    const total = this.credenciales();
-    const personas = this.resumen()?.personas ?? 0;
-    if (!total) return null;
-    return Math.min(100, Math.round((personas / total) * 100));
-  });
-
   readonly filtros: { valor: Filtro; etiqueta: string }[] = [
     { valor: 'todas', etiqueta: 'Todas' },
     { valor: 'pwa', etiqueta: 'App' },
@@ -167,12 +159,6 @@ export default class EstadisticasComponent implements AfterViewInit, OnDestroy {
   cuando = computed(() => {
     if (this.modo() === 'semana') return 'Esta semana';
     return this.fecha() === this.hoy ? 'Hoy' : `El ${corta(this.fecha())}`;
-  });
-
-  /** Lo mismo que cuando(), para ir en medio de una frase. */
-  enElPeriodo = computed(() => {
-    if (this.modo() === 'semana') return 'esta semana';
-    return this.fecha() === this.hoy ? 'hoy' : 'ese día';
   });
 
   /** "Del lunes 21/09 a hoy", para aclarar qué cubre la semana. */

@@ -115,7 +115,12 @@
 
       <!-- Cuántos entraron -->
       <div class="rounded-2xl p-5 text-white bg-gradient-to-br from-[#00BBCF] to-[#00C579] shadow-md flex flex-col justify-between">
-        <p class="text-xs font-semibold uppercase tracking-wider opacity-90">{{ cuando() }}</p>
+        <div class="flex items-start justify-between gap-3">
+          <p class="text-xs font-semibold uppercase tracking-wider opacity-90">{{ cuando() }}</p>
+          <span class="shrink-0 w-10 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3s1.34 3 3 3m-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5S5 6.34 5 8s1.34 3 3 3m0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5m8 0c-.29 0-.62.02-.97.05c1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5"/></svg>
+          </span>
+        </div>
         <div class="mt-3">
           <p class="text-5xl font-bold tabular-nums">{{ r.personas }}</p>
           <p class="text-sm opacity-95 mt-1">
@@ -126,18 +131,18 @@
 
       <!-- Credenciales creadas: total del sistema de gestión, no del período -->
       <div class="rounded-2xl p-5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
-        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Credenciales creadas</p>
+        <div class="flex items-start justify-between gap-3">
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Credenciales creadas</p>
+          <span class="shrink-0 w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2m0 14H4V8h16zM6 10h6v2H6zm0 4h4v2H6z"/></svg>
+          </span>
+        </div>
         <div class="mt-3">
           @if (cargandoCredenciales()) {
             <div class="h-12 w-32 rounded-lg bg-slate-100 animate-pulse"></div>
           } @else if (credenciales() !== null) {
             <p class="text-5xl font-bold tabular-nums text-slate-900">{{ credenciales()! | number:'1.0-0':'es-AR' }}</p>
             <p class="text-sm text-slate-500 mt-1">en total</p>
-            @if (porcentajeConCredencial() !== null) {
-              <p class="text-xs text-slate-400 mt-2">
-                {{ porcentajeConCredencial() }}% de ellos entró {{ enElPeriodo() }}
-              </p>
-            }
           } @else {
             <p class="text-3xl font-bold text-slate-300">—</p>
             <p class="text-xs text-slate-400 mt-1">El sistema de gestión no mandó el dato.</p>
@@ -147,7 +152,12 @@
 
       <!-- Hora pico -->
       <div class="rounded-2xl p-5 bg-slate-900 text-white shadow-md flex flex-col justify-between">
-        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Hora pico</p>
+        <div class="flex items-start justify-between gap-3">
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Hora pico</p>
+          <span class="shrink-0 w-10 h-10 rounded-xl bg-white/10 text-amber-300 flex items-center justify-center" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2M12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8s8 3.58 8 8s-3.58 8-8 8m.5-13H11v6l5.25 3.15l.75-1.23l-4.5-2.67z"/></svg>
+          </span>
+        </div>
         <div class="mt-3">
           <p class="text-3xl font-bold leading-tight">{{ horaPicoTexto() }}</p>
           <p class="text-xs text-slate-400 mt-1">
@@ -163,8 +173,13 @@
 
     <!-- Qué vistas abrieron -->
     <div class="rounded-2xl p-5 bg-white border border-slate-200 shadow-sm">
-      <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Qué vistas abrieron</p>
-      <p class="text-[0.7rem] text-slate-400 mt-0.5">Porcentaje de esos asociados que entró a cada una.</p>
+      <div class="flex items-center gap-3">
+        <span class="shrink-0 w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5s5 2.24 5 5s-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3s3-1.34 3-3s-1.34-3-3-3"/></svg></span>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Qué vistas abrieron</p>
+          <p class="text-[0.7rem] text-slate-400 mt-0.5">Porcentaje de esos asociados que entró a cada una.</p>
+        </div>
+      </div>
 
       @if (vistas().length) {
         <ul class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-3">
@@ -188,7 +203,7 @@
 
     <!-- Actividad por hora -->
     <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
-      <h2 class="text-base font-bold text-slate-900">Actividad por hora</h2>
+      <h2 class="flex items-center gap-2 text-base font-bold text-slate-900"><span class="shrink-0 w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M5 13h3v7H5zm5.5-5h3v12h-3zM16 4h3v16h-3z"/></svg></span>Actividad por hora</h2>
       <p class="text-xs text-slate-500">
         Personas distintas en cada hora{{ modo() === 'semana' ? ', sumando de lunes a hoy' : '' }}. La barra oscura es la hora pico.
       </p>
@@ -200,7 +215,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <!-- App vs navegador -->
       <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
-        <h2 class="text-base font-bold text-slate-900">Desde dónde entran</h2>
+        <h2 class="flex items-center gap-2 text-base font-bold text-slate-900"><span class="shrink-0 w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99M17 19H7V5h10z"/></svg></span>Desde dónde entran</h2>
         <p class="text-xs text-slate-500">Asociados del período, sin importar el filtro.</p>
 
         <div class="relative h-52 mt-4">
@@ -231,7 +246,7 @@
 
       <!-- Últimos 30 días -->
       <div class="lg:col-span-2 rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
-        <h2 class="text-base font-bold text-slate-900">Últimos 30 días</h2>
+        <h2 class="flex items-center gap-2 text-base font-bold text-slate-900"><span class="shrink-0 w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2m0 16H5V10h14zM9 14H7v-2h2zm4 0h-2v-2h2zm4 0h-2v-2h2zm-8 4H7v-2h2zm4 0h-2v-2h2zm4 0h-2v-2h2z"/></svg></span>Últimos 30 días</h2>
         <p class="text-xs text-slate-500">Asociados por día. Los puntos verdes son los días que estás mirando.</p>
         <div class="relative h-64 mt-4">
           <canvas #graficoTendencia></canvas>
@@ -248,7 +263,7 @@
   <!-- Accesos: sólo el dueño -->
   @if (esDueno()) {
     <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
-      <h2 class="text-base font-bold text-slate-900">Quién puede ver las estadísticas</h2>
+      <h2 class="flex items-center gap-2 text-base font-bold text-slate-900"><span class="shrink-0 w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12.65 10A5.99 5.99 0 0 0 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6a5.99 5.99 0 0 0 5.65-4H17v4h4v-4h2v-4zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2s2 .9 2 2s-.9 2-2 2"/></svg></span>Quién puede ver las estadísticas</h2>
       <p class="text-xs text-slate-500">Las personas que agregues van a ver "Estadísticas" en el menú.</p>
 
       <div class="flex gap-2 mt-4 max-w-md">

@@ -112,10 +112,10 @@ describe('EstadisticasComponent', () => {
       discardPeriodicTasks();
     }));
 
-    it('dice qué parte de los que tienen credencial entró en el período', fakeAsync(() => {
-      listo(); // 850 de 2389
+    it('muestra sólo el total, sin el porcentaje de los que entraron', fakeAsync(() => {
+      listo();
 
-      expect(texto()).toContain('36% de ellos entró hoy');
+      expect(texto()).not.toContain('de ellos entró');
       discardPeriodicTasks();
     }));
 
