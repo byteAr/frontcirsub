@@ -77,11 +77,14 @@ export interface AyudasEcPhp {
   AyudasEc?: CuotaAyudaPhp[];
 }
 
+/** Quinto elemento, desde el 27/09/2026: [{ cantCred: "2389" }]. */
+export type CredencialesPhp = { cantCred?: string | number }[];
+
 /**
  * La respuesta completa. Es una tupla, no un objeto, y le fueron agregando
  * elementos con el tiempo: del tercero en adelante pueden no venir.
  */
-export type ListasPhp = [ValorPhp[], TipoTramitePhp[], AhorrosPhp?, AyudasEcPhp?];
+export type ListasPhp = [ValorPhp[], TipoTramitePhp[], AhorrosPhp?, AyudasEcPhp?, CredencialesPhp?];
 
 export interface ValorItem {
   codigo: string;
@@ -205,6 +208,11 @@ export interface ListasGestion {
   tipos: TipoTramite[];
   ahorros: AhorrosSocio;
   ayudasEconomicas: AyudasEconomicasSocio;
+  /**
+   * Cuántas credenciales hay creadas en total. Es un número global, no del
+   * socio. null si el PHP no lo mandó.
+   */
+  credenciales: number | null;
 }
 
 /**
@@ -329,13 +337,37 @@ export class GestionListasService {
     return of(respuesta as ListasPhp);
   }
 
-  private normalizar([valores, tipos, ahorros, ayudas]: ListasPhp): ListasGestion {
+  private normalizar(crudo: ListasPhp): ListasGestion {
+    const [valores, tipos, ahorros, ayudas] = crudo;
+
     return {
       valores: this.normalizarValores(valores ?? []),
       tipos: this.normalizarTipos(tipos ?? []),
       ahorros: this.normalizarAhorros(ahorros),
       ayudasEconomicas: this.normalizarAyudas(ayudas),
+      credenciales: this.cantidadDeCredenciales(crudo),
     };
+  }
+
+  /**
+   * Hoy viene en el quinto elemento, pero no se lo busca por posición: el PHP
+   * ya agregó ramas sin avisar y podría correrse. Se toma la primera fila con
+   * `cantCred`, venga donde venga. Llega como texto ("2389"); se le sacan los
+   * puntos por si algún día viene formateado ("2.389").
+   */
+  private cantidadDeCredenciales(crudo: ListasPhp): number | null {
+    for (const rama of crudo.slice(2)) {
+      if (!Array.isArray(rama)) continue;
+
+      const fila = rama.find(f => f && typeof f === 'object' && 'cantCred' in f) as
+        { cantCred?: string | number } | undefined;
+      if (!fila) continue;
+
+      const numero = Number(String(fila.cantCred ?? '').trim().replace(/\./g, ''));
+      return Number.isFinite(numero) && String(fila.cantCred ?? '').trim() !== '' ? numero : null;
+    }
+
+    return null;
   }
 
   private normalizarValores(filas: ValorPhp[]): ValoresMutual {

@@ -58,9 +58,9 @@
 
   @if (cargando()) {
     <!-- Esqueleto mientras carga -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div class="h-40 rounded-2xl bg-slate-100 animate-pulse"></div>
-      <div class="h-40 rounded-2xl bg-slate-100 animate-pulse lg:col-span-2"></div>
+      <div class="h-40 rounded-2xl bg-slate-100 animate-pulse"></div>
       <div class="h-40 rounded-2xl bg-slate-100 animate-pulse"></div>
     </div>
     <div class="h-80 rounded-2xl bg-slate-100 animate-pulse"></div>
@@ -110,8 +110,8 @@
       </div>
     }
 
-    <!-- Las tres tarjetas -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+    <!-- Tarjetas: cuántos entraron, cuántas credenciales hay y la hora pico -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
       <!-- Cuántos entraron -->
       <div class="rounded-2xl p-5 text-white bg-gradient-to-br from-[#00BBCF] to-[#00C579] shadow-md flex flex-col justify-between">
@@ -124,29 +124,25 @@
         </div>
       </div>
 
-      <!-- Qué vistas abrieron -->
-      <div class="lg:col-span-2 rounded-2xl p-5 bg-white border border-slate-200 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Qué vistas abrieron</p>
-        <p class="text-[0.7rem] text-slate-400 mt-0.5">Porcentaje de esos asociados que entró a cada una.</p>
-
-        @if (vistas().length) {
-          <ul class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-            @for (v of vistas(); track v.vista) {
-              <li>
-                <div class="flex items-baseline justify-between gap-2">
-                  <span class="text-sm text-slate-700 truncate">{{ v.nombre }}</span>
-                  <span class="text-sm font-bold text-slate-900 tabular-nums">{{ v.porcentaje }}%</span>
-                </div>
-                <div class="mt-1 h-2 rounded-full bg-slate-100 overflow-hidden">
-                  <div class="h-full rounded-full bg-gradient-to-r from-[#00BBCF] to-[#00C579] transition-all duration-700"
-                    [style.width.%]="v.porcentaje"></div>
-                </div>
-              </li>
+      <!-- Credenciales creadas: total del sistema de gestión, no del período -->
+      <div class="rounded-2xl p-5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Credenciales creadas</p>
+        <div class="mt-3">
+          @if (cargandoCredenciales()) {
+            <div class="h-12 w-32 rounded-lg bg-slate-100 animate-pulse"></div>
+          } @else if (credenciales() !== null) {
+            <p class="text-5xl font-bold tabular-nums text-slate-900">{{ credenciales()! | number:'1.0-0':'es-AR' }}</p>
+            <p class="text-sm text-slate-500 mt-1">en total</p>
+            @if (porcentajeConCredencial() !== null) {
+              <p class="text-xs text-slate-400 mt-2">
+                {{ porcentajeConCredencial() }}% de ellos entró {{ enElPeriodo() }}
+              </p>
             }
-          </ul>
-        } @else {
-          <p class="mt-6 text-sm text-slate-400">Todavía no se abrió ninguna vista en este período.</p>
-        }
+          } @else {
+            <p class="text-3xl font-bold text-slate-300">—</p>
+            <p class="text-xs text-slate-400 mt-1">El sistema de gestión no mandó el dato.</p>
+          }
+        </div>
       </div>
 
       <!-- Hora pico -->
@@ -163,6 +159,31 @@
           </p>
         </div>
       </div>
+    </div>
+
+    <!-- Qué vistas abrieron -->
+    <div class="rounded-2xl p-5 bg-white border border-slate-200 shadow-sm">
+      <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Qué vistas abrieron</p>
+      <p class="text-[0.7rem] text-slate-400 mt-0.5">Porcentaje de esos asociados que entró a cada una.</p>
+
+      @if (vistas().length) {
+        <ul class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-3">
+          @for (v of vistas(); track v.vista) {
+            <li>
+              <div class="flex items-baseline justify-between gap-2">
+                <span class="text-sm text-slate-700 truncate">{{ v.nombre }}</span>
+                <span class="text-sm font-bold text-slate-900 tabular-nums">{{ v.porcentaje }}%</span>
+              </div>
+              <div class="mt-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+                <div class="h-full rounded-full bg-gradient-to-r from-[#00BBCF] to-[#00C579] transition-all duration-700"
+                  [style.width.%]="v.porcentaje"></div>
+              </div>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="mt-6 text-sm text-slate-400">Todavía no se abrió ninguna vista en este período.</p>
+      }
     </div>
 
     <!-- Actividad por hora -->
